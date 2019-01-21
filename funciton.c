@@ -355,6 +355,9 @@ void sendData_to_PC(void)
       push(2,(uint16)MotorPID.IntSum_all);//
       push(3,(uint16)MotorPID.P_value);//
       push(4,(uint16)MotorPID.OutValue);//
+      push(5,(uint16)servo_duty);//
+      push(6,(uint16)S_p);//
+      push(7,(uint16)S_d);//
 //      push(5,(uint16)ramp);//
 //      push(6,(uint16)(ramp_pre*100));//
 //      push(7,(uint16)Gyroy);//
