@@ -9,7 +9,7 @@ int16 fore_max=28;//使用中63
 int16 foresight=27;//使用中61       U弯最大top58
 
 int16 mid_error[3];
-int16 error[30]={0};
+int16 error[5]={0};
 int16 error_cha[4]={0,0,0,0};
 int16 error_d=0;
 int16 S_d=0;//微分项总和
@@ -114,7 +114,7 @@ void Sevor_control(void)
   error_cha[2]=error_cha[1];
   error_cha[1]=error_cha[0];
   int i;
-  for(i=29;i>0;i--)
+  for(i=4;i>0;i--)
   {//为什么把error扩到了30 现在忘了
    error[i]=error[i-1];
   }
@@ -153,7 +153,7 @@ void Sevor_pid(void)
   /************多帧D计算****************/
   //  S_d=(int16)(Ser_PID.Kd*error_d);
   /************************************/  
-  servo_duty=abs(error[0])>20?(short)(-1.1*(S_d+S_p)+mid):(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
+  servo_duty=abs(error[0])>25?(short)(-1.1*(S_d+S_p)+mid):(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
   
   
   if(servo_duty>max)

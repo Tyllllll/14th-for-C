@@ -19,7 +19,7 @@ extern int16 servo_duty;
 extern int16 mid;
 extern int16 max;
 extern int16 min;
-extern int16 error[30];
+extern int16 error[5];
 extern int16 error_cha[4];
 extern int16 S_d;
 extern int16 S_p;
