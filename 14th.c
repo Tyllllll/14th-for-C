@@ -24,7 +24,7 @@ void main ()
     Oled_GPIO_Init();
     Welcome_page();
      Buzzer_gpio_init();
-    //test
+
     
     
     if(ov7725_init()==1)
