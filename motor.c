@@ -170,7 +170,7 @@ MotorPID_TypeDef MotorPID={0,0,0,1,1,0,0,0,0,0,0,0,0,0};//Kp Ki Kd
 
 void Motor_pid(void)
 {
-  float h=0.018;//0.014 
+  float h=0.028;//0.014 
    
   MotorPID.Kp=M_Kp;
   MotorPID.Ki=M_Ki;
@@ -250,7 +250,7 @@ void Motor_pid(void)
   MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
   
   /****+*****差速控制方案*****/
-  if(error[0]>-5 && error[0]<5)
+  if(error[0]>-15 && error[0]<15)
       h = 0;
   if(error[0]>=0)
   {

@@ -10,11 +10,11 @@ int16 super_zhidao=0;
 int16 shortstraight_flag;
 int16 crossstraight_flag;
 int16 stdDeviation=0;
-int16 s_zhi=240;//36 45 33 30 ª∑30-34 35 ’œ∞≠20-27 25 µﬂÙ§10-25
+int16 s_zhi=250;//36 45 33 30 ª∑30-34 35 ’œ∞≠20-27 25 µﬂÙ§10-25
 int16 s_max=280;//
-int16 s_wan1=180;
-int16 s_wan2=170;
-int16 s_cross=180;  
+int16 s_wan1=200;
+int16 s_wan2=200;
+int16 s_cross=190;  
 int16 g_HighestSpeed=0;
 int16 g_LowestSpeed=0;
 int16 Emergency_flag[20]={0};
