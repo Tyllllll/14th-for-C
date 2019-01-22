@@ -15,7 +15,7 @@ float All_distance=0;
 float jl_distance=0;
 float set_dist=0;
 int16 motor_flag=0;//启动标志
-int8 stop_flag=0;//停车标志
+int16 stop_flag=0;//停车标志
 int Qd_Result_L=0;//编码器值
 int Qd_Result_R=0;//编码器值
 int QD_value_L_test=0;
@@ -250,7 +250,7 @@ void Motor_pid(void)
   MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
   
   /****+*****差速控制方案*****/
-  if(error[0]>-15 && error[0]<15)
+  if(error[0]>-25 && error[0]<25)
       h = 0;
   if(error[0]>=0)
   {

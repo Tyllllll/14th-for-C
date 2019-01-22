@@ -20,7 +20,7 @@ void main ()
     Encoder_QD_init();//初始化编码器 	
     key_init_gpio();//按键初始化
     BatteryVoltage_Init();
-    boma_init_gpio();//开关初始化
+    boma_init_gpio();//开关初始化+
     Oled_GPIO_Init();
     Welcome_page();
      Buzzer_gpio_init();

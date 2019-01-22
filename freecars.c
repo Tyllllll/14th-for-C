@@ -41,11 +41,11 @@ void UartDebug(void)
   }
   if(UartData[6]!=0)
   {
-   foresight1=(int)(UartData[6]);
+   stop_flag=(int16)(UartData[6]);
   }
   if(UartData[7]!=0)
   {
-  //  speedset=(int16)(UartData[7]);
+    motor_flag=(int16)(UartData[7]);
   }
   if(UartData[8]!=0)
   {

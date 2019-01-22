@@ -39,7 +39,7 @@ extern float jl_distance;
 extern float set_dist;
 
 extern int Qd_Result;
-extern int8 stop_flag;
+extern int16 stop_flag;
 extern float M_Kp;
 extern float M_Ki;
 extern float M_Kd;
