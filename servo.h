@@ -29,7 +29,7 @@ extern int16 speed_now;
 extern float S_kp;
 extern float S_kp_r;
 extern float S_kd;
-
+extern int16 index1;
 #define DEG_MAX  1612//ÓÒ1612
 #define DEG_MID  1452//¿Õ´ò1452l
 #define DEG_MIN  1292//×ó1292

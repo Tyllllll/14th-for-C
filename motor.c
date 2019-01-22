@@ -22,7 +22,6 @@ int QD_value_L_test=0;
 int QD_value_R_test=0;
 //int all_Result=0;
 int16 duzhuan_cnt=0;
-
 void Motor_PIT(void)
 {//PIT 周期调用
 
@@ -170,8 +169,7 @@ MotorPID_TypeDef MotorPID={0,0,0,1,1,0,0,0,0,0,0,0,0,0};//Kp Ki Kd
 
 void Motor_pid(void)
 {
-  float h=0.028;//0.014 
-   
+  float h=0.018;
   MotorPID.Kp=M_Kp;
   MotorPID.Ki=M_Ki;
   MotorPID.Kd=M_Kd; 
@@ -250,7 +248,7 @@ void Motor_pid(void)
   MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
   
   /****+*****差速控制方案*****/
-  if(error[0]>-25 && error[0]<25)
+  if(error[0]>-20 && error[0]<20)
       h = 0;
   if(error[0]>=0)
   {

@@ -21,7 +21,7 @@ void Pageinit(signed char sPageNum)
 {
   int i;
   PageNum = sPageNum;
-  sprintf(ScreenStr[0][0], "Camera_CNST");
+  sprintf(ScreenStr[0][0], "index1");
   sprintf(ScreenStr[0][1], "times");
   sprintf(ScreenStr[0][2], "set_dist");
   sprintf(ScreenStr[0][7], "s_cross");
@@ -76,7 +76,7 @@ void Pageinit(signed char sPageNum)
   
   
 
-  ScreenData[0][0]=Camera_CNST;
+  ScreenData[0][0]=index1;
   ScreenData[0][1]=times;
 //  ScreenData[0][2]=set_dist;
   ScreenData[0][7]=s_cross;
@@ -599,9 +599,9 @@ void Key_DataUp(void)    //改动加数值
   {
     switch (Course)
     {
-    case 0:ScreenData[PageNum][Course] += 0.1; break;
-    case 1:ScreenData[PageNum][Course] += 0.1; break;
-    case 2:ScreenData[PageNum][Course] += 0.1; break;
+    case 0:ScreenData[PageNum][Course] += 0.01; break;
+    case 1:ScreenData[PageNum][Course] += 0.01; break;
+    case 2:ScreenData[PageNum][Course] += 0.01; break;
     case 3:ScreenData[PageNum][Course] += 0.1; break;
     case 4:ScreenData[PageNum][Course] += 0.1; break;
     case 5:ScreenData[PageNum][Course] += 0.1; break;
@@ -731,9 +731,9 @@ void Key_DataDown(void)
     switch (Course)
     {
 
-    case 0: ScreenData[PageNum][Course] -= 0.1;break;  
-    case 1: ScreenData[PageNum][Course] -= 0.1; break;
-    case 2: ScreenData[PageNum][Course] -= 0.1; break;
+    case 0: ScreenData[PageNum][Course] -= 0.01;break;  
+    case 1: ScreenData[PageNum][Course] -= 0.01; break;
+    case 2: ScreenData[PageNum][Course] -= 0.01; break;
     case 3: ScreenData[PageNum][Course] -= 0.1; break;
     case 4: ScreenData[PageNum][Course] -= 0.1; break;
     case 5: ScreenData[PageNum][Course] -= 0.1; break;
@@ -830,7 +830,7 @@ void Key_DataDown(void)
 
 void SaveData(void)
 {
-  Camera_CNST= (uint8)ScreenData[0][0]; 
+  index1= (uint8)ScreenData[0][0]; 
   times= (int)ScreenData[0][1];
   set_dist=ScreenData[0][2];
   s_cross=(int16)ScreenData[0][7];

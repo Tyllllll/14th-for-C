@@ -98,7 +98,7 @@
 	  { OV7725_UVADJ1, 0x02 },
 
   };
-  uint8 Camera_CNST = 140;//对比度 越大白色越多 根据场地调
+  uint8 Camera_CNST = 105;//对比度 越大白色越多 根据场地调
   uint8 ov7725_eagle_cfgnum = ARR_SIZE(ov7725_eagle_reg);
   uint8 Image_Buf[ROW + 10][COLUMN / 8], Image_Buf2[ROW + 10][COLUMN / 8];
   unsigned char Image[ROW][COLUMN];
