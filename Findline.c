@@ -83,7 +83,7 @@ void findline1(void)  //基础寻线
 
     
     
-    for(i=118;i>10;i--)//从118行一直找到10行
+    for(i=118;i>10;i--)//从118行一直找到10行  
     {
         k=column_start;   //80列
         f1.leftline[i]=0;

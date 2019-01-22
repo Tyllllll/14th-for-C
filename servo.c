@@ -8,7 +8,7 @@ int16 fore_min=13;//使用中47
 int16 fore_max=28;//使用中63
 int16 foresight=27;//使用中61       U弯最大top58
 
-int16 mid_error[3];
+int16 mid_error[5];
 int16 error[5]={0};
 int16 error_cha[4]={0,0,0,0};
 int16 error_d=0;
@@ -21,8 +21,8 @@ int16 min=DEG_MIN;
 int16 speed_now=0;
 
 
-float S_kp=4.3;//实验室参数
-float S_kp_r=4.2;
+float S_kp=4.05;//实验室参数
+float S_kp_r=4.1;
 float S_kd=11.1;//16.9
 
 
@@ -75,10 +75,12 @@ void Sevor_control(void)
 //    foresight=foresight>?65:foresight; 好像没有用 
 
 
-  mid_error[0]=7*(f1.midline[foresight]-80);
-  mid_error[1]=2*(f1.midline[foresight+1]-80);
-  mid_error[2]=1*(f1.midline[foresight+2]-80);
-  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2])/10);//整数除法和单精度乘法的效率差不多
+  mid_error[0]=2*(f1.midline[foresight]-80);
+  mid_error[1]=(f1.midline[foresight+1]-80);
+  mid_error[2]=(f1.midline[foresight+2]-80);
+  mid_error[3]=(f1.midline[foresight-1]-80);
+  mid_error[3]=(f1.midline[foresight-2]-80);
+  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3]+mid_error[4])/6);//整数除法和单精度乘法的效率差不多
   
   
   if(error[0]>60)
@@ -126,22 +128,54 @@ void Sevor_pid(void)
 {
 
 /*******************Normal P***********/  
- if(error[0]>0)
+// if(error[0]>0)
+//  {//右边分离Kp
+//	  if(error[0] < 20 )
+//	  {
+//		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/550;
+//	  }else
+//	    Ser_PID.Kp=S_kp_r;
+//  }
+//  else
+//  { 
+//	  if(error[0] >  -20)
+//	  {
+//		  Ser_PID.Kp=S_kp*error[0]*error[0]/550;
+//	  }else
+//	Ser_PID.Kp=S_kp;
+//  }
+   if(error[0]>0)
   {//右边分离Kp
-	  if(error[0] < 16 )
+          if(error[0] < 20)
+          {
+                  Ser_PID.Kp=S_kp_r * error[0] * error[0]/400;
+          }
+	  else if(error[0] < 30)
 	  {
-		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/196;
+		  Ser_PID.Kp=S_kp_r - (error[0] - 30)*(error[0] - 30)/225;
 	  }else
-	    Ser_PID.Kp=S_kp_r;
+                  Ser_PID.Kp=S_kp_r;
   }
   else
   { 
-	  if(error[0] >  -16)
+          if(error[0] > -20)
+          {
+                  Ser_PID.Kp=S_kp*error[0]*error[0]/400;
+          }
+	  else if(error[0] > -30)
 	  {
-		  Ser_PID.Kp=S_kp*error[0]*error[0]/196;
-	  }else
-	Ser_PID.Kp=S_kp;
+		  Ser_PID.Kp=S_kp - (error[0] + 30)*(error[0] + 30)/225;
+	  }
+          else
+            Ser_PID.Kp=S_kp;
   }
+
+//  if(error[0]<=8&&error[0]>=-8)   //直接分段赋值S_Kp 效果不如二次拟合
+//    Ser_PID.Kp=S_kp_r*0.2;
+//  else if(error[0]<=20&&error[0]>=-20)
+//    Ser_PID.Kp=S_kp_r*0.7;
+//  else
+//    Ser_PID.Kp=S_kp;
 
   Ser_PID.Kd=S_kd;
   

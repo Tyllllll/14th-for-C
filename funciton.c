@@ -204,8 +204,8 @@ float xielv(void)
   Av=Sum1/70.0;
   for(i=100;i>30;i--)
   {
-    Sum2+=(f1.midline[i]-Av)*(f1.midline[i]-Av);
-//    Sum2+=(f1.midline[i]*f1.midline[i]-Av*Av);//类似标准差 效率提升很多
+//    Sum2+=(f1.midline[i]-Av)*(f1.midline[i]-Av);
+    Sum2+=(f1.midline[i]*f1.midline[i]-Av*Av);//类似标准差 效率提升很多
   }
   S=sqrt(Sum2/70.0);
   return S;
