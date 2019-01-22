@@ -21,8 +21,8 @@ int16 min=DEG_MIN;
 int16 speed_now=0;
 
 
-float S_kp=4.1;//实验室参数
-float S_kp_r=4.0;
+float S_kp=4.3;//实验室参数
+float S_kp_r=4.2;
 float S_kd=11.1;//16.9
 
 
@@ -75,10 +75,10 @@ void Sevor_control(void)
 //    foresight=foresight>?65:foresight; 好像没有用 
 
 
-  mid_error[0]=8*(f1.midline[foresight]-80);
-  mid_error[1]=3*(f1.midline[foresight+1]-80);
+  mid_error[0]=7*(f1.midline[foresight]-80);
+  mid_error[1]=2*(f1.midline[foresight+1]-80);
   mid_error[2]=1*(f1.midline[foresight+2]-80);
-  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2])/12);//整数除法和单精度乘法的效率差不多
+  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2])/10);//整数除法和单精度乘法的效率差不多
   
   
   if(error[0]>60)
@@ -128,17 +128,17 @@ void Sevor_pid(void)
 /*******************Normal P***********/  
  if(error[0]>0)
   {//右边分离Kp
-	  if(error[0] < 20 )
+	  if(error[0] < 16 )
 	  {
-		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/400;
+		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/196;
 	  }else
 	    Ser_PID.Kp=S_kp_r;
   }
   else
   { 
-	  if(error[0] >  -20)
+	  if(error[0] >  -16)
 	  {
-		  Ser_PID.Kp=S_kp*error[0]*error[0]/400;
+		  Ser_PID.Kp=S_kp*error[0]*error[0]/196;
 	  }else
 	Ser_PID.Kp=S_kp;
   }
@@ -153,7 +153,7 @@ void Sevor_pid(void)
   /************多帧D计算****************/
   //  S_d=(int16)(Ser_PID.Kd*error_d);
   /************************************/  
-  servo_duty=abs(error[0])>25?(short)(-1.1*(S_d+S_p)+mid):(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
+  servo_duty=abs(error[0])>20?(short)(-1.1*(S_d+S_p)+mid):(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
   
   
   if(servo_duty>max)
