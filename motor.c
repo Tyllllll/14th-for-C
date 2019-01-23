@@ -22,12 +22,15 @@ int QD_value_L_test=0;
 int QD_value_R_test=0;
 //int all_Result=0;
 int16 duzhuan_cnt=0;
+float cc1 = 7.43;
+float cc2 = 5.56;
+
 void Motor_PIT(void)
 {//PIT 周期调用
 
   Qd_Result_L = (int16)(LPLD_FTM_GetCounter(FTM1));// 获取脉冲数
   Qd_Result_R = (int16)(LPLD_FTM_GetCounter(FTM2));// 获取脉冲数
-  Qd_Result_L = (Qd_Result_L>=0xF0)? 0 : Qd_Result_L;  // 刚转时会有FF的错误值
+  //Qd_Result_L = (Qd_Result_L>=0xF0)? 0 : Qd_Result_L;  // 刚转时会有FF的错误值
 //  all_Result=all_Result+Qd_Result_L;//编码器返回测试
   /*********计算速度和距离***********/
   MotorPID.Speed_test_L[0]=(Qd_Result_L==0)?0:((int)(10000*(((float)(Qd_Result_L))/((float)(QD_value_L)))));//单位cm/s
@@ -248,18 +251,30 @@ void Motor_pid(void)
   MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
   
   /****+*****差速控制方案*****/
-  if(error[0]>-20 && error[0]<20)
-      h = 0;
-  if(error[0]>=0)
+  if(error[0]>index1)
   {
-      MotorPID.OutValue_L=(int)(((h * error[0])+1) * MotorPID.OutValue);
-      MotorPID.OutValue_R=MotorPID.OutValue;    
-  }
-  else if(error[0]<0)
+      MotorPID.OutValue_L=(int)((-0.004435 * servo_duty + cc1) * (MotorPID.OutValue / 10 - 20) + 20) * 10;
+      MotorPID.OutValue_R=MotorPID.OutValue; 
+  }	  
+  else if(error[0]<-index1)
   {
      MotorPID.OutValue_L=MotorPID.OutValue;
-     MotorPID.OutValue_R=(int)(((h * (-error[0]))+1) * MotorPID.OutValue);  
+     MotorPID.OutValue_R=(int)((0.004435 * servo_duty - cc2) * (MotorPID.OutValue / 10 - 20) + 20) * 10;
   }
+	  
+  
+//  if(error[0]>-20 && error[0]<20)
+//      h = 0;
+//  if(error[0]>=0)
+//  {
+//      MotorPID.OutValue_L=(int)(((h * error[0])+1) * MotorPID.OutValue);
+//      MotorPID.OutValue_R=MotorPID.OutValue;    
+//  }
+//  else if(error[0]<0)
+//  {
+//     MotorPID.OutValue_L=MotorPID.OutValue;
+//     MotorPID.OutValue_R=(int)(((h * (-error[0]))+1) * MotorPID.OutValue);  
+//  }
   
   
   MotorPID.OutValue_L=MotorPID.OutValue_L>Max_output?Max_output:MotorPID.OutValue_L;

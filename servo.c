@@ -222,3 +222,17 @@ void Servo_PIT_Isr(void)
   PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 }
 
+
+/***************************************************************
+	*	@brief	舵机测试
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void servo_up10(void)
+{
+	servo_duty += 10;
+}
+void servo_down10(void)
+{
+	servo_duty -= 10;
+}
