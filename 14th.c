@@ -12,15 +12,15 @@ void main ()
     NVIC_Init();
     pit0_init();
     led_init();  
-    UART_Init();//´®¿Ú³õÊ¼»¯
-    gpio_init();//ÉãÏñÍ·GPIOÅäÖÃ
-    dma_init();//dmaÖĞ¶Ï³õÊ¼»¯
-    Servo_gpio_init();//  ¶æ»ú³õÊ¼»¯
-    Motor_pwm_init();//µç»ú³õÊ¼»¯
-    Encoder_QD_init();//³õÊ¼»¯±àÂëÆ÷ 	
-    key_init_gpio();//°´¼ü³õÊ¼»¯
+    UART_Init();//ä¸²å£åˆå§‹åŒ–
+    gpio_init();//æ‘„åƒå¤´GPIOé…ç½®
+    dma_init();//dmaä¸­æ–­åˆå§‹åŒ–
+    Servo_gpio_init();//  èˆµæœºåˆå§‹åŒ–
+    Motor_pwm_init();//ç”µæœºåˆå§‹åŒ–
+    Encoder_QD_init();//åˆå§‹åŒ–ç¼–ç å™¨ 	
+    key_init_gpio();//æŒ‰é”®åˆå§‹åŒ–
     BatteryVoltage_Init();
-    boma_init_gpio();//¿ª¹Ø³õÊ¼»¯+
+    boma_init_gpio();//å¼€å…³åˆå§‹åŒ–+
     Oled_GPIO_Init();
     Welcome_page();
      Buzzer_gpio_init();
@@ -52,7 +52,7 @@ void main ()
     {
         
         if(SWITCH1==0&&SWITCH2==0&&SWITCH3==0&&SWITCH4==0)
-        {//µ÷ÊÔ²ÎÊı
+        {//è°ƒè¯•å‚æ•°
             key_process();
             if(times>0)
             {
@@ -65,7 +65,7 @@ void main ()
         }
         
         if(key1==0&&SWITCH1==1&&SWITCH2==0&&SWITCH3==0&&SWITCH4==0)
-        {//°´¼ü·¢³µ
+        {//æŒ‰é”®å‘è½¦
             key_delay();    
             if(key1==0)
             {
@@ -78,8 +78,8 @@ void main ()
                                
                 if(motor_flag==0)
                 {
-                    motor_flag=50;//µç»ú×ª¶¯±êÖ¾
-                    MotorPID.IntSum_all=0;//·¢³µµç»úIÏîÇåÁã
+                    motor_flag=50;//ç”µæœºè½¬åŠ¨æ ‡å¿—
+                    MotorPID.IntSum_all=0;//å‘è½¦ç”µæœºIé¡¹æ¸…é›¶
                     if(times>0)
                     {
                         time_flag=50*times;
@@ -96,32 +96,32 @@ void main ()
           if(key2 == 0)
             stop_flag=20;
         }
-        if(sampleover ==1)  //Íê³É²ÉÍ¼
+        if(sampleover ==1)  //å®Œæˆé‡‡å›¾
         {
-            //      LPLD_PIT_Time_Start(PIT2); // ¼ÆÊ±¿ªÊ¼
+            //      LPLD_PIT_Time_Start(PIT2); // è®¡æ—¶å¼€å§‹
             
             LedOff(1);
             LedOff(3);
             LedOff(2);
             sampleover = 0;
-            img_extract();//½âÑ¹Í¼Æ¬
+            img_extract();//è§£å‹å›¾ç‰‡
             
             //      time = LPLD_PIT_Time_Get(PIT2);
             //      LPLD_PIT_Close(PIT2);
-            //      time *= (1000000.0 / g_bus_clock); // ¼ÆÊ±½áÊø
+            //      time *= (1000000.0 / g_bus_clock); // è®¡æ—¶ç»“æŸ
             
-            findline1();//»ù´¡Ñ°Ïß
+            findline1();//åŸºç¡€å¯»çº¿
             findline2();
             
             //      int i;
             //      for(i=119;i>=0;i--)
-            //      {//ÈüµÀ°ë¿í²âÁ¿
+            //      {//èµ›é“åŠå®½æµ‹é‡
             //        half[i]=(f1.rightline[i]-f1.leftline[i]);//2;
             //      }
             
-            Sevor_control();//¶æ»ú´ò½ÇÊä³ö
+            Sevor_control();//èˆµæœºæ‰“è§’è¾“å‡º
             if( SWITCH1==1&&SWITCH3==0)
-            {//¼ÆÊ±Í£³µ
+            {//è®¡æ—¶åœè½¦
                 if(time_flag>0&&times>0)
                 {
                     if(time_flag!=0)
@@ -130,25 +130,25 @@ void main ()
                     }
                     if(time_flag==0)
                     {
-                        stop_flag=20;        	   
+                        stop_flag=100;        	   
                     }
                 }
             }
             if(motor_flag!=0)
-            {//¸÷ÖÖÍ£³µ
+            {//å„ç§åœè½¦
                 
                 if(set_dist>=1)
                 {
                     if(All_distance>=set_dist)
                     {
-                        stop_flag=20;
+                        stop_flag=100;
                     } 
                 }
                 
                 Emergency_judge();
                 if( Emergencystop_flag==1)
                 {
-                    stop_flag=20;
+                    stop_flag=100;
                 }
             }
             
@@ -183,7 +183,7 @@ void main ()
         
         
         if(SWITCH1==1&&SWITCH2==1&&SWITCH3==1&&SWITCH4==1)
-        {//´«Í¼Ïñ¸øµçÄÔ
+        {//ä¼ å›¾åƒç»™ç”µè„‘
             static int8 Image_Show_sele = 4;    
             PutcharCamera(Image_Show_sele);
         }
