@@ -11,9 +11,9 @@ int16 shortstraight_flag;
 int16 crossstraight_flag;
 int16 stdDeviation=0;
 int16 s_zhi=260;//36 45 33 30 环30-34 35 障碍20-27 25 颠簸10-25
-int16 s_max=280;//
-int16 s_wan1=210;
-int16 s_wan2=200;
+int16 s_max=320;//
+int16 s_wan1=230;
+int16 s_wan2=220;
 int16 s_cross=220;  
 int16 g_HighestSpeed=0;
 int16 g_LowestSpeed=0;
@@ -81,7 +81,7 @@ void Emergency_judge(void)
 输出参数：        无
 添加时间         2017.04.10
 *******************************************************************************/
-#define zhidao_endrow  31
+#define zhidao_endrow  15
 #define Mid_err  5
 void zhidao(void)
 {//在zhidao_endrow到车头这段距离内 1中线不太偏 2也不丢线 3且不为十字和坡道 4顶点满足直道条件
@@ -89,17 +89,18 @@ void zhidao(void)
     int16 i=0,flag1=0,flag2=0;
     flag1=1;//对中线的要求
     flag2=1;//对丢线的要求
-    for(i=118;i>zhidao_endrow;i--)
+    for(i=100;i>zhidao_endrow;i--)
     {
         if(f1.midline[i]>88||f1.midline[i]<72)
         {
-            flag1=0;
-            break;
+            lose_cnt++;
         }
     }
+    flag1 = lose_cnt<=3?1:0;
+    lose_cnt = 0;
     if(flag1)
     {//丢线不能超过3
-        for(i=118;i>zhidao_endrow;i--)
+        for(i=60;i>zhidao_endrow;i--)
         { 
             if(f1.leftlineflag[i]==0||f1.rightlineflag[i]==0)
             {
@@ -111,7 +112,7 @@ void zhidao(void)
             flag2=0;
         }
     }
-    if(f2.toppoint<=35&&flag1==1&&flag2==1)
+    if(f2.toppoint<=15&&flag1==1&&flag2==1)
     {
         super_zhidao=1;
     }

@@ -94,7 +94,7 @@ void main ()
         {
           key_delay(); 
           if(key2 == 0)
-            stop_flag=100;
+            stop_flag=20;
         }
         if(sampleover ==1)  //Íê³É²ÉÍ¼
         {
@@ -130,7 +130,7 @@ void main ()
                     }
                     if(time_flag==0)
                     {
-                        stop_flag=100;        	   
+                        stop_flag=20;        	   
                     }
                 }
             }
@@ -141,14 +141,14 @@ void main ()
                 {
                     if(All_distance>=set_dist)
                     {
-                        stop_flag=100;
+                        stop_flag=20;
                     } 
                 }
                 
                 Emergency_judge();
                 if( Emergencystop_flag==1)
                 {
-                    stop_flag=100;
+                    stop_flag=20;
                 }
             }
             
