@@ -228,25 +228,9 @@ void Servo_PIT_Isr(void)
 	*	@param	нч
 	*	@note	нч
 ***************************************************************/
-void servo_up1(void)
-{
-	servo_duty += 1;
-}
-void servo_up5(void)
-{
-	servo_duty += 5;
-}
 void servo_up10(void)
 {
 	servo_duty += 10;
-}
-void servo_down1(void)
-{
-	servo_duty -= 1;
-}
-void servo_down5(void)
-{
-	servo_duty -= 5;
 }
 void servo_down10(void)
 {
