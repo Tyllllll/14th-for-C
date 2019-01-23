@@ -5,8 +5,7 @@ int16 foresight1=46;//调试用
 
 //int16 fore_offset=12;//前瞻弯道随动量
 int16 fore_min=39;//使用中47
-int16 fore_max=47;/
-/使用中63
+int16 fore_max=47;//使用中63
 int16 foresight=55;//使用中61       U弯最大top58
 
 int16 mid_error[5];
