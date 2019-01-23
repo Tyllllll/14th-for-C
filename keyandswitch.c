@@ -21,8 +21,8 @@ void Pageinit(signed char sPageNum)
 {
   int i;
   PageNum = sPageNum;
-  sprintf(ScreenStr[0][0], "index1");
-  sprintf(ScreenStr[0][1], "times");
+  sprintf(ScreenStr[0][0], "cc1");
+  sprintf(ScreenStr[0][1], "cc2");
   sprintf(ScreenStr[0][2], "set_dist");
   sprintf(ScreenStr[0][7], "s_cross");
   
@@ -76,8 +76,8 @@ void Pageinit(signed char sPageNum)
   
   
 
-  ScreenData[0][0]=index1;
-  ScreenData[0][1]=times;
+  ScreenData[0][0]=cc1;
+  ScreenData[0][1]=cc2;
 //  ScreenData[0][2]=set_dist;
   ScreenData[0][7]=s_cross;
   
@@ -315,7 +315,6 @@ unsigned char key_scan(void)
   
   else if (key1==0)
   {
-     BUZZER_ON;
      key_delay();
      if (key1==0)
      {
@@ -326,7 +325,6 @@ unsigned char key_scan(void)
   
   else if (key2==0)
   {
-    BUZZER_ON;
      key_delay();
      if (key2==0)
      {
@@ -568,8 +566,8 @@ void Key_DataUp(void)    //改动加数值
   {
     switch (Course)
     {
-    case 0: ScreenData[PageNum][Course] += 1.0; break;
-    case 1: ScreenData[PageNum][Course] += 1.0; break;
+    case 0: ScreenData[PageNum][Course] += 0.01; break;
+    case 1: ScreenData[PageNum][Course] += 0.01; break;
     case 2: ScreenData[PageNum][Course] += 1.0; break;
     case 3: ScreenData[PageNum][Course] += 10.0; break;
     case 4: ScreenData[PageNum][Course] += 10.0; break;
@@ -698,8 +696,8 @@ void Key_DataDown(void)
   {
     switch (Course)
     {
-    case 0: ScreenData[PageNum][Course] -= 1.0f; break;
-    case 1: ScreenData[PageNum][Course] -= 1.0f; break;
+    case 0: ScreenData[PageNum][Course] -= 0.01f; break;
+    case 1: ScreenData[PageNum][Course] -= 0.01f; break;
     case 2: ScreenData[PageNum][Course] -= 1.0f; break;
     case 3: ScreenData[PageNum][Course] -= 10.0; break;
     case 4: ScreenData[PageNum][Course] -= 10.0; break;
@@ -830,8 +828,8 @@ void Key_DataDown(void)
 
 void SaveData(void)
 {
-  index1= (uint8)ScreenData[0][0]; 
-  times= (int)ScreenData[0][1];
+  cc1= (float)ScreenData[0][0]; 
+  cc2= (float)ScreenData[0][1];
   set_dist=ScreenData[0][2];
   s_cross=(int16)ScreenData[0][7];
   

@@ -34,7 +34,8 @@ extern int16 index1;
 #define DEG_MID  1452//¿Õ´ò1452l
 #define DEG_MIN  1292//×ó1292
 
-
+void servo_up10(void);
+void servo_down10(void);
 
 
 

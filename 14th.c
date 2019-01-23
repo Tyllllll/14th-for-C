@@ -130,7 +130,7 @@ void main ()
                     }
                     if(time_flag==0)
                     {
-                        stop_flag=100;        	   
+                        stop_flag=10;        	   
                     }
                 }
             }
@@ -141,14 +141,14 @@ void main ()
                 {
                     if(All_distance>=set_dist)
                     {
-                        stop_flag=100;
+                        stop_flag=10;
                     } 
                 }
                 
                 Emergency_judge();
                 if( Emergencystop_flag==1)
                 {
-                    stop_flag=100;
+                    stop_flag=10;
                 }
             }
             
@@ -187,6 +187,28 @@ void main ()
             static int8 Image_Show_sele = 4;    
             PutcharCamera(Image_Show_sele);
         }
+//		if(key1 == 0)
+//        {
+//          key_delay(); 
+//          if(key1 == 0)
+//            servo_up10();
+//        }
+//		if(key6 == 0)
+//        {
+//          key_delay(); 
+//          if(key6 == 0)
+//            servo_down10();
+//        }
+//		if(key2 == 0)
+//		{
+//			key_delay(); 
+//			if(key2 == 0)
+//			{
+//				LPLD_FTM_ClearCounter(FTM2);//清空计数器
+//				LPLD_FTM_ClearCounter(FTM1);//清空计数器
+//			}
+//		}
+		
     }
     
 }

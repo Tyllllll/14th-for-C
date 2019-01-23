@@ -44,4 +44,7 @@ extern float M_Kp;
 extern float M_Ki;
 extern float M_Kd;
 
+extern float cc1;
+extern float cc2;
+
 #endif
