@@ -14,6 +14,5 @@
 #include "camera.h"
 #include "DEV_SCCB.h"
 #include "encoder.h"
-#include "behavior.h"
 
 #endif
