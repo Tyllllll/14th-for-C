@@ -94,7 +94,7 @@ void main ()
         {
           key_delay(); 
           if(key2 == 0)
-            stop_flag=100;
+            stop_flag=10;
         }
         if(sampleover ==1)  //ÕÍ≥…≤…Õº
         {
