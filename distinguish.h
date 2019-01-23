@@ -12,7 +12,8 @@ extern int16 Emergency_flag[20];
 extern int16 Emergencystop_flag;
 extern int16 road_type[200];
 extern int16 shortstraight_flag;
-
+extern int16 flag1;
+extern int16 flag2;
 
 
 void zhidao(void);
