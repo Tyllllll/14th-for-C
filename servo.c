@@ -4,9 +4,10 @@ PID_InitTypeDef Ser_PID={1,0,5};
 int16 foresight1=46;//调试用
 
 //int16 fore_offset=12;//前瞻弯道随动量
-int16 fore_min=13;//使用中47
-int16 fore_max=28;//使用中63
-int16 foresight=27;//使用中61       U弯最大top58
+int16 fore_min=39;//使用中47
+int16 fore_max=47;/
+/使用中63
+int16 foresight=55;//使用中61       U弯最大top58
 
 int16 mid_error[5];
 int16 error[5]={0};
@@ -19,10 +20,10 @@ int16 mid=DEG_MID;
 int16 max=DEG_MAX;
 int16 min=DEG_MIN;
 int16 speed_now=0;
+int16 index1=8;
 
-
-float S_kp=4.05;//实验室参数
-float S_kp_r=4.1;
+float S_kp=4.01;//实验室参数
+float S_kp_r=4.01;
 float S_kd=11.1;//16.9
 
 
@@ -76,11 +77,10 @@ void Sevor_control(void)
 
 
   mid_error[0]=2*(f1.midline[foresight]-80);
-  mid_error[1]=(f1.midline[foresight+1]-80);
+  mid_error[1]=2*(f1.midline[foresight+1]-80);
   mid_error[2]=(f1.midline[foresight+2]-80);
   mid_error[3]=(f1.midline[foresight-1]-80);
-  mid_error[3]=(f1.midline[foresight-2]-80);
-  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3]+mid_error[4])/6);//整数除法和单精度乘法的效率差不多
+  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);//整数除法和单精度乘法的效率差不多
   
   
   if(error[0]>60)
@@ -128,47 +128,48 @@ void Sevor_pid(void)
 {
 
 /*******************Normal P***********/  
-// if(error[0]>0)
-//  {//右边分离Kp
-//	  if(error[0] < 20 )
-//	  {
-//		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/550;
-//	  }else
-//	    Ser_PID.Kp=S_kp_r;
-//  }
-//  else
-//  { 
-//	  if(error[0] >  -20)
-//	  {
-//		  Ser_PID.Kp=S_kp*error[0]*error[0]/550;
-//	  }else
-//	Ser_PID.Kp=S_kp;
-//  }
-   if(error[0]>0)
+ if(error[0]>0)
   {//右边分离Kp
-          if(error[0] < 20)
-          {
-                  Ser_PID.Kp=S_kp_r * error[0] * error[0]/400;
-          }
-	  else if(error[0] < 30)
+	  if(error[0] < 25 )
 	  {
-		  Ser_PID.Kp=S_kp_r - (error[0] - 30)*(error[0] - 30)/225;
+		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/(25*25);
 	  }else
-                  Ser_PID.Kp=S_kp_r;
+	    Ser_PID.Kp=S_kp_r;
   }
   else
   { 
-          if(error[0] > -20)
-          {
-                  Ser_PID.Kp=S_kp*error[0]*error[0]/400;
-          }
-	  else if(error[0] > -30)
+	  if(error[0] >  -25)
 	  {
-		  Ser_PID.Kp=S_kp - (error[0] + 30)*(error[0] + 30)/225;
-	  }
-          else
-            Ser_PID.Kp=S_kp;
+		  Ser_PID.Kp=S_kp*error[0]*error[0]/(25*25);
+	  }else
+	Ser_PID.Kp=S_kp;
   }
+ 
+//   if(error[0]>0)
+//  {//右边分离Kp
+//          if(error[0] < index1)
+//          {
+//                  Ser_PID.Kp=S_kp_r * error[0] * error[0]/(index1*index1);
+//          }
+//	  else if(error[0] < 30)
+//	  {
+//		  Ser_PID.Kp=S_kp_r - (error[0] - 30)*(error[0] - 30)/225;
+//	  }else
+//                  Ser_PID.Kp=S_kp_r;
+//  }
+//  else
+//  { 
+//          if(error[0] > -20)
+//          {
+//                  Ser_PID.Kp=S_kp*error[0]*error[0]/400;
+//          }
+//	  else if(error[0] > -30)
+//	  {
+//		  Ser_PID.Kp=S_kp - (error[0] + 30)*(error[0] + 30)/225;
+//	  }
+//          else
+//            Ser_PID.Kp=S_kp;
+//  }
 
 //  if(error[0]<=8&&error[0]>=-8)   //直接分段赋值S_Kp 效果不如二次拟合
 //    Ser_PID.Kp=S_kp_r*0.2;
@@ -187,8 +188,8 @@ void Sevor_pid(void)
   /************多帧D计算****************/
   //  S_d=(int16)(Ser_PID.Kd*error_d);
   /************************************/  
-  servo_duty=abs(error[0])>20?(short)(-1.1*(S_d+S_p)+mid):(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
-  
+ // servo_duty=abs(error[0])<Deadzone?(short)0:(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
+  servo_duty = abs(error[0])<index1?(short)mid:(short)(-(S_d+S_p)+mid);
   
   if(servo_duty>max)
   {//限幅
