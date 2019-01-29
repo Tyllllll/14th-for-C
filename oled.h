@@ -1,10 +1,9 @@
 #ifndef _OLED_H_
 #define _OLED_H_
-#include "common.h"
 
 #define OLED_GPIO_PTx 		PTE
-#define OLED_SCLK_PTx		PTA
 #define OLED_GPIO_SCLK_Pinx	GPIO_Pin6
+#define OLED_SCLK_PTx		PTA
 #define OLED_GPIO_SDA_Pinx	GPIO_Pin12
 #define OLED_GPIO_RST_Pinx	GPIO_Pin11
 #define OLED_GPIO_DC_Pinx	GPIO_Pin10

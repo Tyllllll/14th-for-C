@@ -73,7 +73,7 @@
 #if defined(USE_K60DZ10)
   #define CORE_CLK_MHZ        PLL_96
 #elif defined(USE_K60D10)
-  #define CORE_CLK_MHZ        PLL_96
+  #define CORE_CLK_MHZ        PLL_150
 #elif defined(USE_K60F12)
   #define CORE_CLK_MHZ        PLL_120
 #elif defined(USE_K60F15)

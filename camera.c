@@ -99,11 +99,7 @@ reg_s regaCameraEagle[] =
 
 const uint8 c_ubyColor[] = {253, 0};
 uint8 ubyCameraEagle_CfgNum = ARR_SIZE(regaCameraEagle);
-uint16 contrast = 140;//对比度，越大白色越多，根据场地调
-uint8 ready_read;
-uint8 ready_write = 1;
-uint8 which_buffer;
-Camera_Class camera;
+Camera_Class camera = {105, 0, 1, 0};
 
 /***************************************************************
 	*	@brief	摄像头gpio初始化
@@ -112,10 +108,16 @@ Camera_Class camera;
 ***************************************************************/
 static void Camera_Gpio_Init(void)
 {
+	static GPIO_InitTypeDef CameraPT_InitStructure;
 	static GPIO_InitTypeDef isr_InitStructure;
 	static GPIO_InitTypeDef DMA_GPIO_InitStructure;
-	static GPIO_InitTypeDef CameraPT_InitStructure;
 	static DMA_InitTypeDef DMA_InitStructure;
+
+	CameraPT_InitStructure.GPIO_PTx = CAMERAPT_PTx;
+	CameraPT_InitStructure.GPIO_Pins = CAMERAPT_Pinx;
+	CameraPT_InitStructure.GPIO_Dir = DIR_INPUT;
+	CameraPT_InitStructure.GPIO_PinControl = IRQC_DIS;
+	LPLD_GPIO_Init(CameraPT_InitStructure);
 
 	/* img interrupt */
 	isr_InitStructure.GPIO_PTx = IMG_IRQ_PTx;
@@ -125,12 +127,6 @@ static void Camera_Gpio_Init(void)
 	isr_InitStructure.GPIO_Isr = Img_Isr;
 	LPLD_GPIO_Init(isr_InitStructure);
 	LPLD_GPIO_EnableIrq(isr_InitStructure);
-
-	CameraPT_InitStructure.GPIO_PTx = CAMERAPT_PTx;
-	CameraPT_InitStructure.GPIO_Pins = CAMERAPT_Pinx;
-	CameraPT_InitStructure.GPIO_Dir = DIR_INPUT;
-	CameraPT_InitStructure.GPIO_PinControl = IRQC_DIS;
-	LPLD_GPIO_Init(CameraPT_InitStructure);
 
 	DMA_GPIO_InitStructure.GPIO_PTx = CAMERA_DMA_PTx;
 	DMA_GPIO_InitStructure.GPIO_Pins = CAMERA_DMA_Pinx;
@@ -159,10 +155,8 @@ static void Camera_Gpio_Init(void)
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = contrast;
-	camera.ready_read = ready_read;
-	camera.ready_write = ready_write;
-	camera.which_buffer = which_buffer;
+//	camera.contrast = contrast;
+//	camera.ready_write = ready_write;
 	uint16 i = 0;
 	uint8 ubyDeviceID = 0;
 	LPLD_SCCB_Init();
@@ -172,7 +166,7 @@ uint8 ubyCamera_Init(void)
 	while(!LPLD_SCCB_WriteReg(OV7725_COM7, 0x80))
 	{
 		i++;
-		if (i == 500)
+		if(i == 500)
 		{
 			return 1; // 通信失败
 		}

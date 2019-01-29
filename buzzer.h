@@ -1,6 +1,5 @@
 #ifndef _BUZZER_H_
 #define _BUZZER_H_
-#include "common.h"
 
 #define BUZZER_PTx	PTC
 #define BUZZER_Pinx	GPIO_Pin12

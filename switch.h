@@ -1,6 +1,5 @@
 #ifndef _SWITCH_H_
 #define _SWITCH_H_
-#include "common.h"
 
 #define SWITCH1_PTx		PTE
 #define SWITCH1_Pinx	GPIO_Pin24

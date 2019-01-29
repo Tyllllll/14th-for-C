@@ -1,6 +1,5 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
-#include "common.h"
 
 //#define DMA_MAX_NUM 0x7FFF
 #define COLUMN			160

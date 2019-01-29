@@ -19,17 +19,17 @@ void Motor_Pwm_Init(void)
 	//左反转
 	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR1_FTM_CH2x, 0, MOTOR1_PORTPin2x, ALIGN_LEFT);
 	//右反转
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH1x, 0, MOTOR1_PORTPin1x, ALIGN_LEFT);
+	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH1x, 0, MOTOR2_PORTPin1x, ALIGN_LEFT);
 	//右正转
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH2x, 0, MOTOR1_PORTPin2x, ALIGN_LEFT);
+	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH2x, 0, MOTOR2_PORTPin2x, ALIGN_LEFT);
 }
 
 /***************************************************************
-	*	@brief	PIT0初始化
+	*	@brief	PIT1初始化
 	*	@param	无
 	*	@note	Motor_PIT为回调函数
 ***************************************************************/
-void Motor_Pit0_Init(void)
+void Motor_Pit1_Init(void)
 {
 	static  PIT_InitTypeDef PIT_InitStructure; 
 	PIT_InitStructure.PIT_Pitx = PIT1;

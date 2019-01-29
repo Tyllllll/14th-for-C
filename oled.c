@@ -268,7 +268,9 @@ void OLED_Put6x8Char(unsigned char x, unsigned char y, unsigned char ch)
 	OLED_SetPosition(x, y);
 
 	for(i = 0 ; i < 6 ; i++)
+	{
 		OLED_WriteData(F6x8[c][i]);
+	}
 }
 
 /***************************************************************
@@ -292,7 +294,9 @@ void OLED_Put6x8Str(unsigned char x, unsigned char y, unsigned char ch[])
 		OLED_SetPosition(x, y);
 
 		for(i = 0 ; i < 6 ; i++)
+		{
 			OLED_WriteData(F6x8[c][i]);
+		}
 		x += 6;
 		j++;
 	}
@@ -319,11 +323,13 @@ void OLED_PrintIntValue(unsigned char x, unsigned char y, int data)
 {
 	if(data < 0)
 	{
-			OLED_Put6x8Char(x, y, '-');
-			data = -data;
+		OLED_Put6x8Char(x, y, '-');
+		data = -data;
 	}
 	else
-			OLED_Put6x8Char(x, y, '+');
+	{
+		OLED_Put6x8Char(x, y, '+');
+	}
 
 	OLED_Put6x8Char(x + 6, y, (data / 1000) + 48);
 	OLED_Put6x8Char(x + 12, y, ((data % 1000) / 100) + 48);
@@ -380,7 +386,7 @@ void OLED_ShowImage(void)
 	int cnt;
 	for(i = 0; i < 8; i++)
 	{
-		OLED_WriteCmd(0xB0 + i);
+		OLED_WriteCmd(0xb0 + i);
 		OLED_WriteCmd(0x01);
 		OLED_WriteCmd(0x10);
 		for(j = 0; j < 80; j++)
@@ -389,7 +395,7 @@ void OLED_ShowImage(void)
 			for(cnt = 7; cnt >= 0; cnt--)
 			{
 				data <<= 1;
-				data |= camera.image[((i * 8) + cnt) << 1][j * 5] / 253;
+				data |= camera.image[(i * 8 + cnt) * 2][2 * j] && 1;
 			}
 			OLED_WriteData(data);
 		}

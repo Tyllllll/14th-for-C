@@ -20,21 +20,18 @@
 
 void main (void)
 {
+	DisableInterrupts;
     Init_All();
+	EnableInterrupts;
+	OLED_Fill(0x00);
     while(1)
     {
-//		if(camera.ready_read)
-//		{
-//			LED1_O = 1;
-//			LED2_O = 1;
-//			LED3_O = 1;
-//			Img_Extract();
-//			OLED_ShowImage();
-//		}else
-//		{
-//			LED1_O = 1;
-//			LED2_O = 0;
-//			LED3_O = 0;
-//		}
+//		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 3500);
+//		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 3500);
+		if(camera.ready_read)
+		{
+			Img_Extract();
+			OLED_ShowImage();
+		}
     }
 }

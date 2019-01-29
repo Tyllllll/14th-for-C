@@ -1,6 +1,5 @@
 #ifndef _KEY_H_
 #define _KEY_H_
-#include "common.h"
 
 #define KEY1_PTx		PTE
 #define KEY1_Pinx		GPIO_Pin28
