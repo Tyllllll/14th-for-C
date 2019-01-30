@@ -7,9 +7,9 @@
 
 typedef struct
 {
-	float left_mag;
-	float mid_mag;
-	float right_mag;
+	float32 left_mag;
+	float32 mid_mag;
+	float32 right_mag;
 }Magnetic_Class;
 extern Magnetic_Class magnetic;
 

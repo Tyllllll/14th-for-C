@@ -8,9 +8,9 @@
 #define SERVO_HIGH_PITx PIT0
 
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
-#define DEG_MAX  1645
-#define DEG_MID  1458
-#define DEG_MIN  1292
+#define DEG_MAX  1612
+#define DEG_MID  1452
+#define DEG_MIN  1287
 
 void Servo_Gpio_Init(void);
 void Servo_PIT_Isr(void);

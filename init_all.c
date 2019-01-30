@@ -8,7 +8,7 @@
 void Init_All(void)
 {
     DisableInterrupts;
-	NVIC_Init();
+//	NVIC_Init();
 	Oled_Gpio_Init();
 	OLED_Put6x8Str(20, 2, "initializing...");
 	Led_Gpio_Init();
@@ -41,6 +41,7 @@ void Init_All(void)
 	Motor_Pwm_Init();
 	Servo_Gpio_Init();
 	Encoder_Init();
+	OLED_Fill(0x00);
 	EnableInterrupts;
 }
 

@@ -14,5 +14,6 @@
 #include "DEV_SCCB.h"
 #include "encoder.h"
 #include "magnetic.h"
+#include "identify.h"
 
 #endif

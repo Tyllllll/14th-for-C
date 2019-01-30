@@ -183,11 +183,11 @@ typedef struct{
 }reg_s;
 typedef struct
 {
-	uint16 contrast;//对比度，越大白色越多，根据场地调
+	uint8 contrast;//对比度，越大白色越多，根据场地调
 	uint8 ready_read;
 	uint8 ready_write;
 	uint8 which_buffer;
-	unsigned char image[ROW][COLUMN];
+	uint8 image[ROW][COLUMN];
 	uint8 image_buf1[ROW + 10][COLUMN / 8];
 	uint8 image_buf2[ROW + 10][COLUMN / 8];
 }Camera_Class;

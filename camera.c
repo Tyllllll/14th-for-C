@@ -96,7 +96,6 @@ reg_s regaCameraEagle[] =
 	{OV7725_UVADJ0,		0x11},
 	{OV7725_UVADJ1,		0x02}
 };
-
 const uint8 c_ubyColor[] = {253, 0};
 uint8 ubyCameraEagle_CfgNum = ARR_SIZE(regaCameraEagle);
 Camera_Class camera = {105, 0, 1, 0};
@@ -216,7 +215,7 @@ static void Camera_Delay(void)
 /***************************************************************
 	*	@brief	img中断(gpio)
 	*	@param	无
-	*	@note	无
+	*	@note	进行DMA
 ***************************************************************/
 void Img_Isr(void)
 {
@@ -249,7 +248,7 @@ void Img_Isr(void)
 /***************************************************************
 	*	@brief	DMA中断
 	*	@param	无
-	*	@note	无
+	*	@note	可读写，切换传图标志
 ***************************************************************/
 void DMA_Complete_Isr(void)
 {
