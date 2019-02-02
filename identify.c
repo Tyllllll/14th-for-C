@@ -75,7 +75,14 @@ void Find_Line(void)
 ***************************************************************/
 void Judge_Feature(void)
 {
-	Find_Toppoint();
+	//特征清零
+	feature.top_point = 0;
+	feature.left_flection_flag = 0;
+	feature.left_flection_row = 0;
+	feature.right_flection_flag = 0;
+	feature.right_flection_row = 0;
+	
+	Find_Top_Point();
 	Find_Inflection();
 }
 
@@ -84,25 +91,25 @@ void Judge_Feature(void)
 	*	@param	无
 	*	@note	顶点的定义为某一行的中线上的为白色点，但是该中线列的后面的点为黑点，即赛道边界
 ***************************************************************/
-void Find_Toppoint(void)
+void Find_Top_Point(void)
 {
 	uint8 i = 0;
-	feature.toppoint = 0;
+	feature.top_point = 0;
 	for(i = 100; i > 5; i--)
 	{
 		if(camera.image[i][line.midline[i]] != 0 && (camera.image[i - 1][line.midline[i]] == 0 || camera.image[i - 3][line.midline[i]] == 0 || camera.image[i - 5][line.midline[i]] == 0))
 		{
-			feature.toppoint = i;
+			feature.top_point = i;
 			break;
 		}
 	}
-	if(feature.toppoint == 0)
+	if(feature.top_point == 0)
 	{
 		for(i = 118; i > 2; i--)
 		{
 			if(line.midline[i] > 150 || line.midline[i] < 10)
 			{
-				feature.toppoint = i;
+				feature.top_point = i;
 				break;
 			}
 		}
@@ -117,9 +124,10 @@ void Find_Toppoint(void)
 void Find_Inflection(void)
 {
 	uint8 i = 0;
-	if(feature.toppoint < 100 && feature.toppoint > 20)
+	if(feature.top_point < 100 && feature.top_point > 10)
 	{
-		for(i = 108; i > feature.toppoint + 4; i--)
+		//找左拐点
+		for(i = 108; i > feature.top_point + 4; i--)
 		{
 			if(feature.left_flection_flag == 0)
 			{
@@ -128,16 +136,107 @@ void Find_Inflection(void)
 				{
 					//大小条件
 					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] > line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5] &&
-					   line.left_line[i] > line.left_line[i - 2] && line.left_line[i] > line.left_line[i - 4] && line.left_line[i - 3] - line.left_line[i + 3] < 4)
+					   line.left_line[i - 3] - line.left_line[i + 3] < 4)
+						//最后一个条件？？？
 					{
 						//存在性条件
-						if(line.left_line_flag[i + 3] == 1 && line.left_line_flag[i + 5] == 1 && line.left_line_flag[i] == 1)
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i + 3] == 1 && line.left_line_flag[i + 5] == 1)
 						{
 							//斜率条件
-							if(line.left_line[i] - line.left_line[i - 3] - line.left_line[i + 3] + line.left_line[i] > 4)
+							if(line.left_line[i] - line.left_line[i - 3] - (line.left_line[i + 3] - line.left_line[i]) > 4)
 							{
 								feature.left_flection_row = i;
 								feature.left_flection_flag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		//找右拐点
+		for(i = 108; i > feature.top_point + 4; i--)
+		{
+			if(feature.right_flection_flag == 0)
+			{
+				//位置条件
+				if(i > 35 && line.right_line[i] > 20)
+				{
+					//大小条件
+					if(line.right_line[i] < line.right_line[i + 3] && line.left_line[i] < line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5] &&
+					   line.right_line[i - 3] - line.right_line[i + 3] > -4)
+						//最后一个条件？？？
+					{
+						//存在性条件
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i + 3] == 1 && line.right_line_flag[i + 5] == 1)
+						{
+							//斜率条件
+							if(line.right_line[i + 3] - line.right_line[i] - (line.right_line[i] - line.right_line[i - 3]) > 4)
+							{
+								feature.right_flection_row = i;
+								feature.right_flection_flag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	找拐点2
+	*	@param	无
+	*	@note	十字远点处拐点（透视图中中间值）有待改进，未测试
+***************************************************************/
+void Find_Flection2(void)
+{
+	uint8 i = 0;
+	//找左拐点2
+	if(feature.top_point < 100 && feature.top_point > 10)
+	{
+		for(i = 100; i > feature.top_point + 4; i--)
+		{
+			if(feature.left_flection2_flag == 0)
+			{
+				//位置条件
+				if(line.left_line[i] < 140)
+				{
+					//大小条件
+					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] < line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5])
+					{
+						//存在性条件
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1 && line.left_line_flag[i - 5] == 1)
+						{
+							//斜率条件
+							if(line.left_line[i + 3] - line.left_line[i] > 2)
+							{
+								feature.left_flection2_row = i;
+								feature.left_flection2_flag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		//找右拐点2
+		for(i = 100; i > feature.top_point + 4; i--)
+		{
+			if(feature.right_flection2_flag == 0)
+			{
+				//位置条件
+				if(line.right_line[i] > 20)
+				{
+					//大小条件
+					if(line.right_line[i] < line.right_line[i + 3] && line.right_line[i] > line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5])
+					{
+						//存在性条件
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1 && line.right_line_flag[i - 5] == 1)
+						{
+							//斜率条件
+							if(line.right_line[i + 3] - line.right_line[i] < -2)
+							{
+								feature.right_flection2_row = i;
+								feature.right_flection2_flag = 1;
 							}
 						}
 					}
