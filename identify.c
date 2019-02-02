@@ -84,6 +84,11 @@ void Judge_Feature(void)
 	
 	Find_Top_Point();
 	Find_Inflection();
+	Find_Inflection2();
+	if(feature.top_point != 0)
+	{
+		Judge_Curve();
+	}
 }
 
 /***************************************************************
@@ -242,6 +247,113 @@ void Find_Flection2(void)
 					}
 				}
 			}
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	判弯
+	*	@param	无
+	*	@note	无（十字flag=1情况未写）
+***************************************************************/
+void Judge_Curve(void)
+{
+	uint8 i = 0;
+	//判小弯
+	for(i = 100; i > feature.top_point + 3; i--)
+	{
+		if(feature.turn_flag != 1)
+		{
+			//左丢线的一行
+			if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+			{
+				if(line.right_line_flag[i - 5] == 1 && i > 30)
+				{
+					//行数很靠前时防止在十字后远方看过去的时候误判
+					if(i < 40 && line.right_line[i - 5] > 100)
+					{
+						if(line.right_line[i - 5] - line.right_line[i] > 10)
+						{
+							feature.turn_flag = 0;
+						}
+					}
+					else
+					{
+						feature.turn_flag = 1;
+					}
+				}
+			}
+		}
+		else if(feature.turn_flag != 2)
+		{
+			//右丢线的一行
+			if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+			{
+				if(line.left_line_flag[i - 5] == 1 && i > 30)
+				{
+					//行数很靠前时防止在十字后远方看过去的时候误判
+					if(i < 40 && line.left_line[i - 5] < 60)
+					{
+						if(line.left_line[i] - line.left_line[i - 5] > 10)
+						{
+							feature.turn_flag = 0;
+						}
+					}
+					else
+					{
+						feature.turn_flag = 2;
+					}
+				}
+			}
+		}
+	}
+	//判深弯
+	uint8 is_left_turn = 0;
+	uint8 is_right_turn = 0;
+	if(feature.top_point < 95 && feature.turn_flag == 0)
+	{
+		//扩大搜索范围
+		for(i = 118; i > 112; i--)
+		{
+			//左线118-112行有丢线
+			if(line.left_line_flag[i] == 0 && is_left_turn == 0)
+			{
+				is_left_turn = 1;
+			}
+			if(line.right_line_flag[i] == 0 && is_right_turn == 0)
+			{
+				is_right_turn = 1;
+			}
+		}
+		if(is_left_turn == 1)
+		{
+			//100减到90，放松条件，提前转弯
+			for(i = 100; i > feature.top_point + 10; i--)
+			{
+				if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
+				{
+					is_left_turn = 0;
+				}
+			}
+		}
+		if(is_right_turn == 1)
+		{
+			//100减到90，放松条件，提前转弯
+			for(i = 100; i > feature.top_point + 10; i--)
+			{
+				if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
+				{
+					is_right_turn = 0;
+				}
+			}
+		}
+		if(is_left_turn == 1 && is_right_turn == 0)
+		{
+			feature.turn_flag = 3;
+		}
+		if(is_left_turn == 0 && is_right_turn == 1)
+		{
+			feature.turn_flag = 4;
 		}
 	}
 }

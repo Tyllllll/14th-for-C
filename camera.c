@@ -225,12 +225,12 @@ void Img_Isr(void)
 		i++;
 		if(i >= 3)
 		{
-			if(camera.ready_write)
+			if(camera.ready_write == 1)
 			{
 				camera.ready_write = 0;
 				i = 0;
 				LPLD_GPIO_ClearIntFlag(PORTB);
-				if (camera.which_buffer)
+				if (camera.which_buffer == 1)
 				{
 					LPLD_DMA_LoadDstAddr(DMA_CH0, (uint8 *)camera.image_buf1);
 				}
@@ -254,7 +254,7 @@ void DMA_Complete_Isr(void)
 {
 	camera.ready_read = 1;
 	camera.ready_write = 1;
-	if(camera.which_buffer)
+	if(camera.which_buffer == 1)
 	{
 		camera.which_buffer = 0;
 	}
