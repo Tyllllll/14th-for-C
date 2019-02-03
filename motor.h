@@ -13,8 +13,33 @@
 #define MOTOR2_FTM_CH2x FTM_Ch7		//сруЩ
 #define MOTOR2_PORTPin2x PTD7
 
+#define MOTOR_MAX_OUTPUT 6000
+
+typedef struct
+{
+	float32 kp;
+	float32 ki;
+	float32 kd;
+	int8 start;
+	int8 stop;
+	uint8 stall_cnt;
+	int16 speed_ave;
+	int16 speed_set;
+	int16 speed_current[5];
+	int16 speed_current_left[5];
+	int16 speed_current_right[5];
+	int16 error;
+	int16 integral;
+	int16 output_value;
+	int16 output_value_left;
+	int16 output_value_right;
+}Motor_Class;
+extern Motor_Class motor;
+
 void Motor_Pwm_Init(void);
 void Motor_Pit1_Init(void);
 void Motor_PIT(void);
+void Motor_Control(void);
+void Motor_PID(void);
 
 #endif

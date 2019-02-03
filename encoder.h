@@ -14,6 +14,17 @@
 #define ENCODER2_PORTPin1x PTB18
 #define ENCODER2_PORTPin2x PTB19
 
+#define ENCODER_NUM_PER_METER_LEFT  5746 //编码器一米累加的脉冲数
+#define ENCODER_NUM_PER_METER_RIGHT  5746 //编码器一米累加的脉冲数
+
+typedef struct
+{
+	int left_num;
+	int right_num;
+}Encoder_Class;
+extern Encoder_Class encoder;
+
 void Encoder_Init(void);
+void Encoder_Get(void);
 
 #endif

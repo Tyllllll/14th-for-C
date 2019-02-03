@@ -27,6 +27,10 @@ typedef struct
 	uint8 right_flection2_flag;
 	//左右转标志（12小弯34深弯）
 	uint8 turn_flag;
+	//十字标志
+	uint8 cross_state[2];
+	//环岛标志
+	uint8 roundabouts_state;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -36,5 +40,12 @@ void Find_Top_Point(void);
 void Find_Inflection(void);
 void Find_Inflection2(void);
 void Judge_Curve(void);
+void Judge_Cross(void);
+void Judeg_Roundabouts(void);
+
+uint8 is_Left_Lose_Line(uint8 row);
+uint8 is_Right_Lose_Line(uint8 row);
+uint8 is_Left_Point_Lose_Line(uint8 row);
+uint8 is_Right_Point_Lose_Line(uint8 row);
 
 #endif

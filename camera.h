@@ -183,7 +183,7 @@ typedef struct{
 }reg_s;
 typedef struct
 {
-	uint8 contrast;//对比度，越大白色越多，根据场地调
+	uint8 contrast;
 	uint8 ready_read;
 	uint8 ready_write;
 	uint8 which_buffer;

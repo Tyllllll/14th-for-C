@@ -3,6 +3,10 @@
 int16 servo_duty = DEG_MID;
 int16 max = DEG_MAX;
 int16 min = DEG_MIN;
+uint8 fore_max = 42;
+uint8 fore_min = 37;
+
+Servo_Class servo;
 
 /***************************************************************
 	*	@brief	舵机初始化
@@ -59,6 +63,28 @@ void Servo_PIT_Isr(void)
 	//拉低电平
 	SERVO_O = 0;
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
+}
+
+/***************************************************************
+	*	@brief	舵机控制
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Sevor_Control(void)
+{
+	if(motor.speed_ave > 400)
+	{
+		servo.foresight = fore_min;
+	}
+	else if(motor.speed_ave < 250)
+	{
+		servo.foresight = fore_max;
+	}
+	else
+	{
+		servo.foresight = (uint8)(fore_min + (float32)(fore_max - fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
+	}
+	error[0] = (uint8)(line.midline[servo.foresight] - 80)
 }
 
 /***************************************************************

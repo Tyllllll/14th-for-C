@@ -1,5 +1,7 @@
 #include "header.h"
 
+Encoder_Class encoder;
+
 /***************************************************************
 	*	@brief	编码器初始化
 	*	@param	无
@@ -32,4 +34,15 @@ void Encoder_Init(void)
 	FTM_InitStrcture.FTM_QdMode = QD_MODE_CNTDIR;
 	LPLD_FTM_Init(FTM_InitStrcture);
 	LPLD_FTM_QD_Enable(ENCODER2_FTMx, ENCODER2_PORTPin1x, ENCODER2_PORTPin2x);
+}
+
+/***************************************************************
+	*	@brief	获取编码器脉冲数
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Encoder_Get(void)
+{
+	encoder.left_num = (int16)LPLD_FTM_GetCounter(FTM1);
+	encoder.right_num = (int16)LPLD_FTM_GetCounter(FTM2);
 }

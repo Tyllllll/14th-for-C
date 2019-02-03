@@ -12,9 +12,18 @@
 #define DEG_MID  1452
 #define DEG_MIN  1287
 
+typedef struct
+{
+	uint8 foresight;
+	uint8 error[4];
+	uint8 error_differ[3];
+}Servo_Class;
+extern Servo_Class serco;
+
 void Servo_Gpio_Init(void);
 void Servo_PIT_Isr(void);
 void Sevor_Output(void);
+void Sevor_Control(void);
 
 void servo_up1(void);
 void servo_up5(void);

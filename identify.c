@@ -89,6 +89,8 @@ void Judge_Feature(void)
 	{
 		Judge_Curve();
 	}
+	Judge_Cross();
+	Judeg_Roundabouts();
 }
 
 /***************************************************************
@@ -355,5 +357,228 @@ void Judge_Curve(void)
 		{
 			feature.turn_flag = 4;
 		}
+	}
+}
+
+/***************************************************************
+	*	@brief	判十字
+	*	@param	无
+	*	@note	拐点是否不应该取消，其他路况使用（重新写）
+***************************************************************/
+void Judge_Cross(void)
+{
+	if(feature.left_flection_flag == 1 || feature.right_flection_flag == 1)
+	{
+		if(feature.left_flection_flag == 1)
+		{
+			//在左边拐弯的标志为1的前提下，左拐列数太大，不宜再进行左拐，应将左拐标志取消
+			if(line.left_line[feature.left_flection_row] > 140)
+			{
+				feature.left_flection_flag = 0;
+				feature.left_flection_row = 0;
+			}
+			//或者在此时右边没有丢线的情况下，左拐标志应为零（十字时候，才存在既有左拐点，同时在左拐点对应的行数上面判断右边线丢线）
+			else if(is_Right_Lose_Line(feature.left_flection_row) == 0)
+			{
+				feature.left_flection_flag = 0;
+				feature.left_flection_row = 0;
+			}
+		}
+		if(feature.right_flection_flag == 1)
+		{
+			if(feature.right_flection_row < 20)
+			{
+				feature.right_flection_flag = 0;
+				feature.right_flection_row = 0;
+			}
+			else if(is_Left_Lose_Line(feature.right_flection_row) == 0)
+			{
+				feature.right_flection_flag = 0;
+				feature.right_flection_row = 0;
+			}
+		}
+		if(feature.left_flection_flag == 1 && feature.right_flection_flag == 1)
+		{
+			//左拐点在右拐点右边时 保留近处拐点
+			if(line.left_line[feature.left_flection_row] > line.right_line[feature.right_flection_row])
+			{
+				if(feature.left_flection_row > feature.right_flection_row)
+				{
+					feature.right_flection_flag = 0;
+				}
+				if(feature.left_flection_row < feature.right_flection_row)
+				{
+					feature.left_flection_flag = 0;
+				}
+			}
+		}
+		if(feature.left_flection_flag == 1)
+		{
+			//如果左或右拐点有丢线，原有拐点标志不变，如果没有丢线，原有拐点标志变为0
+			if(is_Left_Point_Lose_Line(feature.left_flection_row) == 0 || is_Right_Point_Lose_Line(feature.left_flection_row) == 0)
+			{
+				feature.left_flection_flag = 0;
+			}
+		}
+		if(feature.right_flection_flag == 1)
+		{
+			//如果左或右拐点有丢线，原有拐点标志不变，如果没有丢线，原有拐点标志变为0
+			if(is_Left_Point_Lose_Line(feature.right_flection_row) == 0 || is_Right_Point_Lose_Line(feature.right_flection_row) == 0)
+			{
+				feature.right_flection_flag = 0;
+			}
+		}
+		if(feature.left_flection_flag == 1 || feature.right_flection_row == 1)
+		{
+			if(feature.cross_state[1] == 0)
+			{
+				feature.cross_state[0]++;
+			}
+			if(feature.cross_state[0] == 3)
+			{
+				feature.cross_state[1] = 1;
+				feature.cross_state[0] = 0;
+			}
+			//拐点存在，销去转弯标志位
+			if(feature.turn_flag != 0)
+			{
+				feature.turn_flag = 0;
+			}
+		}
+		else
+		{
+			feature.cross_state[1] = 0;
+		}
+		if(feature.left_flection_flag == 0)
+		{
+			feature.left_flection_row = 0;
+		}
+		if(feature.right_flection_flag == 0)
+		{
+			feature.right_flection_row = 0;
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	判环
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Judeg_Roundabouts(void)
+{
+	Magnetic_GetAdc();
+	if(magnetic.left_mag > 45 || magnetic.right_mag > 45)
+	{
+		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
+		{
+			if(is_Right_Lose_Line(feature.left_flection2_row - 10))
+			{
+				feature.roundabouts_state = 1;
+			}
+		}
+		if(feature.left_flection2_flag == 0 && feature.right_flection2_flag == 1)
+		{
+			if(is_Left_Lose_Line(feature.right_flection2_row - 10))
+			{
+				feature.roundabouts_state = 2;
+			}
+		}
+	}
+}
+
+
+/**********************a little funcitons**********************/
+/***************************************************************
+	*	@brief	判断左右边线是否丢线
+	*	@param	row：行数
+	*	@note	从行数到顶点判断
+***************************************************************/
+uint8 is_Left_Lose_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row; i > feature.top_point; i--)
+	{
+		if(line.left_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 3)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+uint8 is_Right_Lose_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row; i > feature.top_point; i--)
+	{
+		if(line.right_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 3)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+/***************************************************************
+	*	@brief	判断某一行附近行是否丢线
+	*	@param	row：行数
+	*	@note	上下10行判断
+***************************************************************/
+uint8 is_Left_Point_Lose_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row + 10; i > row - 10; i--)
+	{
+		if(line.left_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 2)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+uint8 is_Right_Point_Lose_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row + 10; i > row - 10; i--)
+	{
+		if(line.right_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 2)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
 	}
 }
