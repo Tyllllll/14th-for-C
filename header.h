@@ -1,6 +1,7 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 #include "common.h"
+#include "math.h"
 
 #include "init_all.h"
 #include "motor.h"
@@ -15,6 +16,6 @@
 #include "encoder.h"
 #include "magnetic.h"
 #include "identify.h"
-#include "math.h"
+#include "control.h"
 
 #endif

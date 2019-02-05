@@ -254,6 +254,16 @@ void Find_Flection2(void)
 }
 
 /***************************************************************
+	*	@brief	判直道
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Judge_Straight(void)
+{
+	
+}
+
+/***************************************************************
 	*	@brief	判弯
 	*	@param	无
 	*	@note	无（十字flag=1情况未写）
@@ -264,7 +274,7 @@ void Judge_Curve(void)
 	//判小弯
 	for(i = 100; i > feature.top_point + 3; i--)
 	{
-		if(feature.turn_flag != 1)
+		if(feature.turn_state != 1)
 		{
 			//左丢线的一行
 			if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
@@ -276,17 +286,18 @@ void Judge_Curve(void)
 					{
 						if(line.right_line[i - 5] - line.right_line[i] > 10)
 						{
-							feature.turn_flag = 0;
+							feature.turn_state = 0;
 						}
 					}
 					else
 					{
-						feature.turn_flag = 1;
+						feature.turn_state = 1;
+						feature.turn_row = i;
 					}
 				}
 			}
 		}
-		else if(feature.turn_flag != 2)
+		else if(feature.turn_state != 2)
 		{
 			//右丢线的一行
 			if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
@@ -298,12 +309,13 @@ void Judge_Curve(void)
 					{
 						if(line.left_line[i] - line.left_line[i - 5] > 10)
 						{
-							feature.turn_flag = 0;
+							feature.turn_state = 0;
 						}
 					}
 					else
 					{
-						feature.turn_flag = 2;
+						feature.turn_state = 2;
+						feature.turn_row = i;
 					}
 				}
 			}
@@ -312,7 +324,7 @@ void Judge_Curve(void)
 	//判深弯
 	uint8 is_left_turn = 0;
 	uint8 is_right_turn = 0;
-	if(feature.top_point < 95 && feature.turn_flag == 0)
+	if(feature.top_point < 95 && feature.turn_state == 0)
 	{
 		//扩大搜索范围
 		for(i = 118; i > 112; i--)
@@ -351,11 +363,13 @@ void Judge_Curve(void)
 		}
 		if(is_left_turn == 1 && is_right_turn == 0)
 		{
-			feature.turn_flag = 3;
+			feature.turn_state = 3;
+			feature.turn_row = i;
 		}
 		if(is_left_turn == 0 && is_right_turn == 1)
 		{
-			feature.turn_flag = 4;
+			feature.turn_state = 4;
+			feature.turn_row = i;
 		}
 	}
 }
@@ -440,9 +454,9 @@ void Judge_Cross(void)
 				feature.cross_state[0] = 0;
 			}
 			//拐点存在，销去转弯标志位
-			if(feature.turn_flag != 0)
+			if(feature.turn_state != 0)
 			{
-				feature.turn_flag = 0;
+				feature.turn_state = 0;
 			}
 		}
 		else
