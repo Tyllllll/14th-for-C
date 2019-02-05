@@ -14,16 +14,23 @@
 
 typedef struct
 {
+	int16 duty;
 	uint8 foresight;
-	uint8 error[4];
-	uint8 error_differ[3];
+	float32 kp;
+	float32 ki;
+	float32 kd;
+	int16 error[4];
+	int16 error_differ[3];
+	uint8 dead_zone;
+	uint8 dynamic_zone;
 }Servo_Class;
-extern Servo_Class serco;
+extern Servo_Class servo;
 
 void Servo_Gpio_Init(void);
 void Servo_PIT_Isr(void);
 void Sevor_Output(void);
 void Sevor_Control(void);
+void Servo_PID(void);
 
 void servo_up1(void);
 void servo_up5(void);

@@ -29,7 +29,7 @@ typedef struct
 	int16 speed_current_left[5];
 	int16 speed_current_right[5];
 	int16 error;
-	int16 integral;
+	int16 error_integral;
 	int16 output_value;
 	int16 output_value_left;
 	int16 output_value_right;

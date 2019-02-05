@@ -1,8 +1,8 @@
 #include "header.h"
 
-float32 kp = 65;
-float32 ki = 20;
-float32 kd = 0;
+float32 motor_kp = 65;
+float32 motor_ki = 20;
+float32 motor_kd = 0;
 Motor_Class motor;
 
 /***************************************************************
@@ -12,6 +12,10 @@ Motor_Class motor;
 ***************************************************************/
 void Motor_Pwm_Init(void)
 {
+	motor.kp = motor_kp;
+	motor.ki = motor_ki;
+	motor.kd = motor_kd;
+	
     static FTM_InitTypeDef FTM_InitStructure;
     FTM_InitStructure.FTM_Ftmx = MOTOR_FTMx;	//选择FTM通道
     FTM_InitStructure.FTM_Mode = FTM_MODE_PWM;	//FTM0的工作模式是PWM波输出
@@ -53,8 +57,22 @@ void Motor_PIT(void)
 {
 	Encoder_Get();
 	//实时速度，单位cm/s
-	motor.speed_current_left[0] = encoder.left_num == 0 ? 0 : (int16)(10000 * (float32)encoder.left_num / ENCODER_NUM_PER_METER_LEFT);
-	motor.speed_current_right[0] = encoder.right_num == 0 ? 0 : (int16)(10000 * (float32)encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);
+	if(encoder.left_num != 0)
+	{
+		motor.speed_current_left[0] = (int16)(10000 * (float32)encoder.left_num / ENCODER_NUM_PER_METER_LEFT);
+	}
+	else
+	{
+		motor.speed_current_left[0] = 0;
+	}
+	if(encoder.right_num != 0)
+	{
+		motor.speed_current_right[0] = (int16)(10000 * (float32)encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);
+	}
+	else
+	{
+		motor.speed_current_right[0] = 0;
+	}
 	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
 	Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
@@ -78,15 +96,33 @@ void Motor_Control(void)
 	{
 		if(motor.speed_ave >= 0.9 * motor.speed_set)
 		{
-			motor.output_value_left = motor.output_value_left > MOTOR_MAX_OUTPUT ? MOTOR_MAX_OUTPUT : motor.output_value_left;
-			motor.output_value_left = motor.output_value_left < -MOTOR_MAX_OUTPUT ? -MOTOR_MAX_OUTPUT : motor.output_value_left;
-			motor.output_value_right = motor.output_value_right > MOTOR_MAX_OUTPUT ? MOTOR_MAX_OUTPUT : motor.output_value_right;
-			motor.output_value_right = motor.output_value_right < -MOTOR_MAX_OUTPUT ? -MOTOR_MAX_OUTPUT : motor.output_value_right;
+			if(motor.output_value_left > MOTOR_MAX_OUTPUT)
+			{
+				motor.output_value_left = MOTOR_MAX_OUTPUT;
+			}
+			if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
+			{
+				motor.output_value_left = -MOTOR_MAX_OUTPUT;
+			}
+			if(motor.output_value_right > MOTOR_MAX_OUTPUT)
+			{
+				motor.output_value_right = MOTOR_MAX_OUTPUT;
+			}
+			if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
+			{
+				motor.output_value_right = -MOTOR_MAX_OUTPUT;
+			}
 		}
 		else if(motor.speed_ave > 0)
 		{
-			motor.output_value_left = motor.output_value_left > 10000 ? 10000 : motor.output_value_left;
-			motor.output_value_right = motor.output_value_right > 10000 ? 10000 : motor.output_value_right;
+			if(motor.output_value_left > 10000)
+			{
+				motor.output_value_left = 10000;
+			}
+			if(motor.output_value_right > 10000)
+			{
+				motor.output_value_right = 10000;
+			}
 		}
 	}
 	else if(motor.start <= 0)
@@ -162,11 +198,7 @@ void Motor_Control(void)
 	*	@note	Motor_Control调用
 ***************************************************************/
 void Motor_PID(void)
-{
-	motor.kp = kp;
-	motor.ki = ki;
-	motor.kp = kp;
-	
+{	
 	if(motor.stop >= 1)
 	{
 		motor.speed_set = 0;
@@ -185,44 +217,44 @@ void Motor_PID(void)
 		//积分抗饱和，可用积分限幅代替
 		if(motor.output_value > 5000 && (int16)(motor.ki * motor.error) < 0)
 		{
-			motor.integral += (int16)(motor.ki * motor.error);
+			motor.error_integral += (int16)(motor.ki * motor.error);
 		}
 		else if(motor.output_value < -3000 && (int16)(motor.ki * motor.error) > 0)
 		{
-			motor.integral += (int16)(motor.ki * motor.error);
+			motor.error_integral += (int16)(motor.ki * motor.error);
 		}
 		else if(motor.output_value >= -3000 && motor.output_value <= 5000)
 		{
-			motor.integral += (int16)(motor.ki * motor.error);
+			motor.error_integral += (int16)(motor.ki * motor.error);
 		}
 		//减速积分退饱和
 		if(motor.error < -20)
 		{
-			if(motor.integral > 3000)
+			if(motor.error_integral > 3000)
 			{
 				if(motor.error < -100)
 				{
-					motor.integral *= 0.2;
+					motor.error_integral *= 0.2;
 				}
 				else if(motor.error < -80)
 				{
-					motor.integral *= 0.4;
+					motor.error_integral *= 0.4;
 				}
 				else if(motor.error < -60)
 				{
-					motor.integral *= 0.6;
+					motor.error_integral *= 0.6;
 				}
 				else if(motor.error < -40)
 				{
-					motor.integral *= 0.8;
+					motor.error_integral *= 0.8;
 				}
 				else if(motor.error < -20)
 				{
-					motor.integral *= 0.9;
+					motor.error_integral *= 0.9;
 				}
 			}
 		}
-		motor.output_value = (int16)(motor.kp * motor.error + motor.integral);
+		motor.output_value = (int16)(motor.kp * motor.error + motor.error_integral);
 	}
 	//转弯差速控制
 }

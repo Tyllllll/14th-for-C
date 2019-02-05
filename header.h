@@ -15,5 +15,6 @@
 #include "encoder.h"
 #include "magnetic.h"
 #include "identify.h"
+#include "math.h"
 
 #endif
