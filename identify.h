@@ -3,9 +3,9 @@
 
 typedef struct
 {
-	uint8 left_line[120];
+	int16 left_line[120];
 	uint8 left_line_flag[120];
-	uint8 right_line[120];
+	int16 right_line[120];
 	uint8 right_line_flag[120];
 	int16 midline[120];
 }Line_Class;
@@ -45,7 +45,7 @@ void Find_Inflection2(void);
 void Judge_Straight(void);
 void Judge_Curve(void);
 void Judge_Cross(void);
-void Judeg_Roundabouts(void);
+void Judge_Roundabouts(void);
 
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);

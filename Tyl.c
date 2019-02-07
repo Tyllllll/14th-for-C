@@ -23,10 +23,48 @@ void main (void)
     Init_All();
     while(1)
     {
+		//按键发车
+		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0 && SWITCH4 == 0)
+		{
+			Key_Delay();
+			if(KEY1 == 0)
+			{
+				BUZZER_ON;
+				LPLD_LPTMR_DelayMs(200);
+				BUZZER_OFF;
+				if(motor.start == 0)
+				{
+					motor.start = 50;
+					motor.error_integral = 0;
+				}
+			}
+		}
+		//按键停车
+		if(KEY2 == 0)
+		{
+			Key_Delay();
+			if(KEY2 == 0)
+			{
+				motor.stop = 1;
+			}
+		}
 		if(camera.ready_read)
 		{
 			Img_Extract();
-			OLED_ShowImage();
+			Find_Line();
+			Judge_Feature();
+			Servo_Control();
+			if(motor.start != 0)
+			{
+				if(is_Lose_All() == 1)
+				{
+					motor.stop = 25;
+				}
+			}
+			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0 && SWITCH4 == 0)
+			{
+				OLED_ShowImage();
+			}
 		}
 //		if(KEY1 == 0)
 //		{

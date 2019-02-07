@@ -44,7 +44,7 @@ void Servo_Gpio_Init(void)
 	//PIT0 20ms定时中断，负责拉高电平
 	PIT_InitStructure.PIT_Pitx = SERVO_HIGH_PITx;
 	PIT_InitStructure.PIT_PeriodMs = 20;
-	PIT_InitStructure.PIT_Isr = Sevor_Output;
+	PIT_InitStructure.PIT_Isr = Servo_Output;
 	LPLD_PIT_Init(PIT_InitStructure);
 	LPLD_PIT_EnableIrq(PIT_InitStructure);//使能中断
 }
@@ -54,7 +54,7 @@ void Servo_Gpio_Init(void)
 	*	@param	无
 	*	@note	周期调用，负责拉高电平
 ***************************************************************/
-void Sevor_Output(void)
+void Servo_Output(void)
 {
 	if(servo.duty > DEG_MAX)
 	{
@@ -85,7 +85,7 @@ void Servo_PIT_Isr(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Sevor_Control(void)
+void Servo_Control(void)
 {
 	if(motor.speed_ave > 400)
 	{
@@ -97,7 +97,7 @@ void Sevor_Control(void)
 	}
 	else
 	{
-		servo.foresight = (uint8)(fore_min + (float32)(fore_max - fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
+		servo.foresight = (uint8)(fore_min + (fore_max - fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150.0 * 150.0));
 	}
 	servo.error[0] = (uint8)((line.midline[servo.foresight] - 80) / 3.0) + (uint8)((line.midline[servo.foresight + 1] - 80) / 3.0) + 
 		(uint8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (uint8)((line.midline[servo.foresight - 1] - 80) / 6.0);
@@ -134,13 +134,13 @@ void Sevor_Control(void)
 	{
 		servo.error_differ[i] = servo.error_differ[i - 1];
 	}
-	
+	Servo_PID();
 }
 
 /***************************************************************
 	*	@brief	舵机pid计算
 	*	@param	无
-	*	@note	Sevor_Control调用
+	*	@note	Servo_Control调用
 ***************************************************************/
 void Servo_PID(void)
 {
@@ -173,7 +173,7 @@ void Servo_PID(void)
 	p_value = (int16)(servo.kp * servo.error[0]);
 	d_value = (int16)(servo.kd * servo.error_differ[0]);
 	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
-	//Speed_Set();
+	Speed_Set();
 }
 
 

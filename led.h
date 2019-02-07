@@ -6,13 +6,13 @@
 #define LED2_Pinx	GPIO_Pin1
 #define LED3_Pinx	GPIO_Pin2
 
-#define LED1_O	PTB0_O
-#define LED2_O	PTB1_O
-#define LED3_O	PTB2_O
+#define LED1	PTB0_O
+#define LED2	PTB1_O
+#define LED3	PTB2_O
 
-#define LED1_Toggle()	LED1_O = !LED1_O
-#define LED2_Toggle()	LED2_O = !LED2_O
-#define LED3_Toggle()	LED3_O = !LED3_O
+#define LED1_Toggle()	LED1 = !LED1
+#define LED2_Toggle()	LED2 = !LED2
+#define LED3_Toggle()	LED3 = !LED3
 
 void Led_Gpio_Init(void);
 

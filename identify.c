@@ -90,7 +90,8 @@ void Judge_Feature(void)
 		Judge_Curve();
 	}
 	Judge_Cross();
-	Judeg_Roundabouts();
+	Judge_Roundabouts();
+	Judge_Straight();
 }
 
 /***************************************************************
@@ -195,7 +196,7 @@ void Find_Inflection(void)
 	*	@param	无
 	*	@note	十字远点处拐点（透视图中中间值）有待改进，未测试
 ***************************************************************/
-void Find_Flection2(void)
+void Find_Inflection2(void)
 {
 	uint8 i = 0;
 	//找左拐点2
@@ -479,7 +480,7 @@ void Judge_Cross(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Judeg_Roundabouts(void)
+void Judge_Roundabouts(void)
 {
 	Magnetic_GetAdc();
 	if(magnetic.left_mag > 45 || magnetic.right_mag > 45)

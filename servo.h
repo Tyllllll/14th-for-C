@@ -28,8 +28,8 @@ extern Servo_Class servo;
 
 void Servo_Gpio_Init(void);
 void Servo_PIT_Isr(void);
-void Sevor_Output(void);
-void Sevor_Control(void);
+void Servo_Output(void);
+void Servo_Control(void);
 void Servo_PID(void);
 
 void servo_up1(void);
