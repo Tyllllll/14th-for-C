@@ -47,6 +47,7 @@ void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
 
+float Midline_Std_Deviation(void);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_Line(uint8 row);

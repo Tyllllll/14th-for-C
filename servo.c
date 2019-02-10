@@ -1,15 +1,5 @@
 #include "header.h"
 
-int16 duty = DEG_MID;
-uint8 fore_max = 42;
-uint8 fore_min = 37;
-float32 servo_kp_left = 4;
-float32 servo_kp_right = 4;
-float32 servo_ki = 0;
-float32 servo_kd = 11.1;
-uint8 dead_zone = 7;
-uint8 dynamic_zone = 25;
-
 Servo_Class servo;
 
 /***************************************************************
@@ -19,12 +9,15 @@ Servo_Class servo;
 ***************************************************************/
 void Servo_Gpio_Init(void)
 {
-	servo.duty = duty;
-	servo.kp = servo_kp_left;
-	servo.ki = servo_ki;
-	servo.kd = servo_kd;
-	servo.dead_zone = dead_zone;
-	servo.dynamic_zone = dynamic_zone;
+	servo.duty = DEG_MID;
+	servo.fore_max = 42;
+	servo.fore_min = 37;
+	servo.kp_left = 4;
+	servo.kp_right = 4;
+	servo.ki = 0;
+	servo.kd = 11.1;
+	servo.dead_zone = 7;
+	servo.dynamic_zone = 25;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	//舵机引脚初始化
@@ -89,15 +82,15 @@ void Servo_Control(void)
 {
 	if(motor.speed_ave > 400)
 	{
-		servo.foresight = fore_min;
+		servo.foresight = servo.fore_min;
 	}
 	else if(motor.speed_ave < 250)
 	{
-		servo.foresight = fore_max;
+		servo.foresight = servo.fore_max;
 	}
 	else
 	{
-		servo.foresight = (uint8)(fore_min + (fore_max - fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150.0 * 150.0));
+		servo.foresight = (uint8)(servo.fore_min + (servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150.0 * 150.0));
 	}
 	servo.error[0] = (uint8)((line.midline[servo.foresight] - 80) / 3.0) + (uint8)((line.midline[servo.foresight + 1] - 80) / 3.0) + 
 		(uint8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (uint8)((line.midline[servo.foresight - 1] - 80) / 6.0);
@@ -151,11 +144,11 @@ void Servo_PID(void)
 	{
 		if(servo.error[0] > -servo.dynamic_zone)
 		{
-			servo.kp = servo_kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+			servo.kp = servo.kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
 		}
 		else
 		{
-			servo.kp = servo_kp_left;
+			servo.kp = servo.kp_left;
 		}
 	}
 	//右
@@ -163,11 +156,11 @@ void Servo_PID(void)
 	{
 		if(servo.error[0] < servo.dynamic_zone)
 		{
-			servo.kp = servo_kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+			servo.kp = servo.kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
 		}
 		else
 		{
-			servo.kp = servo_kp_right;
+			servo.kp = servo.kp_right;
 		}
 	}
 	p_value = (int16)(servo.kp * servo.error[0]);

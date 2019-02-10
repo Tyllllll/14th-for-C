@@ -23,6 +23,17 @@ void main (void)
     Init_All();
     while(1)
     {
+		//参数设置
+		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0 && SWITCH4 == 0)
+		{
+			Parameter_Setting();
+			feature.straight_state = 0;
+			feature.turn_state = 0;
+			feature.turn_row = 0;
+			feature.cross_state[0] = 0;
+			feature.cross_state[1] = 0;
+			feature.roundabouts_state = 0;
+		}
 		//按键发车
 		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0 && SWITCH4 == 0)
 		{
@@ -66,56 +77,56 @@ void main (void)
 				OLED_ShowImage();
 			}
 		}
-//		if(KEY1 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY1 == 0)
-//			{
-//				servo_up1();
-//			}
-//		}
-//		if(KEY2 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY2 == 0)
-//			{
-//				servo_up5();
-//			}
-//		}
-//		if(KEY3 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY3 == 0)
-//			{
-//				servo_up10();
-//			}
-//		}
-//		if(KEY4 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY4 == 0)
-//			{
-//				servo_down10();
-//			}
-//		}
-//		if(KEY5 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY5 == 0)
-//			{
-//				servo_down5();
-//			}
-//		}
-//		if(KEY6 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY6 == 0)
-//			{
-//				servo_down1();
-//			}
-//		}
-//		Magnetic_GetAdc();
-//		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
-//		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
+/*		if(KEY1 == 0)
+		{
+			Key_Delay();
+			if(KEY1 == 0)
+			{
+				servo_up1();
+			}
+		}
+		if(KEY2 == 0)
+		{
+			Key_Delay();
+			if(KEY2 == 0)
+			{
+				servo_up5();
+			}
+		}
+		if(KEY3 == 0)
+		{
+			Key_Delay();
+			if(KEY3 == 0)
+			{
+				servo_up10();
+			}
+		}
+		if(KEY4 == 0)
+		{
+			Key_Delay();
+			if(KEY4 == 0)
+			{
+				servo_down10();
+			}
+		}
+		if(KEY5 == 0)
+		{
+			Key_Delay();
+			if(KEY5 == 0)
+			{
+				servo_down5();
+			}
+		}
+		if(KEY6 == 0)
+		{
+			Key_Delay();
+			if(KEY6 == 0)
+			{
+				servo_down1();
+			}
+		}
+		Magnetic_GetAdc();
+		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
+		OLED_PrintFloatValue(40, 6, magnetic.right_mag);*/
     }
 }

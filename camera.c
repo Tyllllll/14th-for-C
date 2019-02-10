@@ -98,8 +98,6 @@ reg_s regaCameraEagle[] =
 };
 const uint8 c_ubyColor[] = {253, 0};
 uint8 ubyCameraEagle_CfgNum = ARR_SIZE(regaCameraEagle);
-uint8 contrast = 64;//对比度，越大白色越多
-uint8 ready_write = 1;
 Camera_Class camera;
 
 /***************************************************************
@@ -109,8 +107,8 @@ Camera_Class camera;
 ***************************************************************/
 static void Camera_Gpio_Init(void)
 {
-	camera.contrast = contrast;
-	camera.ready_write = ready_write;
+	camera.contrast = 64;
+	camera.ready_write = 1;
 	
 	static GPIO_InitTypeDef CameraPT_InitStructure;
 	static GPIO_InitTypeDef isr_InitStructure;

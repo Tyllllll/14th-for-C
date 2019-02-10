@@ -81,6 +81,10 @@ void Judge_Feature(void)
 	feature.left_flection_row = 0;
 	feature.right_flection_flag = 0;
 	feature.right_flection_row = 0;
+	feature.left_flection2_flag = 0;
+	feature.left_flection2_row = 0;
+	feature.right_flection2_flag = 0;
+	feature.right_flection2_row = 0;
 	
 	Find_Top_Point();
 	Find_Inflection();
@@ -261,7 +265,61 @@ void Find_Inflection2(void)
 ***************************************************************/
 void Judge_Straight(void)
 {
-	
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	//超长直道 1中线不太偏 2也不丢线 3且不为十字和坡道 4顶点满足直道条件
+	//中线要求
+	for(i = 90; i > 20; i--)
+	{
+		if(line.midline[i] > 85 || line.midline[i] < 75)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 3)
+	{
+		//丢线要求
+		lose_cnt = 0;
+		for(i = 50; i > 20; i--)
+		{
+			if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 0)
+			{
+				lose_cnt++;
+			}
+		}
+		if(lose_cnt < 3)
+		{
+			//顶点要求
+			if(feature.top_point <= 30)
+			{
+				feature.straight_state = 1;
+			}
+			else
+			{
+				feature.straight_state = 0;
+			}
+		}
+		else
+		{
+			feature.straight_state = 0;
+		}
+	}
+	else
+	{
+		feature.straight_state = 0;
+	}
+	//短直道判断
+	if(feature.straight_state == 0)
+	{
+		if(Midline_Std_Deviation() < 8)
+		{
+			feature.straight_state = 2;
+		}
+		else
+		{
+			feature.straight_state = 0;
+		}
+	}
 }
 
 /***************************************************************
@@ -504,6 +562,29 @@ void Judge_Roundabouts(void)
 
 
 /**********************a little funcitons**********************/
+/***************************************************************
+	*	@brief	求80-30行范围内中线标准差
+	*	@param	无
+	*	@note	无
+***************************************************************/
+float Midline_Std_Deviation(void)
+{
+	uint8 i = 0;
+	uint8 sum1 = 0;
+	float32 ave = 0;
+	float32 sum2 = 0;
+	for(i = 80; i > 30; i--)
+	{
+		sum1 += line.midline[i];
+	}
+	ave = sum1 / 50.0;
+	for(i = 80; i > 30; i--)
+	{
+		sum2 += (line.midline[i] * line.midline[i] - ave * ave);
+	}
+	return sqrt(sum2 / 50.0);
+}
+
 /***************************************************************
 	*	@brief	判断左右边线是否丢线
 	*	@param	row：行数

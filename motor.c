@@ -1,8 +1,5 @@
 #include "header.h"
 
-float32 motor_kp = 65;
-float32 motor_ki = 20;
-float32 motor_kd = 0;
 Motor_Class motor;
 
 /***************************************************************
@@ -12,9 +9,9 @@ Motor_Class motor;
 ***************************************************************/
 void Motor_Pwm_Init(void)
 {
-	motor.kp = motor_kp;
-	motor.ki = motor_ki;
-	motor.kd = motor_kd;
+	motor.kp = 65;
+	motor.ki = 20;
+	motor.kd = 0;
 	
     static FTM_InitTypeDef FTM_InitStructure;
     FTM_InitStructure.FTM_Ftmx = MOTOR_FTMx;	//—°‘ÒFTMÕ®µ¿

@@ -16,6 +16,10 @@ typedef struct
 {
 	int16 duty;
 	uint8 foresight;
+	uint8 fore_min;
+	uint8 fore_max;
+	float32 kp_left;
+	float32 kp_right;
 	float32 kp;
 	float32 ki;
 	float32 kd;

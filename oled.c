@@ -304,7 +304,7 @@ void OLED_Put6x8Str(unsigned char x, unsigned char y, unsigned char ch[])
 
 /***************************************************************
 	*	@brief	指定位置输出字符的值
-	*	@param	(x, y)：坐标		ch：字符
+	*	@param	(x, y)：坐标		data：字符
 	*	@note	无
 ***************************************************************/
 void OLED_PrintCharValue(unsigned char x, unsigned char y, unsigned char data)
@@ -352,7 +352,7 @@ void OLED_PrintUintValue(unsigned char x, unsigned char y, unsigned int data)
 
 /***************************************************************
 	*	@brief	指定位置输出浮点型的值
-	*	@param	(x, y)：坐标		ch：浮点型
+	*	@param	(x, y)：坐标		data：浮点型
 	*	@note	无
 ***************************************************************/
 void OLED_PrintFloatValue(unsigned char x, unsigned char y, float data)
