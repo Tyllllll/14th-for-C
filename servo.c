@@ -18,6 +18,8 @@ void Servo_Gpio_Init(void)
 	servo.kd = 11.1;
 	servo.dead_zone = 7;
 	servo.dynamic_zone = 25;
+	servo.dif_const_left = 7.48;
+	servo.dif_const_right = 5.4;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	//舵机引脚初始化
@@ -58,7 +60,7 @@ void Servo_Output(void)
 		servo.duty = DEG_MIN;
 	}
 	PIT->CHANNEL[3].LDVAL = (servo.duty) * (g_bus_clock / 1000000) - 1;
-	SERVO_O = 1;
+	SERVO = 1;
 	PIT->CHANNEL[3].TCTRL |= PIT_TCTRL_TEN_MASK;//开始计时 
 }
 
@@ -69,7 +71,7 @@ void Servo_Output(void)
 ***************************************************************/
 void Servo_PIT_Isr(void)
 {
-	SERVO_O = 0;
+	SERVO = 0;
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 }
 

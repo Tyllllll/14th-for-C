@@ -383,7 +383,17 @@ void OLED_ShowImage(void)
 {
 	uint8 i, j;
 	uint8 data;
-	int cnt;
+	int8 cnt;
+	for(i = 118; i > 5; i--)
+	{
+		camera.image[i][line.left_line[i]] = 0;
+		camera.image[i][line.right_line[i]] = 0;
+		camera.image[i][line.midline[i]] = 0;
+	}
+	for(i = 0; i < 159; i++)
+	{
+		camera.image[feature.top_point][i] = 0;
+	}
 	for(i = 0; i < 8; i++)
 	{
 		OLED_WriteCmd(0xb0 + i);

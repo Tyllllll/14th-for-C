@@ -289,7 +289,8 @@ void Img_Extract(void)
 				}
 			}
 		}
-	}else
+	}
+	else
 	{
 		for(i = 0; i < ROW; i++)
 		{

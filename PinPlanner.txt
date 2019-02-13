@@ -1,3 +1,11 @@
+拨码开关用途：
+	S123：
+		000		参数设置
+		100+K1	发车
+		110		OLED显图
+	S4：
+		0		发数据给FreeCars
+		1		不发数据
 GPIO:
 	PTC12	蜂鸣器
 	PTC0_7	摄像头
@@ -29,6 +37,8 @@ GPIO:
 	PTA25	拨码开关SWITCH2
 	PTE26	拨码开关SWITCH3
 	PTA24	拨码开关SWITCH4
+	PTA1	UART0	Rx
+	PTA2	UART0	Tx
 
 PIT:
 	PIT0	舵机（拉高电平）
@@ -49,3 +59,6 @@ DMA:
 ADC:
 	ADC1	电磁	DM0		DAD0
 	ADC1	电磁	DP0		AD19
+	
+UART:
+	UART0

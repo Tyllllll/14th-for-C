@@ -9,6 +9,7 @@ void Init_All(void)
 {
     DisableInterrupts;
 	NVIC_Init();
+	Uart_Init();
 	Oled_Gpio_Init();
 	OLED_Put6x8Str(20, 2, "initializing...");
 	Led_Gpio_Init();
@@ -54,7 +55,13 @@ void Init_All(void)
 void NVIC_Init(void)
 {
 	static NVIC_InitTypeDef NVIC_InitStructure;
-	//舵机打脚中断函数抢占优先级最高
+	//串口中断
+	NVIC_InitStructure.NVIC_IRQChannel = UART0_RX_TX_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelGroupPriority = NVIC_PriorityGroup_2;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	LPLD_NVIC_Init(NVIC_InitStructure); 
+	//舵机打脚中断
 	NVIC_InitStructure.NVIC_IRQChannel = PIT3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelGroupPriority = NVIC_PriorityGroup_2;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -78,10 +85,4 @@ void NVIC_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	LPLD_NVIC_Init(NVIC_InitStructure);
-	//串口中断
-//	NVIC_InitStructure.NVIC_IRQChannel = UART0_RX_TX_IRQn;
-//	NVIC_InitStructure.NVIC_IRQChannelGroupPriority = NVIC_PriorityGroup_2;
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//	LPLD_NVIC_Init(NVIC_InitStructure); 
 }

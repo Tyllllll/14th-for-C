@@ -24,7 +24,7 @@ void main (void)
     while(1)
     {
 		//参数设置
-		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0 && SWITCH4 == 0)
+		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
 			Parameter_Setting();
 			feature.straight_state = 0;
@@ -34,8 +34,12 @@ void main (void)
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
 		}
+		if(SWITCH4 == 0)
+		{
+			Send_Data_to_FreeCars();
+		}
 		//按键发车
-		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0 && SWITCH4 == 0)
+		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
 			Key_Delay();
 			if(KEY1 == 0)
@@ -72,7 +76,7 @@ void main (void)
 					motor.stop = 25;
 				}
 			}
-			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0 && SWITCH4 == 0)
+			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
 				OLED_ShowImage();
 			}

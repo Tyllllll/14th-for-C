@@ -17,5 +17,6 @@
 #include "magnetic.h"
 #include "identify.h"
 #include "control.h"
+#include "uart.h"
 
 #endif

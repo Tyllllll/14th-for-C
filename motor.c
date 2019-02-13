@@ -195,7 +195,7 @@ void Motor_Control(void)
 	*	@note	Motor_Control调用
 ***************************************************************/
 void Motor_PID(void)
-{	
+{
 	if(motor.stop >= 1)
 	{
 		motor.speed_set = 0;
@@ -253,5 +253,15 @@ void Motor_PID(void)
 		}
 		motor.output_value = (int16)(motor.kp * motor.error + motor.error_integral);
 	}
-	//转弯差速控制
+	//转向差速控制
+	if(servo.error[0] > servo.dead_zone)
+	{
+		motor.output_value_left = (int16)((-0.004435 * servo.duty + servo.dif_const_left) * (motor.output_value / 10 - 20) + 20) * 10;
+		motor.output_value_right = motor.output_value;
+	}
+	else if(servo.error[0] < - servo.dead_zone)
+	{
+		motor.output_value_left = motor.output_value;
+		motor.output_value_right = (int16)((0.004435 * servo.duty - servo.dif_const_right) * (motor.output_value / 10 - 20) + 20) * 10;
+	}
 }

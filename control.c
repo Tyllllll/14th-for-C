@@ -410,6 +410,7 @@ void Parameter_Setting_Init(void)
 	setting.data[0][5] = (float32)speed.cross;
 	sprintf(setting.string[0][6], "round");
 	setting.data[0][6] = (float32)speed.roundabouts;
+        
 	sprintf(setting.string[1][0], "FORESIGHT");
 	sprintf(setting.string[1][1], "fore_min");
 	setting.data[1][1] = (float32)servo.fore_min;
@@ -419,6 +420,7 @@ void Parameter_Setting_Init(void)
 	setting.data[1][3] = (float32)servo.dead_zone;
 	sprintf(setting.string[1][4], "dynamic_zone");
 	setting.data[1][4] = (float32)servo.dynamic_zone;
+        
 	sprintf(setting.string[2][0], "SERVO");
 	sprintf(setting.string[2][1], "kp_left");
 	setting.data[2][1] = (float32)servo.kp_left;
@@ -428,6 +430,11 @@ void Parameter_Setting_Init(void)
 	setting.data[2][3] = (float32)servo.ki;
 	sprintf(setting.string[2][4], "kd");
 	setting.data[2][4] = (float32)servo.kd;
+	sprintf(setting.string[2][5], "dif_const_l");
+	setting.data[2][5] = (float32)servo.dif_const_left;
+	sprintf(setting.string[2][6], "dif_const_r");
+	setting.data[2][6] = (float32)servo.dif_const_right;
+        
 	sprintf(setting.string[3][0], "MOTOR");
 	sprintf(setting.string[3][1], "kp");
 	setting.data[3][1] = (float32)motor.kp;
@@ -495,10 +502,10 @@ void Setting_Paint(void)
 ***************************************************************/
 int8 Setting_Key_Scan(void)
 {
-	if(SWITCH1 == 1 || SWITCH2 == 1 || SWITCH3 == 1 || SWITCH4 == 1)
+	if(SWITCH1 == 1 || SWITCH2 == 1 || SWITCH3 == 1)
 	{
 		Key_Delay();
-		if(SWITCH1 == 1 || SWITCH2 == 1 || SWITCH3 == 1 || SWITCH4 == 1)
+		if(SWITCH1 == 1 || SWITCH2 == 1 || SWITCH3 == 1)
 		{
 			return -1;
 		}
@@ -581,6 +588,8 @@ void Save_Data(void)
 	servo.kp_right = setting.data[2][2];
 	servo.ki = setting.data[2][3];
 	servo.kd = setting.data[2][4];
+        servo.dif_const_left = setting.data[2][5];
+        servo.dif_const_right = setting.data[2][6];
 	motor.kp = setting.data[3][1];
 	motor.ki = setting.data[3][2];
 	motor.kd = setting.data[3][3];
