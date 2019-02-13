@@ -254,7 +254,7 @@ void OLED_DelayMs(unsigned int ms)
 	*	@param	(x, y)£º×ø±ê		ch£º×Ö·û
 	*	@note	ÎÞ
 ***************************************************************/
-void OLED_Put6x8Char(unsigned char x, unsigned char y, unsigned char ch)
+void OLED_Put6x8Char(uint8 x, uint8 y, int8 ch)
 {
 	unsigned char c = 0, i = 0;
 
@@ -278,7 +278,7 @@ void OLED_Put6x8Char(unsigned char x, unsigned char y, unsigned char ch)
 	*	@param	(x, y)£º×ø±ê		ch£º×Ö·û´®
 	*	@note	ÎÞ
 ***************************************************************/
-void OLED_Put6x8Str(unsigned char x, unsigned char y, unsigned char ch[])
+void OLED_Put6x8Str(uint8 x, uint8 y, int8 ch[])
 {
 	unsigned char c = 0, i = 0, j = 0;
 
@@ -410,6 +410,20 @@ void OLED_ShowImage(void)
 			OLED_WriteData(data);
 		}
 	}
+	OLED_Put6x8Str(80, 0, "zh");
+	OLED_PrintUintValue(100, 0, feature.straight_state);
+	OLED_Put6x8Str(80, 1, "wa");
+	OLED_PrintUintValue(100, 1, feature.turn_state);
+	OLED_Put6x8Str(80, 2, "sh");
+	OLED_PrintUintValue(100, 2, feature.cross_state[1]);
+	OLED_Put6x8Str(80, 3, "hu");
+	OLED_PrintUintValue(100, 3, feature.roundabouts_state);
+	OLED_Put6x8Str(80, 4, "rt");
+	OLED_PrintUintValue(100, 4, feature.road_type[0]);
+//	OLED_Put6x8Str(80, 0, fs");
+//	OLED_PrintFloatValue(100, 0, servo.foresight);
+//	OLED_Put6x8Str(80, 2, "top");
+//	OLED_PrintFloatValue(100, 2, feature.top_point);
 }
 
 /***************************************************************

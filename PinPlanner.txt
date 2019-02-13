@@ -4,8 +4,8 @@
 		100+K1	发车
 		110		OLED显图
 	S4：
-		0		发数据给FreeCars
-		1		不发数据
+		1		发数据给FreeCars
+		0		不发数据
 GPIO:
 	PTC12	蜂鸣器
 	PTC0_7	摄像头

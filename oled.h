@@ -20,8 +20,8 @@ void OLED_SetPosition(unsigned char x, unsigned char y);
 void OLED_Fill(unsigned char bmp_data);
 void OLED_DelayMs(unsigned int ms);
 
-void OLED_Put6x8Char(unsigned char x, unsigned char y, unsigned char ch);
-void OLED_Put6x8Str(unsigned char x, unsigned char y, unsigned char ch[]);
+void OLED_Put6x8Char(uint8 x, uint8 y, int8 ch);
+void OLED_Put6x8Str(uint8 x, uint8 y, int8 ch[]);
 void OLED_PrintCharValue(unsigned char x, unsigned char y, unsigned char data);
 void OLED_PrintIntValue(unsigned char x, unsigned char y, int data);
 void OLED_PrintUintValue(unsigned char x, unsigned char y, unsigned int data);

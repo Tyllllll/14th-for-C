@@ -25,6 +25,8 @@ typedef struct
 	uint8 left_flection2_flag;
 	uint8 right_flection2_row;
 	uint8 right_flection2_flag;
+	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为障碍
+	uint8 road_type[200];
 	//直道标志
 	uint8 straight_state;
 	//左右转标志（12小弯34深弯）

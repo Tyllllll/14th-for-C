@@ -17,7 +17,7 @@ typedef struct
 	int8 page_num;
 	int8 string[8][8][30];
 	float32 data[8][8];
-	uint8 course;
+	int8 course;
 }Setting_Class;
 extern Setting_Class setting;
 

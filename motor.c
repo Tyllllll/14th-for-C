@@ -121,71 +121,72 @@ void Motor_Control(void)
 				motor.output_value_right = 10000;
 			}
 		}
+		if(motor.output_value_left >= 0)
+		{
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, motor.output_value_left);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0); 
+		}
+		else
+		{
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, -motor.output_value_left); 
+		}
+		if(motor.output_value_right >= 0)
+		{
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, motor.output_value_right);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0); 
+		}
+		else
+		{
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 0);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, -motor.output_value_right); 
+		}
+		if(motor.start > 1)
+		{
+			motor.start--;
+		}
+		//堵转(10ms调用100次为1s)
+		if(motor.start == 1 && motor.output_value >= 4000)
+		{
+			if(motor.speed_current[0] <= 10 && motor.speed_current[1] <= 10 && motor.speed_current[2] <= 10)
+			{
+				if(motor.stall_cnt <= 100)
+				{
+					motor.stall_cnt++;
+				}
+				else
+				{
+					motor.start = 0;
+				}
+			}
+			else
+			{
+				motor.stall_cnt = 0;
+			}
+		}
+		//stop*10ms后关电机
+		if(motor.start == 1 && motor.stop >= 1)
+		{
+			if(motor.stop > 1)
+			{
+				motor.stop--;
+			}
+			//停车成功
+			else
+			{
+				motor.start = 0;
+				motor.stop = 0;
+			}
+		}
+		
 	}
-	else if(motor.start <= 0)
+	else
 	{
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
 		motor.start = 0;
-	}
-	if(motor.output_value_left >= 0)
-	{
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, motor.output_value_left);
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0); 
-	}
-	else
-	{
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, -motor.output_value_left); 
-	}
-	if(motor.output_value_right >= 0)
-	{
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, motor.output_value_right);
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0); 
-	}
-	else
-	{
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 0);
-		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, -motor.output_value_right); 
-	}
-	if(motor.start > 1)
-	{
-		motor.start--;
-	}
-	//堵转(10ms调用100次为1s)
-	if(motor.start == 1 && motor.output_value >= 4000)
-	{
-		if(motor.speed_current[0] <= 10 && motor.speed_current[1] <= 10 && motor.speed_current[2] <= 10)
-		{
-			if(motor.stall_cnt <= 100)
-			{
-				motor.stall_cnt++;
-			}
-			else
-			{
-				motor.start = 0;
-			}
-		}
-		else
-		{
-			motor.stall_cnt = 0;
-		}
-	}
-	//stop*10ms后关电机
-	if(motor.start == 1 && motor.stop >= 1)
-	{
-		if(motor.stop > 1)
-		{
-			motor.stop--;
-		}
-		//停车成功
-		else
-		{
-			motor.start = 0;
-			motor.stop = 0;
-		}
 	}
 }
 

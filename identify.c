@@ -12,7 +12,7 @@ void Find_Line(void)
 {
 	uint8 i = 0, j = 0;
 	uint8 column_start = 80;//基础寻线每行起始搜索列
-	for(i = 100; i >5; i--)
+	for(i = 118; i >5; i--)
 	{
 		//从中线往左扫
 		for(j = column_start; j > 2; j--)
@@ -55,7 +55,7 @@ void Find_Line(void)
 		{
 			line.left_line[i] = 0;
 			line.right_line[i] = 159;
-			if(100 == i)
+			if(118 == i)
 			{
 				line.midline[i] = 80;
 			}

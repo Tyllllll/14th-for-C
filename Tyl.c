@@ -34,7 +34,7 @@ void main (void)
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
 		}
-		if(SWITCH4 == 0)
+		if(SWITCH4 == 1)
 		{
 			Send_Data_to_FreeCars();
 		}
@@ -63,7 +63,7 @@ void main (void)
 				motor.stop = 1;
 			}
 		}
-		if(camera.ready_read)
+		if(camera.ready_read == 1)
 		{
 			Img_Extract();
 			Find_Line();

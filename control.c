@@ -1,7 +1,5 @@
 #include "header.h"
 
-//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为障碍
-uint8 road_type[200];
 uint8 half_width[120];
 Speed_Class speed;
 Setting_Class setting;
@@ -226,27 +224,27 @@ void Speed_Set(void)
 //	if(feature.roundabouts_state != 0 && feature.roundabouts_state != 5 && feature.roundabouts_state != 6)
 	if(feature.roundabouts_state != 0)
 	{
-		road_type[0] = 4;
+		feature.road_type[0] = 4;
 		motor.speed_set = speed.roundabouts;
 	}
 	else if(feature.cross_state[1] == 1)
 	{
-		road_type[0] = 5;
+		feature.road_type[0] = 5;
 		motor.speed_set = speed.cross;
 	}
 	else if(feature.straight_state == 1)
 	{
-		road_type[0] = 1;
+		feature.road_type[0] = 1;
 		motor.speed_set = speed.long_straight;
 	}
 	else if(feature.straight_state == 2)
 	{
-		road_type[0] = 2;
+		feature.road_type[0] = 2;
 		motor.speed_set = speed.straight;
 	}
-	else if(feature.turn_state != 0)
+	else
 	{
-		road_type[0] = 3;
+		feature.road_type[0] = 3;
 		error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
 		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
 		if(motor.speed_set > speed.curve_high)
@@ -299,6 +297,7 @@ void Parameter_Setting(void)
 	int8 key_state;
 	DisableInterrupts;
 	Parameter_Setting_Init();
+	Setting_Paint();
 	while(1)
 	{
 		key_state = Setting_Key_Scan();
@@ -313,7 +312,8 @@ void Parameter_Setting(void)
 			{
 				//上切页
 			case 1:
-				if(setting.page_num == 0)
+				setting.page_num--;
+				if(setting.page_num < 0)
 				{
 					setting.page_num = 3;
 				}
@@ -321,7 +321,8 @@ void Parameter_Setting(void)
 				break;
 				//下切页
 			case 6:
-				if(setting.page_num == 3)
+				setting.page_num++;
+				if(setting.page_num > 3)
 				{
 					setting.page_num = 0;
 				}
@@ -329,7 +330,8 @@ void Parameter_Setting(void)
 				break;
 				//上一项
 			case 2:
-				if(setting.course == 0)
+				setting.course--;
+				if(setting.course < 0)
 				{
 					setting.course = 7;
 				}
@@ -337,7 +339,8 @@ void Parameter_Setting(void)
 				break;
 				//下一项
 			case 5:
-				if(setting.course == 7)
+				setting.course++;
+				if(setting.course > 7)
 				{
 					setting.course = 0;
 				}
@@ -387,7 +390,10 @@ void Parameter_Setting(void)
 				break;
 			}
 		}
+		Key_Delay();
+		Key_Delay();
 	}
+	EnableInterrupts;
 }
 
 /***************************************************************
@@ -456,38 +462,38 @@ void Setting_Paint(void)
 	switch(setting.page_num)
 	{
 	case 0:
-		OLED_Put6x8Str(8, 0, (uint8*)setting.string[0][0]);
+		OLED_Put6x8Str(8, 0, setting.string[0][0]);
 		OLED_Put6x8Str(115, 0, "P1");
 		for(i = 1; i < 8; i++)
 		{
-			OLED_Put6x8Str(8, i, (uint8*)setting.string[0][i]);
+			OLED_Put6x8Str(8, i, setting.string[0][i]);
 			OLED_PrintFloatValue(70, i, setting.data[0][i]);
 		}
 		break;
 	case 1:
-		OLED_Put6x8Str(8, 0, (uint8*)setting.string[1][0]);
+		OLED_Put6x8Str(8, 0, setting.string[1][0]);
 		OLED_Put6x8Str(115, 0, "P2");
 		for(i = 1; i < 8; i++)
 		{
-			OLED_Put6x8Str(8, i, (uint8*)setting.string[1][i]);
+			OLED_Put6x8Str(8, i, setting.string[1][i]);
 			OLED_PrintFloatValue(70, i, setting.data[1][i]);
 		}
 		break;
 	case 2:
-		OLED_Put6x8Str(8, 0, (uint8*)setting.string[2][0]);
+		OLED_Put6x8Str(8, 0, setting.string[2][0]);
 		OLED_Put6x8Str(115, 0, "P3");
 		for(i = 1; i < 8; i++)
 		{
-			OLED_Put6x8Str(8, i, (uint8*)setting.string[2][i]);
+			OLED_Put6x8Str(8, i, setting.string[2][i]);
 			OLED_PrintFloatValue(70, i, setting.data[2][i]);
 		}
 		break;
 	case 3:
-		OLED_Put6x8Str(8, 0, (uint8*)setting.string[3][0]);
+		OLED_Put6x8Str(8, 0, setting.string[3][0]);
 		OLED_Put6x8Str(115, 0, "P4");
 		for(i = 1; i < 8; i++)
 		{
-			OLED_Put6x8Str(8, i, (uint8*)setting.string[3][i]);
+			OLED_Put6x8Str(8, i, setting.string[3][i]);
 			OLED_PrintFloatValue(70, i, setting.data[3][i]);
 		}
 		break;
@@ -564,6 +570,7 @@ int8 Setting_Key_Scan(void)
 			return 6;
 		}
 	}
+	BUZZER_OFF;
 	return 0;
 }
 

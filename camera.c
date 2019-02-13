@@ -107,9 +107,6 @@ Camera_Class camera;
 ***************************************************************/
 static void Camera_Gpio_Init(void)
 {
-	camera.contrast = 64;
-	camera.ready_write = 1;
-	
 	static GPIO_InitTypeDef CameraPT_InitStructure;
 	static GPIO_InitTypeDef isr_InitStructure;
 	static GPIO_InitTypeDef DMA_GPIO_InitStructure;
@@ -157,8 +154,9 @@ static void Camera_Gpio_Init(void)
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-//	camera.contrast = contrast;
-//	camera.ready_write = ready_write;
+	camera.contrast = 64;
+	camera.ready_write = 1;
+
 	uint16 i = 0;
 	uint8 ubyDeviceID = 0;
 	LPLD_SCCB_Init();
