@@ -154,7 +154,7 @@ static void Camera_Gpio_Init(void)
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 64;
+	camera.contrast = 100;
 	camera.ready_write = 1;
 
 	uint16 i = 0;
@@ -274,8 +274,10 @@ void DMA_Complete_Isr(void)
 void Img_Extract(void)
 {
 	uint8 i, j, k;
+	uint8 which_buffer = camera.which_buffer;
 	camera.ready_read = 0;
-	if(camera.which_buffer)
+//	Mid_Filter();
+	if(which_buffer == 1)
 	{
 		for(i = 0; i < ROW; i++)
 		{
@@ -298,6 +300,75 @@ void Img_Extract(void)
 				{
 					camera.image[i][j * 8 + k] = c_ubyColor[(camera.image_buf2[i][j] >> (7 - k)) & 0x01];
 				}
+			}
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	灰度图片中值滤波
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Mid_Filter(void)
+{
+	uint8 i, j, k, l;
+	uint8 window[3];
+	uint8 min;
+	uint8 temp;
+	if(camera.which_buffer == 1)
+	{
+		for(i = 0; i < ROW; i++)
+		{
+			for(j = 1; j < COLUMN - 1; j++)
+			{
+				for(k = 0; k < 3; k++)
+				{
+					window[k] = camera.image_buf1[i][j - 1 + k];
+				}
+				for(k = 0; k < 2; k++)
+				{
+					min = k;
+					for(l = k + 1; l < 3; l++)
+					{
+						if(window[l] < window[min])
+						{
+							min = l;
+						}
+					}
+					temp = window[k];
+					window[k] = window[min];
+					window[min] = temp;
+				}
+				camera.image_buf1[i][j] = window[2];
+			}
+		}
+	}
+	else
+	{
+		for(i = 0; i < ROW; i++)
+		{
+			for(j = 1; j < COLUMN - 1; j++)
+			{
+				for(k = 0; k < 3; k++)
+				{
+					window[k] = camera.image_buf1[i][j - 1 + k];
+				}
+				for(k = 0; k < 2; k++)
+				{
+					min = k;
+					for(l = k + 1; l < 3; l++)
+					{
+						if(window[l] < window[min])
+						{
+							min = l;
+						}
+					}
+					temp = window[k];
+					window[k] = window[min];
+					window[min] = temp;
+				}
+				camera.image_buf2[i][j] = window[2];
 			}
 		}
 	}

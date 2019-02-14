@@ -9,7 +9,7 @@
 
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
 #define DEG_MAX  1612
-#define DEG_MID  1452
+#define DEG_MID  1454
 #define DEG_MIN  1287
 
 typedef struct
@@ -23,8 +23,8 @@ typedef struct
 	float32 kp;
 	float32 ki;
 	float32 kd;
-	int16 error[4];
-	int16 error_differ[3];
+	int16 error[5];
+	int16 error_differ[4];
 	uint8 dead_zone;
 	uint8 dynamic_zone;
 	float32 dif_const_left;
@@ -38,6 +38,7 @@ void Servo_Output(void);
 void Servo_Control(void);
 void Servo_PID(void);
 
+int abs(int a);
 void servo_up1(void);
 void servo_up5(void);
 void servo_up10(void);

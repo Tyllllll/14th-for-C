@@ -1,5 +1,7 @@
 #include "header.h"
 
+uint8 flag;
+
 Line_Class line;
 Feature_Class feature;
 
@@ -14,6 +16,11 @@ void Find_Line(void)
 	uint8 column_start = 80;//基础寻线每行起始搜索列
 	for(i = 118; i >5; i--)
 	{
+		line.left_line[i] = 0;
+		line.left_line_flag[i] = 0;
+		line.right_line[i] = 0;
+		line.right_line_flag[i] = 0;
+		line.midline[i] = 0;
 		//从中线往左扫
 		for(j = column_start; j > 2; j--)
 		{
@@ -37,21 +44,21 @@ void Find_Line(void)
 			}
 		}
 		//计算中线
-		if(line.left_line_flag[i] && line.right_line_flag[i])
+		if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1)
 		{
 			line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 		}
-		else if(line.left_line_flag[i] && !line.right_line_flag[i])
+		else if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 0)
 		{
 			line.right_line[i] = 159;
 			line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 		}
-		else if(!line.left_line_flag[i] && line.right_line_flag[i])
+		else if(line.left_line_flag[i] == 0 && line.right_line_flag[i] == 1)
 		{
 			line.left_line[i] = 0;
 			line.midline[i] = line.right_line[i] / 2;
 		}
-		else if(!line.left_line_flag[i] && !line.right_line_flag[i])
+		else if(line.left_line_flag[i] == 0 && line.right_line_flag[i] == 0)
 		{
 			line.left_line[i] = 0;
 			line.right_line[i] = 159;
@@ -89,13 +96,11 @@ void Judge_Feature(void)
 	Find_Top_Point();
 	Find_Inflection();
 	Find_Inflection2();
-	if(feature.top_point != 0)
-	{
-		Judge_Curve();
-	}
-	Judge_Cross();
-	Judge_Roundabouts();
-	Judge_Straight();
+	
+//	Judge_Roundabouts();
+//	Judge_Straight();
+//	Judge_Curve();
+//	Judge_Cross();
 }
 
 /***************************************************************
@@ -136,7 +141,7 @@ void Find_Top_Point(void)
 void Find_Inflection(void)
 {
 	uint8 i = 0;
-	if(feature.top_point < 100 && feature.top_point > 10)
+	if(feature.top_point < 100)
 	{
 		//找左拐点
 		for(i = 108; i > feature.top_point + 4; i--)
@@ -144,7 +149,7 @@ void Find_Inflection(void)
 			if(feature.left_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 35 && line.left_line[i] < 140)
+				if(i > 5 && line.left_line[i] < 155)
 				{
 					//大小条件
 					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] > line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5] &&
@@ -171,7 +176,7 @@ void Find_Inflection(void)
 			if(feature.right_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 35 && line.right_line[i] > 20)
+				if(i > 5 && line.right_line[i] > 5)
 				{
 					//大小条件
 					if(line.right_line[i] < line.right_line[i + 3] && line.left_line[i] < line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5] &&
@@ -203,8 +208,8 @@ void Find_Inflection(void)
 void Find_Inflection2(void)
 {
 	uint8 i = 0;
-	//找左拐点2
-	if(feature.top_point < 100 && feature.top_point > 10)
+	//找左2拐点
+	if(feature.top_point < 100)
 	{
 		for(i = 100; i > feature.top_point + 4; i--)
 		{
@@ -214,13 +219,13 @@ void Find_Inflection2(void)
 				if(line.left_line[i] < 140)
 				{
 					//大小条件
-					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] < line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5])
+					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] < line.left_line[i - 3] && line.left_line[i] < line.left_line[i - 5])
 					{
 						//存在性条件
-						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1 && line.left_line_flag[i - 5] == 1)
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1 && line.left_line_flag[i - 5] == 1 && line.left_line_flag[i + 5] == 0)
 						{
 							//斜率条件
-							if(line.left_line[i + 3] - line.left_line[i] > 2)
+							if(line.left_line[i - 3] - line.left_line[i + 3] > 20)
 							{
 								feature.left_flection2_row = i;
 								feature.left_flection2_flag = 1;
@@ -230,7 +235,7 @@ void Find_Inflection2(void)
 				}
 			}
 		}
-		//找右拐点2
+		//找右2拐点
 		for(i = 100; i > feature.top_point + 4; i--)
 		{
 			if(feature.right_flection2_flag == 0)
@@ -239,13 +244,13 @@ void Find_Inflection2(void)
 				if(line.right_line[i] > 20)
 				{
 					//大小条件
-					if(line.right_line[i] < line.right_line[i + 3] && line.right_line[i] > line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5])
+					if(line.right_line[i] < line.right_line[i + 3] && line.right_line[i] > line.right_line[i - 3] && line.right_line[i] > line.right_line[i - 5])
 					{
 						//存在性条件
 						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1 && line.right_line_flag[i - 5] == 1)
 						{
 							//斜率条件
-							if(line.right_line[i + 3] - line.right_line[i] < -2)
+							if(line.right_line[i - 3] - line.right_line[i + 3] < -20)
 							{
 								feature.right_flection2_row = i;
 								feature.right_flection2_flag = 1;
@@ -271,7 +276,7 @@ void Judge_Straight(void)
 	//中线要求
 	for(i = 90; i > 20; i--)
 	{
-		if(line.midline[i] > 85 || line.midline[i] < 75)
+		if(line.midline[i] >= 88 || line.midline[i] <= 72)
 		{
 			lose_cnt++;
 		}
@@ -311,7 +316,7 @@ void Judge_Straight(void)
 	//短直道判断
 	if(feature.straight_state == 0)
 	{
-		if(Midline_Std_Deviation() < 8)
+		if(Midline_Std_Deviation() < 7)
 		{
 			feature.straight_state = 2;
 		}
@@ -330,60 +335,10 @@ void Judge_Straight(void)
 void Judge_Curve(void)
 {
 	uint8 i = 0;
-	//判小弯
-	for(i = 100; i > feature.top_point + 3; i--)
-	{
-		if(feature.turn_state != 1)
-		{
-			//左丢线的一行
-			if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-			{
-				if(line.right_line_flag[i - 5] == 1 && i > 30)
-				{
-					//行数很靠前时防止在十字后远方看过去的时候误判
-					if(i < 40 && line.right_line[i - 5] > 100)
-					{
-						if(line.right_line[i - 5] - line.right_line[i] > 10)
-						{
-							feature.turn_state = 0;
-						}
-					}
-					else
-					{
-						feature.turn_state = 1;
-						feature.turn_row = i;
-					}
-				}
-			}
-		}
-		else if(feature.turn_state != 2)
-		{
-			//右丢线的一行
-			if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-			{
-				if(line.left_line_flag[i - 5] == 1 && i > 30)
-				{
-					//行数很靠前时防止在十字后远方看过去的时候误判
-					if(i < 40 && line.left_line[i - 5] < 60)
-					{
-						if(line.left_line[i] - line.left_line[i - 5] > 10)
-						{
-							feature.turn_state = 0;
-						}
-					}
-					else
-					{
-						feature.turn_state = 2;
-						feature.turn_row = i;
-					}
-				}
-			}
-		}
-	}
-	//判深弯
 	uint8 is_left_turn = 0;
 	uint8 is_right_turn = 0;
-	if(feature.top_point < 95 && feature.turn_state == 0)
+	//判深弯
+	if(feature.top_point < 95)
 	{
 		//扩大搜索范围
 		for(i = 118; i > 112; i--)
@@ -425,12 +380,115 @@ void Judge_Curve(void)
 			feature.turn_state = 3;
 			feature.turn_row = i;
 		}
-		if(is_left_turn == 0 && is_right_turn == 1)
+		else if(is_left_turn == 0 && is_right_turn == 1)
 		{
 			feature.turn_state = 4;
 			feature.turn_row = i;
 		}
+		else
+		{
+			feature.turn_state = 0;
+		}
 	}
+	for(i = 100; i > feature.top_point + 3; i--)
+	{
+		//左丢线的一行
+		if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+		{
+			if(line.right_line_flag[i - 5] == 1 && i > 30)
+			{
+				//行数很靠前时防止在十字后远方看过去的时候误判
+				if(i < 40 && line.right_line[i - 5] > 100)
+				{
+					if(line.right_line[i - 5] - line.right_line[i] > 10)
+					{
+						feature.turn_state = 0;
+					}
+				}
+				else
+				{
+					feature.turn_state = 1;
+					feature.turn_row = i;
+				}
+			}
+		}
+		//右丢线的一行
+		if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+		{
+			if(line.left_line_flag[i - 5] == 1 && i > 30)
+			{
+				//行数很靠前时防止在十字后远方看过去的时候误判
+				if(i < 40 && line.left_line[i - 5] < 60)
+				{
+					if(line.left_line[i] - line.left_line[i - 5] > 10)
+					{
+						feature.turn_state = 0;
+					}
+				}
+				else
+				{
+					feature.turn_state = 2;
+					feature.turn_row = i;
+				}
+			}
+		}
+	}
+//	is_left_turn = 0;
+//	is_right_turn = 0;
+//	//判小弯
+//	if(feature.turn_state != 3 && feature.turn_state != 4)
+//	{
+//		if(feature.top_point < 70)
+//		{
+//			//扩大搜索范围
+//			for(i = 80; i > 70; i--)
+//			{
+//				//左线80-70行有丢线
+//				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
+//				{
+//					is_left_turn = 1;
+//				}
+//				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
+//				{
+//					is_right_turn = 1;
+//				}
+//			}
+//			if(is_left_turn == 1)
+//			{
+//				for(i = 70; i > feature.top_point + 10; i--)
+//				{
+//					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
+//					{
+//						is_left_turn = 0;
+//					}
+//				}
+//			}
+//			if(is_right_turn == 1)
+//			{
+//				for(i = 70; i > feature.top_point + 10; i--)
+//				{
+//					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
+//					{
+//						is_right_turn = 0;
+//					}
+//				}
+//			}
+//			if(is_left_turn == 1 && is_right_turn == 0)
+//			{
+//				feature.turn_state = 1;
+//				feature.turn_row = i;
+//			}
+//			else if(is_left_turn == 0 && is_right_turn == 1)
+//			{
+//				feature.turn_state = 2;
+//				feature.turn_row = i;
+//			}
+//			else
+//			{
+//				feature.turn_state = 0;
+//			}
+//		}
+//	}
 }
 
 /***************************************************************
@@ -563,26 +621,26 @@ void Judge_Roundabouts(void)
 
 /**********************a little funcitons**********************/
 /***************************************************************
-	*	@brief	求80-30行范围内中线标准差
+	*	@brief	求60-30行范围内中线标准差
 	*	@param	无
 	*	@note	无
 ***************************************************************/
 float Midline_Std_Deviation(void)
 {
 	uint8 i = 0;
-	uint8 sum1 = 0;
+	uint16 sum1 = 0;
 	float32 ave = 0;
 	float32 sum2 = 0;
-	for(i = 80; i > 30; i--)
+	for(i = 60; i > 30; i--)
 	{
 		sum1 += line.midline[i];
 	}
-	ave = sum1 / 50.0;
-	for(i = 80; i > 30; i--)
+	ave = sum1 / 30.0;
+	for(i = 60; i > 30; i--)
 	{
 		sum2 += (line.midline[i] * line.midline[i] - ave * ave);
 	}
-	return sqrt(sum2 / 50.0);
+	return sqrt(sum2 / 30.0);
 }
 
 /***************************************************************

@@ -344,10 +344,10 @@ void OLED_PrintIntValue(unsigned char x, unsigned char y, int data)
 ***************************************************************/
 void OLED_PrintUintValue(unsigned char x, unsigned char y, unsigned int data)
 {
-	OLED_Put6x8Char(x + 0, y, (data / 1000) + 48);
-	OLED_Put6x8Char(x + 6, y, ((data % 1000) / 100) + 48);
-	OLED_Put6x8Char(x + 12, y, ((data % 100) / 10) + 48);
-	OLED_Put6x8Char(x + 18, y, (data % 10) + 48);
+	OLED_Put6x8Char(x + 0, y, (data / 100) + 48);
+	OLED_Put6x8Char(x + 6, y, ((data % 100) / 10) + 48);
+	OLED_Put6x8Char(x + 12, y, (data % 10) + 48);
+//	OLED_Put6x8Char(x + 18, y, (data % 10) + 48);
 }
 
 /***************************************************************
@@ -410,16 +410,22 @@ void OLED_ShowImage(void)
 			OLED_WriteData(data);
 		}
 	}
-	OLED_Put6x8Str(80, 0, "zh");
-	OLED_PrintUintValue(100, 0, feature.straight_state);
-	OLED_Put6x8Str(80, 1, "wa");
-	OLED_PrintUintValue(100, 1, feature.turn_state);
-	OLED_Put6x8Str(80, 2, "sh");
-	OLED_PrintUintValue(100, 2, feature.cross_state[1]);
-	OLED_Put6x8Str(80, 3, "hu");
-	OLED_PrintUintValue(100, 3, feature.roundabouts_state);
-	OLED_Put6x8Str(80, 4, "rt");
-	OLED_PrintUintValue(100, 4, feature.road_type[0]);
+	OLED_Put6x8Str(80, 0, "top");
+	OLED_PrintUintValue(100, 0, feature.top_point);
+	OLED_Put6x8Str(80, 1, "zh");
+	OLED_PrintUintValue(100, 1, feature.straight_state);
+	OLED_Put6x8Str(80, 2, "wa");
+	OLED_PrintUintValue(100, 2, feature.turn_state);
+	OLED_Put6x8Str(80, 3, "sh");
+	OLED_PrintUintValue(100, 3, feature.cross_state[1]);
+	OLED_Put6x8Str(80, 4, "hu");
+	OLED_PrintUintValue(100, 4, feature.roundabouts_state);
+	OLED_Put6x8Str(80, 5, "rt");
+	OLED_PrintUintValue(100, 5, feature.road_type[0]);
+	OLED_PrintUintValue(80, 6, feature.left_flection_row);
+	OLED_PrintUintValue(100, 6, feature.right_flection_row);
+	OLED_PrintUintValue(80, 7, feature.left_flection2_row);
+	OLED_PrintUintValue(100, 7, feature.right_flection2_row);
 //	OLED_Put6x8Str(80, 0, fs");
 //	OLED_PrintFloatValue(100, 0, servo.foresight);
 //	OLED_Put6x8Str(80, 2, "top");

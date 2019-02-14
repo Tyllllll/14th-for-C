@@ -199,5 +199,6 @@ void Img_Isr(void);
 void DMA_Complete_Isr(void);
 void Camera_Delay(void);
 void Img_Extract(void);
+void Mid_Filter(void);
 
 #endif

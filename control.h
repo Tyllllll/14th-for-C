@@ -22,6 +22,7 @@ typedef struct
 extern Setting_Class setting;
 
 void Speed_Init(void);
+void All_Fill(void);
 void Curve_Fill(void);
 void Cross_Fill(void);
 void Roundabouts_Fill(void);
