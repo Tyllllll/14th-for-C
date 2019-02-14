@@ -9,51 +9,34 @@ SerialPortType SerialPortRx;
 int aa;
 void UartDebug(void)
 {
-  push(15,(int16)UartData[0]);//将数据发送回去观察
-  push(1,(int16)UartData[6]);//将数据发送回去观察
-  push(2,(int16)UartData[7]);//将数据发送回去观察
-  push(3,(int16)UartData[3]);//将数据发送回去观察
-  push(4,(int16)UartData[4]);//将数据发送回去观察
-  push(5,(int16)UartData[5]);//将数据发送回去观察
-  if(UartData[0]!=0)
-  {
-    MotorPID.SpeedSet=(int16)UartData[0];
-  }
-  if(UartData[1]!=0)
-  {
-   M_Kp=(int16)(UartData[1]);
-  }
-  if(UartData[2]!=0)
-  {
-   M_Ki=(int16)(UartData[2]);
-  }
-  if(UartData[3]!=0)
-  {
-    M_Kd=(int16)(UartData[3]);
-  }
-  if(UartData[4]!=0)
-  {
-    S_kp=(UartData[4]);
-  }
-  if(UartData[5]!=0)
-  {
-    S_kd=(UartData[5]);
-  }
-  if(UartData[6]!=0)
-  {
-   stop_flag=(int16)(UartData[6]);
-  }
-  if(UartData[7]!=0)
-  {
-    motor_flag=(int16)(UartData[7]);
-  }
-  if(UartData[8]!=0)
-  {
- //   d=(int16)(UartData[8]);
-  }
-  BUZZER_ON;
-  LPLD_LPTMR_DelayMs(100);
-  BUZZER_OFF;
+	push(0,(int16)UartData[0]);//将数据发送回去观察
+	push(1,(int16)UartData[1]);//将数据发送回去观察
+	push(2,(int16)UartData[2]);//将数据发送回去观察
+	push(3,(int16)UartData[3]);//将数据发送回去观察
+	push(4,(int16)UartData[4]);//将数据发送回去观察
+	if(UartData[0]!=0)
+	{
+		M_Kp=(int16)UartData[0];
+	}
+	if(UartData[1]!=0)
+	{
+		M_Ki=(int16)(UartData[1]);
+	}
+	if(UartData[2]!=0)
+	{
+		M_Kd=(int16)(UartData[2]);
+	}
+	if(UartData[3]!=0)
+	{
+		motor_flag=(int16)(UartData[3]);
+	}
+	if(UartData[4]!=0)
+	{
+		stop_flag=(int16)(UartData[4]);
+	}
+	BUZZER_ON;
+	LPLD_LPTMR_DelayMs(100);
+	BUZZER_OFF;
 }
 /*
 命令接收函数
@@ -197,8 +180,8 @@ void uart0_isr(void)
 void PutcharCamera(int8 sele)
 {
   int i,j,Image_Mode_selection=sele;
-       LedOn(3);
-       LedOff(2);
+//       LedOn(3);
+//       LedOff(2);
        LPLD_LPTMR_DelayMs(400);
        LED_Fill(0x00);
        LED_P6x8Str(20,4, "da ga hao");

@@ -1,14 +1,14 @@
 
 /*10cm-i=95 top=100
-20cm-i=82 top=87
-30cm-i=70 top=75
-40cm-i=61 top=66
-50cm-i=54 top=59
-60cm-i=49 top=54
-70cm-i=45 top=50
-80cm-i=42 top=47
-90cm-i=39 top=44
-100cm-i=37 top=42
+20cm-i=82 top=87	100
+30cm-i=70 top=75	76
+40cm-i=61 top=66	60
+50cm-i=54 top=59	45
+60cm-i=49 top=54	37
+70cm-i=45 top=50	34
+80cm-i=42 top=47	26
+90cm-i=39 top=44	22
+100cm-i=37 top=42	21
 110cm-i=35 top=40
 120cm-i=33 top=38
 130cm-i=32 top=37
@@ -48,18 +48,21 @@ int16 leftlineflag_reg[120];
 int16 rightlineflag_reg[120];
 int16 column_start=80;//基础寻线的每行的起始搜索列
 int16 text_width[120]={0};
-int16 width_real[120]=  {0, 1,  2,  2,  5,  9,  10, 12, 15, 16,   //0-9
-                        17, 17, 20, 22, 23, 24, 25, 27, 28, 29,   //10-11
-                        30, 31, 32, 32, 33, 34, 35, 37, 38, 39,   //...
-                        40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-                        50, 51, 52, 53, 54, 55, 56, 57, 59, 60,
-                        60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
-                        70, 70, 71, 72, 73, 74, 75, 76, 77, 77,
-                        77, 78, 78, 79, 79, 79, 79, 79, 79, 79,
-                        79, 79, 79, 79, 79, 79, 79, 79, 79, 79,
-                        79, 79, 79, 79, 79, 79, 79, 79, 79, 79,
-                        79, 79, 79, 79, 79, 79, 79, 79, 79, 79,
-                        79, 79, 79, 79, 79, 79, 79, 79, 79, 79};
+
+
+int16 width_real[120] = {14, 17, 19, 20, 22, 23, 24, 24, 25, 25,//0
+						27, 28, 29, 30, 31, 32, 33, 35, 36, 36,//1
+						37, 39, 40, 41, 42, 43, 44, 45, 46, 47,//2
+						48, 49, 50, 51, 52, 53, 53, 54, 55, 56,//3
+						57, 58, 59, 60, 61, 62, 63, 64, 65, 65,//4
+						66, 67, 68, 69, 70, 71, 72, 72, 73, 74,//5
+						75, 76, 76, 76, 77, 77, 77, 78, 78, 79,//6
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//7
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//8
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//9
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//10
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 79//11
+};
 
 int16  width[120]={1,1,2,2,2,3,3,4,4,4,  //赛道全宽 ，具体要根据自己的车进行测量
 5,5,6,7,7,8,9,10,10,10,
@@ -75,6 +78,11 @@ int16  width[120]={1,1,2,2,2,3,3,4,4,4,  //赛道全宽 ，具体要根据自己的车进行测量
 113,114,115,116,118,119,120,121,122,122};//118-108
 
 int16 width_test[120]={0};
+
+int16 state3to5column = 68;
+int16 loselinecount = 40;
+int16 xielvcha = 25;
+int16 dianshu = 8;
 void findline1(void)  //基础寻线
 {
     int16 i=0,j=0,k=0;
@@ -83,7 +91,7 @@ void findline1(void)  //基础寻线
 
     
     
-    for(i=118;i>10;i--)//从118行一直找到10行  
+    for(i=118;i>5;i--)//从118行一直找到10行  
     {
         k=column_start;   //80列
         f1.leftline[i]=0;
@@ -102,12 +110,12 @@ void findline1(void)  //基础寻线
         }
         for(j=k;j<157;j++)
         {
-            if(Image[i][j]!=0&&Image[i][j+1]!=0&&Image[i][j+2]==0)
-            {//寻找右跳变点
-                f1.rightline[i]=j+1;
-                f1.rightlineflag[i]=1;
-                break;
-            }
+			if(Image[i][j]!=0&&Image[i][j+1]!=0&&Image[i][j+2]==0)
+			{//寻找右跳变点
+				f1.rightline[i]=j+1;
+				f1.rightlineflag[i]=1;
+				break;
+			}
         }
 //        
 //        if(i>10&&i<116) //滤除噪点
@@ -120,51 +128,75 @@ void findline1(void)  //基础寻线
 //          {
 //            f1.rightlineflag[i] = rightlineflag_reg[i+1];
 //          }
-//        }
-        
-        if(f1.leftlineflag[i]==1&&f1.rightlineflag[i]==1)
-        {//两边都找到跳变点
-            f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
-//            f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
-//            f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];  
-        }
-        else if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==1)
-        {//左边无跳变点，右边有跳变点
-            f1.leftline[i]=0;
-            f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
-//            if(i<95&&f1.rightline[i]<=f1.rightline[i+1]&&f1.leftlineflag[i+15]==0&&f1.rightlineflag[i+15]==0)//直线上不可能出现该情况，仅存在于转弯处
-//            {
-//                f1.midline[i]=f1.midline[i+1];
-//            }  
-            f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
-            f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
-        }
-        else if(f1.leftlineflag[i]==1&&f1.rightlineflag[i]==0)
-        {//左边有跳变点，右边无跳变点
-            f1.rightline[i]=159;
-            f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
-//            if(i<99&&f1.leftline[i]>=f1.leftline[i+1]&&f1.leftlineflag[i+15]==0&&f1.rightlineflag[i+15]==0)  //弯道右转
-//            {
-//                f1.midline[i]=f1.midline[i+1];
-//            }
-            f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
-            f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
-        }
-        else if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==0)//&&f2.shiziflag[1]==0)
-        {//左右无跳变点
-            f1.leftline[i]=0;
-            f1.rightline[i]=159;
-            if(i==118)
-            {
-                f1.midline[i]=80;
-            }
-            else
-            {
-                f1.midline[i]=f1.midline[i+1];//用上一场的
-            }
-            f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
-            f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
-        }
+//        }        
+		if(f2.huandaoflag == 7)
+		{
+			if(i==118)
+			{
+				f1.midline[i]=f1.leftlineflag[i]? f1.leftline[i] + width_real[i]: 10;
+			}
+			else
+			{
+				f1.midline[i]=f1.leftlineflag[i]? f1.leftline[i] + width_real[i]: f1.midline[i+1];
+			}
+		}
+		else if(f2.huandaoflag == 8)
+		{
+			if(i==118)
+			{
+				f1.midline[i]=f1.rightlineflag[i]? f1.rightline[i] - width_real[i]: 150;
+			}
+			else
+			{
+				f1.midline[i]=f1.rightlineflag[i]? f1.rightline[i] - width_real[i]: f1.midline[i+1];
+			}
+		}
+		else
+		{
+			if(f1.leftlineflag[i]==1&&f1.rightlineflag[i]==1)
+			{//两边都找到跳变点
+				f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
+	//            f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
+	//            f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];  
+			}
+			else if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==1)
+			{//左边无跳变点，右边有跳变点
+				f1.leftline[i]=0;
+				f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
+	//            if(i<95&&f1.rightline[i]<=f1.rightline[i+1]&&f1.leftlineflag[i+15]==0&&f1.rightlineflag[i+15]==0)//直线上不可能出现该情况，仅存在于转弯处
+	//            {
+	//                f1.midline[i]=f1.midline[i+1];
+	//            }  
+				f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
+				f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
+			}
+			else if(f1.leftlineflag[i]==1&&f1.rightlineflag[i]==0)
+			{//左边有跳变点，右边无跳变点
+				f1.rightline[i]=159;
+				f1.midline[i]=(f1.leftline[i]+f1.rightline[i])/2;
+	//            if(i<99&&f1.leftline[i]>=f1.leftline[i+1]&&f1.leftlineflag[i+15]==0&&f1.rightlineflag[i+15]==0)  //弯道右转
+	//            {
+	//                f1.midline[i]=f1.midline[i+1];
+	//            }
+				f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
+				f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
+			}
+			else if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==0)//&&f2.shiziflag[1]==0)
+			{//左右无跳变点
+				f1.leftline[i]=0;
+				f1.rightline[i]=159;
+				if(i==118)
+				{
+					f1.midline[i]=80;
+				}
+				else
+				{
+					f1.midline[i]=f1.midline[i+1];//用上一场的
+				}
+				f1.midline[i]=f1.midline[i]>159?159:f1.midline[i];
+				f1.midline[i]=f1.midline[i]<0?0:f1.midline[i];
+			}
+		}
         column_start=f1.midline[i];
     }  
 //    for(i=118;i>10;i--)
@@ -287,14 +319,11 @@ void findline1(void)  //基础寻线
     
     
 //    column_start=f1.midline[118];//每场之间的起始点设定
-//    //计算赛道半宽
-//    for (i=11;i<=118;i++ )
-//    {width_test[i] = ( - f1.leftline[i] + f1.rightline[i]) / 2;
-////    LPLD_UART_PutChar(UART0,width_test[i] );
-////    LPLD_UART_PutChar(UART0,',' );
-////    
-//    }
+    //计算赛道半宽
+    for (i=118;i>1;i-- )
+    {width_test[i] = ( - f1.leftline[i] + f1.rightline[i]) / 2;
     
+    }
     if(f2.toppoint_flag==0)
     {
         find_toppoint();//寻找一场图像的赛道顶点
@@ -311,11 +340,17 @@ void findline2(void)
   f2.leftguaiflag_up=0;f2.leftguai_column_up=0;f2.leftguai_row_up=0;
   f2.rightguaiflag_up=0;f2.rightguai_column_up=0;f2.rightguai_row_up=0;
   L=0;R=0;both_line=0;
+  
+  uint8 Tyl_huan12_noguai = 0;
+  uint8 Tyl_huan12_top = 0;
+  static uint8 Tyl_huan34_state;
+  uint8 Tyl_huan34_noguai = 0;
+  uint8 Tyl_huan34_top = 0;
 
-//  if(f2.leftguaiflag==0&&f2.rightguaiflag==0)
-//  {//寻找赛道上是否存在拐点
-//    find_guai(); 
-//  }
+  if(f2.leftguaiflag==0&&f2.rightguaiflag==0)
+  {//寻找赛道上是否存在拐点
+    find_guai(); 
+  }
 
   if(f2.toppoint!=0)
   {//有顶点时找小弯
@@ -330,68 +365,71 @@ void findline2(void)
 
   
   /********************************************十字判断*******************************************************************/
-  if(f2.leftguaiflag==1||f2.rightguaiflag==1)
-  {//拐点存在 
-      shizi_judge();
-      if(f2.leftguaiflag==1&&f2.rightguaiflag==1)
-      {
-          
-          if(f2.leftguai_row>f2.rightguai_row&&f2.leftguai_column>f2.rightguai_column)  
-          {//左拐点在右拐点右边时 保留近处拐点
-              f2.rightguaiflag=0;
-          }
-          if(f2.rightguai_row>f2.leftguai_row&&f2.leftguai_column>f2.rightguai_column)
-          {
-              f2.leftguaiflag=0;
-          }  
-          
-      }   
-      
-      
-      bianxian();//检查左右拐点的两边是否存在丢线  
-      if(f2.leftguaiflag==1||f2.rightguaiflag==1)
-      {
-          
-          if(f2.shiziflag[1]==0)
-          {
-              shizi_distance=0;
-              f2.shiziflag[0]=f2.shiziflag[0]+1;
-          }
-          if(f2.shiziflag[0]==4) //满足4帧图像，确认为十字
-          {
-              f2.shiziflag[1]=1;
-              f2.shiziflag[0]=0; 
-          }
-          
-          
-          if(f2.leftturnflag!=0||f2.rightturnflag!=0) //拐点存在，销去转弯标志位
-          {
-              f2.leftturnflag=0;
-              f2.rightturnflag=0;
-          }
-      }
-      
-      if(f2.leftguaiflag==0) 
-      {
-          f2.leftguaiflag=0;
-          f2.leftguai_row=0;
-          f2.leftguai_column=0;    
-      }
-      if(f2.rightguaiflag==0)
-      {
-          f2.rightguaiflag=0;
-          f2.rightguai_row=0;
-          f2.rightguai_column=0;     
-      }
-  }
-  
-  
-  
-  
-  
-  /**********************************十字补线***********************************************/
-  if(f2.shiziflag[1]==1)
+  if(!f2.huandaoflag)
   {
+	  if(f2.leftguaiflag==1||f2.rightguaiflag==1)
+	  {//拐点存在 
+		  shizi_judge();
+		  if(f2.leftguaiflag==1&&f2.rightguaiflag==1)
+		  {
+			  
+			  if(f2.leftguai_row>f2.rightguai_row&&f2.leftguai_column>f2.rightguai_column)  
+			  {//左拐点在右拐点右边时 保留近处拐点
+				  f2.rightguaiflag=0;
+			  }
+			  if(f2.rightguai_row>f2.leftguai_row&&f2.leftguai_column>f2.rightguai_column)
+			  {
+				  f2.leftguaiflag=0;
+			  }  
+			  
+		  }   
+		  
+		  
+		  bianxian();//检查左右拐点的两边是否存在丢线  
+		  if(f2.leftguaiflag==1||f2.rightguaiflag==1)
+		  {
+			  
+			  if(f2.shiziflag[1]==0)
+			  {
+				  shizi_distance=0;
+				  f2.shiziflag[0]=f2.shiziflag[0]+1;
+			  }
+			  if(f2.shiziflag[0]==3) //满足4帧图像，确认为十字
+			  {
+				  f2.shiziflag[1]=1;
+				  f2.shiziflag[0]=0;
+			  }
+			  else
+			  {
+				  f2.shiziflag[1]=0;
+			  }
+			  
+			  
+			  if(f2.leftturnflag!=0||f2.rightturnflag!=0) //拐点存在，销去转弯标志位
+			  {
+				  f2.leftturnflag=0;
+				  f2.rightturnflag=0;
+			  }
+		  }
+		  
+		  if(f2.leftguaiflag==0) 
+		  {
+			  f2.leftguaiflag=0;
+			  f2.leftguai_row=0;
+			  f2.leftguai_column=0;    
+		  }
+		  if(f2.rightguaiflag==0)
+		  {
+			  f2.rightguaiflag=0;
+			  f2.rightguai_row=0;
+			  f2.rightguai_column=0;     
+		  }
+	  }
+  }
+
+  /**********************************十字补线***********************************************/
+ if(f2.shiziflag[1]==1)
+ {
       if(f2.leftguaiflag==1&&f2.rightguaiflag==1)
       {
           if(f2.leftguai_row+8<118)
@@ -570,7 +608,61 @@ void findline2(void)
   
   /******************十字补线结束******************/
   
-  
+//  if(f2.huandaoflag == 0)
+//  {
+//	  if(abs(xielv()) < 10 && !f2.leftguaiflag && !f2.rightguaiflag && !judge_bothlose())
+//	  {
+//		  if(f1.leftlineflag[6] == 1 || f1.leftlineflag[7] == 1 || f1.rightlineflag[6] == 1 || f1.rightlineflag[7] == 1)
+//		  {
+//	  		Tyl_judge_huandao();
+//		  }
+//	  }
+//  }
+	Magnetic_GetAdc();
+  if(magnetic.left_mag > 58 || magnetic.right_mag > 58)
+  {
+	  FM_Start_di();
+	Tyl_judge_huandao();
+  }
+  /*if(f2.huandaoflag == 1)
+  {
+	  Magnetic_GetAdc();
+	  if(magnetic.left_mag < 900)
+	  {
+		  Magnetic_GetAdc();
+		  if(magnetic.left_mag < 900)
+		  {
+			f2.huandaoflag = 0;
+		  }
+	  }
+
+  }
+  else if(f2.huandaoflag == 2)
+  {
+	  Magnetic_GetAdc();
+	  if(magnetic.right_mag < 900)
+	  {
+		  Magnetic_GetAdc();
+		  if(magnetic.right_mag < 900)
+		  {
+			f2.huandaoflag = 0;
+		  }
+	  }
+  }
+  else if(f2.huandaoflag == 5 || f2.huandaoflag == 6|| f2.huandaoflag == 7|| f2.huandaoflag == 8)
+  {
+	  if(f2.toppoint < 13)
+	  {
+		  f2.huandaoflag = 0;
+	  }
+  }
+  else
+  {
+	  LedOn(1);
+	  LedOn(2);
+	  LedOn(3);
+  }*/
+
   /***********************************/
     //  弯道补线
   /************************************/
@@ -687,8 +779,280 @@ void findline2(void)
   
  }
  
-
-
+		  
+/***************************************************************
+	*	@brief	环岛状态机
+	*	@param	无
+	*	@note	无
+***************************************************************/
+	//左环
+	if(f2.huandaoflag == 1)
+	{
+		Tyl_huan12_noguai = 0;
+		Tyl_huan12_top = 0;
+		//进环前
+		for(i=118;i>10;i--)//从118行一直找到10行  
+		{
+			f1.midline[i] = f1.rightline[i] - width_real[i];
+		}
+		for(i = 118; i > 10; i--)
+		{
+			if(f1.leftline[i] - f1.leftline[i + 3] > 20 && f1.leftline[i + 1] - f1.leftline[i + 4] > 20 && f1.leftline[i + 2] - f1.leftline[i + 5] > 20)
+			{
+				Tyl_huan12_top = i;
+				break;
+			}
+		}
+		for(i=118;i>Tyl_huan12_top;i--)
+		{
+			if(f1.leftlineflag[i])
+			{
+				Tyl_huan12_noguai++;
+			}
+		}
+		if(Tyl_huan12_noguai < 8)
+		{
+			f2.huandaoflag = 3;
+		}
+	}
+	else if(f2.huandaoflag == 3)
+	{
+		//进环
+		Tyl_huan34_noguai = 0;
+		Tyl_huan34_top = 0;
+		if(!Tyl_huan34_state)
+		{
+			for(i = 40; i < 50; i++)
+			{
+				if(f1.rightline[i] != 159)
+				{
+					Tyl_huan34_noguai++;
+				}
+			}
+			if(Tyl_huan34_noguai < 3)
+			{
+				Tyl_huan34_state = 1;
+			}
+		}
+		else
+		{
+			for(i = 40; i < 50; i++)
+			{
+				if(f1.rightline[i] == 159)
+				{
+					Tyl_huan34_noguai++;
+				}
+			}
+			if(Tyl_huan34_noguai < 3)
+			{
+				Tyl_huan34_state = 0;
+				f2.huandaoflag = 5;
+			}
+		}
+		for(i = 118; i > 5; i--)
+		{
+			if(f1.leftline[i] - f1.leftline[i + 3] > 20)
+			{
+				Tyl_huan34_top = i;
+				break;
+			}
+		}
+		for(i = 118; i > 10; i--)
+		{
+			if(Tyl_huan34_top < i)
+			{
+//				f1.midline[i] = (int16)(f1.leftline[i] + width_real[i] * (i -  Tyl_huan34_top)/(118 - Tyl_huan34_top));
+				f1.midline[i] = f1.leftline[i] + width_real[i] - 10;
+			}
+			else
+			{
+				f1.midline[i] = 0;
+			}
+		}
+	}
+	else if(f2.huandaoflag == 5)
+	{
+		//环内
+		for(i=108;i>f2.toppoint+4;i--)   //拐点要在顶点之前
+		{
+			if(i>45&&f1.rightline[i]>20&&f1.rightline[i]<f1.rightline[i+3]&&f1.rightline[i]<f1.rightline[i-3]&&f1.rightline[i]<f1.rightline[i+5])
+			{//i>45是为了控制拐点在40行到115行内
+				if(f1.rightline[i-3]-f1.rightline[i+3]>-2&&f1.rightlineflag[i+3]==1)
+				{
+					if(f1.rightline[i+3]+f1.rightline[i-3]-2*f1.rightline[i]>4)
+					{//寻找右拐点
+						for(i = 118; i > f2.toppoint; i--)
+						{
+							f1.midline[i] = width_real[i] * (i - f2.toppoint) / (118 - f2.toppoint);
+						}
+						
+					}
+				}
+			}
+		}
+		for(i=118;i>f2.toppoint+4;i--)   //拐点要在顶点之前
+		{
+			if(i>45&&f1.rightline[i]>20&&f1.rightline[i]<f1.rightline[i+3]&&f1.rightline[i]<f1.rightline[i-3]&&f1.rightline[i]<f1.rightline[i+5])
+			{//i>45是为了控制拐点在40行到115行内
+				if(f1.rightline[i-3]-f1.rightline[i+3]>-2&&f1.rightlineflag[i+3]==1)
+				{
+					if(f1.rightline[i+3]+f1.rightline[i-3]-2*f1.rightline[i]>4)
+					{//寻找右拐点
+						if(f1.rightline[i] > 100)
+						{
+							f2.huandaoflag = 7;
+							break; 
+						}
+					}
+				}
+			}
+		}
+	}
+	else if(f2.huandaoflag == 7)
+	{
+		//出环
+		//强行改中线
+		if(f2.toppoint < 20 && f1.leftlineflag[f2.toppoint] == 0 && f1.rightlineflag[f2.toppoint] == 1)
+		{
+			f2.huandaoflag = 0;
+		}
+	}
+  	//右环
+	else if(f2.huandaoflag == 2)
+	{
+		Tyl_huan12_noguai = 0;
+		Tyl_huan12_top = 0;
+		//进环前
+		for(i=118;i>10;i--)//从118行一直找到10行  
+		{
+			f1.midline[i] = f1.leftline[i] + width_real[i];
+		}
+		for(i = 118; i > 10; i--)
+		{
+			if(f1.rightline[i] - f1.rightline[i + 3] < -20 && f1.rightline[i + 1] - f1.rightline[i + 4] < -20 && f1.rightline[i + 2] - f1.rightline[i + 5] < -20)
+			{
+				Tyl_huan12_top = i;
+				break;
+			}
+		}
+		for(i=118;i>Tyl_huan12_top;i--)
+		{
+			if(f1.rightlineflag[i])
+			{
+				Tyl_huan12_noguai++;
+			}
+		}
+		if(Tyl_huan12_noguai < 5)
+		{
+			f2.huandaoflag = 4;
+		}
+	}
+	else if(f2.huandaoflag == 4)
+	{
+		//进环
+		Tyl_huan34_noguai = 0;
+		Tyl_huan34_top = 0;
+		if(!Tyl_huan34_state)
+		{
+			for(i = 40; i < 50; i++)
+			{
+				if(f1.leftline[i] != 0)
+				{
+					Tyl_huan34_noguai++;
+				}
+			}
+			if(Tyl_huan34_noguai < 3)
+			{
+				Tyl_huan34_state = 1;
+			}
+		}
+		else
+		{
+			for(i = 40; i < 50; i++)
+			{
+				if(f1.leftline[i] == 0)
+				{
+					Tyl_huan34_noguai++;
+				}
+			}
+			if(Tyl_huan34_noguai < 3)
+			{
+				Tyl_huan34_state = 0;
+				f2.huandaoflag = 6;
+			}
+		}
+		for(i = 118; i > 5; i--)
+		{
+			if(f1.rightline[i] - f1.rightline[i + 3] < -20)
+			{
+				Tyl_huan34_top = i;
+				break;
+			}
+		}
+		for(i = 118; i > 10; i--)
+		{
+			if(Tyl_huan34_top < i)
+			{
+//				f1.midline[i] = (int16)(f1.rightline[i] - width_real[i] * (i -  Tyl_huan34_top)/(118 - Tyl_huan34_top));
+				f1.midline[i] = f1.rightline[i] - width_real[i] + 10;
+			}
+			else
+			{
+				f1.midline[i] = 159;
+			}
+		}
+	}
+  	else if(f2.huandaoflag == 6)
+	{
+		//环内
+		for(i=108;i>f2.toppoint+4;i--)   //拐点要在顶点之前
+		{
+			if(f2.leftguaiflag==0)
+			{
+				if(i>45&&f1.leftline[i]<140&&f1.leftline[i]>f1.leftline[i+3]&&f1.leftline[i]>f1.leftline[i-3]&&f1.leftline[i]>f1.leftline[i+5]&&f1.leftline[i]>f1.leftline[i-2]&&f1.leftline[i]>f1.leftline[i-4])
+				{//i>45是为了控制拐点在40行到115行内
+					if(f1.leftline[i-3]-f1.leftline[i+3]<2&&f1.leftlineflag[i+3]==1&&f1.leftlineflag[i+5]==1&&f1.leftlineflag[i]==1)
+					{
+						if(2*f1.leftline[i]-f1.leftline[i-3]-f1.leftline[i+3]>4)
+						{//寻找左拐点
+							for(i = 118; i > f2.toppoint; i--)
+							{
+								f1.midline[i] = 159 - width_real[i] * (i - f2.toppoint) / (118 - f2.toppoint);
+							}
+						}
+					}
+				}
+			}
+		} 
+		
+		for(i=108;i>f2.toppoint+4;i--)   //拐点要在顶点之前
+		{
+			if(i>45&&f1.leftline[i]<140&&f1.leftline[i]>f1.leftline[i+3]&&f1.leftline[i]>f1.leftline[i-3]&&f1.leftline[i]>f1.leftline[i+5]&&f1.leftline[i]>f1.leftline[i-2]&&f1.leftline[i]>f1.leftline[i-4])
+			{//i>45是为了控制拐点在40行到115行内
+				if(f1.leftline[i-3]-f1.leftline[i+3]<2&&f1.leftlineflag[i+3]==1&&f1.leftlineflag[i+5]==1&&f1.leftlineflag[i]==1)
+				{
+					if(2*f1.leftline[i]-f1.leftline[i-3]-f1.leftline[i+3]>4)
+					{//寻找左拐点
+						if(f1.leftline[i] < 60)
+						{
+							f2.huandaoflag = 8;
+							break;
+						}
+					}
+				}
+			}
+		} 
+	}
+  	else if(f2.huandaoflag == 8)
+	{
+		//出环
+		//强行改中线
+		if(f2.toppoint < 20 && f1.rightlineflag[f2.toppoint] == 0 && f1.leftlineflag[f2.toppoint] == 1)
+		{
+			f2.huandaoflag = 0;
+		}
+	}
+ 
 find_toppoint();
 column_start=f1.midline[118];//每场之间的起始点设定
 column_start=column_start>150?150:column_start;
@@ -732,7 +1096,7 @@ void find_toppoint(void)
 }
 
 
-/*****************************
+/***************************** 
 函数名称：find_curve1
 函数功能：找左右小弯
 
@@ -831,7 +1195,7 @@ void find_curve1(void)
 
 ****************************/
 
-void find_curve3(void)  
+int8 find_curve3(void)  
 {
     int i=0,flag_L=0,flag_R=0; 
     if(f2.leftturnflag==0&&f2.rightturnflag==0)
@@ -870,12 +1234,15 @@ void find_curve3(void)
         if(flag_L==1&&flag_R==0)
         {
             f2.leftturnflag=3;
+			return 1;
         }
         else if(flag_L==0&&flag_R==1)
         {
             f2.rightturnflag=3;
+			return 1;
         }
     }
+	return 0;
 }
 
 /*****************************
@@ -978,55 +1345,273 @@ void shizi_judge(void)
 
 }
 
+
+/***************************************************************
+	*	@brief	环岛判断
+	*	@param	无
+	*	@note	近到远，边线宽大于赛道，顶点，大于赛道
+***************************************************************/
+void Tyl_judge_huandao(void)
+{
+	for(int i = 100; i > 5; i--)
+	{
+		if(f1.leftline[i] - f1.leftline[i - 3] <= -20 && f1.leftline[i + 1] - f1.leftline[i - 2] <= -20)
+		{
+			if(isRightZhi(60))
+			{
+				//左环
+				f2.huandaoflag = 3;
+				return;
+			}
+		}
+		if(f1.rightline[i] - f1.rightline[i - 3] >= 20 && f1.rightline[i + 1] - f1.rightline[i - 2] >= 20)
+		{
+			if(isLeftZhi(60))
+			{
+				//右环
+				f2.huandaoflag = 4;
+				return;  
+			}
+		}
+	}
+}
+/*int8 Tyl_judge_huandao(void)
+{
+	int16 i = 0, flag = 0;
+	int16 top = 0;
+	for(i = 0; i < 30; i++)
+	{
+		if(road_type[i] == 5 || road_type[i] == 3)
+		{
+			return 0;
+		}
+	}
+	for(i = 100; i > 5; i--)
+	{
+//		if(f1.rightline[i] - f1.leftline[i] > 2 * width_real[i] && flag == 0)
+//		{
+//			if(f1.rightlineflag[i])
+//			{
+//				flag = 1;//左环出口
+//				continue;
+//			}
+//		}
+		if(!f2.leftguaiflag && 
+		   f1.leftline[i] >= f1.leftline[i + 2] && abs(f1.leftline[i] - f1.leftline[i + 2]) < 10 &&
+			   f1.leftline[i] >= f1.leftline[i - 2] && abs(f1.leftline[i] - f1.leftline[i - 2]) < 10 &&
+//				   f1.leftline[i - 1] >= f1.leftline[i + 1] && abs(f1.leftline[i - 1] - f1.leftline[i + 1]) < 10 &&
+//					   f1.leftline[i - 1] >= f1.leftline[i - 1] && abs(f1.leftline[i - 1] - f1.leftline[i - 1]) < 10
+//		   f1.leftline[i] > f1.leftline[i + 4] && abs(f1.leftline[i] - f1.leftline[i + 4]) < 12 &&
+//			   f1.leftline[i] > f1.leftline[i - 4] && abs(f1.leftline[i] - f1.leftline[i - 4]) < 12 &&
+//				   f1.leftline[i - 1] >= f1.leftline[i + 3] && abs(f1.leftline[i - 1] - f1.leftline[i + 3]) < 12 &&
+//					   f1.leftline[i - 1] >= f1.leftline[i - 3] && abs(f1.leftline[i - 1] - f1.leftline[i - 3]) < 12 &&
+//			f1.leftline[i] > f1.leftline[i + 6] && abs(f1.leftline[i] - f1.leftline[i + 6]) < 14 &&
+//				f1.leftline[i] > f1.leftline[i - 6] && abs(f1.leftline[i] - f1.leftline[i - 6]) < 14 &&
+//					f1.leftline[i - 1] >= f1.leftline[i + 5] && abs(f1.leftline[i - 1] - f1.leftline[i + 5]) < 14 &&
+//						f1.leftline[i - 1] >= f1.leftline[i - 5] && abs(f1.leftline[i - 1] - f1.leftline[i - 5]) < 14 &&
+				flag == 0)
+		{
+			if(right(i + 5))
+			{
+				flag = 3;//左环中点
+				continue;
+			}
+		}
+		if(flag == 3)
+		{
+			if(!f1.leftlineflag[i])
+			{
+				flag = 5;//左环入口丢线
+				continue;
+			}
+		}
+//		if(f1.rightline[i] - f1.leftline[i] > 2.1 * width_real[i] && flag == 3)
+//		{
+//			top = top ? top : i;
+//			 if(isRightZhi(top))
+//			 {
+//				flag = 5;//左环入口
+//				f2.huandaoflag = 1;
+//			 }
+//			return flag;
+//		}
+		if(flag == 5)
+		{
+			if(f1.leftline[i] - f1.leftline[i - 3] <= -20 && f1.leftline[i + 1] - f1.leftline[i - 2] <= -20 && f1.leftline[i + 2] - f1.leftline[i - 1] <= -20)
+			{
+				top = top ? top : i;
+				 if(isRightZhi(top))
+				 {
+					flag = 7;//左环入口
+					f2.huandaoflag = 1;
+				 }
+				return flag;
+			}
+	}
+//		if(f1.rightline[i] - f1.leftline[i] > 2 * width_real[i] && flag == 0)
+//		{
+//			if(f1.leftlineflag[i])
+//			{
+//				flag = 2;//右环出口
+//				continue;
+//			}
+//		}
+		if(!f2.rightguaiflag &&
+		   f1.rightline[i] < f1.rightline[i + 2] && abs(f1.rightline[i] - f1.rightline[i + 2]) < 10 &&
+			   f1.rightline[i] < f1.rightline[i - 2] && abs(f1.rightline[i] - f1.rightline[i - 2]) < 10 &&
+//				   f1.rightline[i - 1] <= f1.rightline[i + 1] && abs(f1.rightline[i - 1] - f1.rightline[i + 1]) < 10 &&
+//					   f1.rightline[i - 1] <= f1.rightline[i - 1] && abs(f1.rightline[i - 1] - f1.rightline[i - 1]) < 10)
+//		   f1.rightline[i] < f1.rightline[i + 4] && abs(f1.rightline[i] - f1.rightline[i + 4]) < 12 &&
+//			   f1.rightline[i] < f1.rightline[i - 4] && abs(f1.rightline[i] - f1.rightline[i - 4]) < 12 &&
+//				   f1.rightline[i - 1] <= f1.rightline[i + 3] && abs(f1.rightline[i - 1] - f1.rightline[i + 3]) < 12 &&
+//					   f1.rightline[i - 1] <= f1.rightline[i - 3] && abs(f1.rightline[i - 1] - f1.rightline[i - 3]) < 12 &&
+//			f1.rightline[i] < f1.rightline[i + 6] && abs(f1.rightline[i] - f1.rightline[i + 6]) < 14 &&
+//				f1.rightline[i] < f1.rightline[i - 6] && abs(f1.rightline[i] - f1.rightline[i - 6]) < 14 &&
+//					f1.rightline[i - 1] <= f1.rightline[i + 5] && abs(f1.rightline[i - 1] - f1.rightline[i + 5]) < 14 &&
+//						f1.rightline[i - 1] <= f1.rightline[i - 5] && abs(f1.rightline[i - 1] - f1.rightline[i - 5]) < 14 &&
+					flag == 0)
+		{
+			if(left(i + 5))
+			{
+				flag = 4;//右环中点
+				continue;
+			}
+		}
+		if(flag == 4)
+		{
+			if(!f1.rightlineflag[i])
+			{
+				flag = 6;//右环入口丢线
+				continue;
+			}
+		}
+//		if(f1.rightline[i] - f1.leftline[i] > 2.1 * width_real[i] && flag == 4)
+//		{
+//			top = top ? top : i;
+//			 if(isLeftZhi(top))
+//			 {
+//				flag = 6;//右环入口
+//				f2.huandaoflag = 2;
+//			 }
+//			return flag;
+//		}
+		if(flag == 6)
+		{
+			if(f1.rightline[i] - f1.rightline[i - 3] >= 20 && f1.rightline[i + 1] - f1.rightline[i - 2] >= 20 && f1.rightline[i + 2] - f1.rightline[i - 1] >= 20)
+			{
+				top = top ? top : i;
+				 if(isLeftZhi(top))
+				 {
+					flag = 6;//右环入口
+					f2.huandaoflag = 2;
+				 }
+				return flag;
+			}
+		}
+	}
+	return flag;
+}*/
+
 /*****************************
 函数名称：judge_leftlose,judge_rightlose，judge_bothlose
 函数功能：分别判断是否丢线
 ****************************/
 int8 judge_leftlose(void)
 {
-  int16 i=0,count=0,flag=0;
-  for(i=118;i>40;i--)
+  int16 i=0, xielv[40], sum = 0, flag = 0;
+  for(i=60;i>20;i--)
   {
-    if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==1)//左边界存在，右边界不存在
-    {
-     count++;        //计数加一
-    }
+	  xielv[60 - i] = f1.leftline[i - 5] - f1.leftline[i];
+	  if(abs(xielv[60 - i]) > xielvcha)
+	  {
+		  xielv[60 - i] = i == 60 ? 0: xielv[59 - i];
+		  sum += sum/(60 - i);
+	  }
+	  else
+	  {
+	  	sum += xielv[60 - i];
+	  }
+	  if(abs(xielv[60 - i] - sum / (61 - i)) > dianshu)
+	  {
+		  flag++;
+	  }
   }
-  if(count>35)   
-  {
-    flag=1;        //如果左边界丢线场数大于35行，左丢线标志置一
-  }
-  return flag;
+  if(flag > 10)
+  	return 1;
+  else
+	  return 0;
 }
 int8 judge_rightlose(void)
 {
-  int16 i=0,count=0,flag=0;
-  for(i=118;i>40;i--)
+  int16 i=0, xielv[40], sum = 0, flag = 0;
+  for(i=60;i>20;i--)
   {
-    if(f1.leftlineflag[i]==1&&f1.rightlineflag[i]==0)
-    {
-     count++;
-    }
+	  xielv[60 - i] = f1.rightline[i - 5] - f1.rightline[i];
+	  if(abs(xielv[70 - i]) > xielvcha)
+	  {
+		  xielv[60 - i] = i == 60 ? 0: xielv[59 - i];
+		  sum += i == 60 ? 0: sum/(60 - i);
+	  }
+	  else
+	  {
+	  	sum += xielv[60 - i];
+	  }
+	  if(abs(xielv[60 - i] - sum / (61 - i)) > dianshu)
+	  {
+		  flag++;
+	  }
   }
-  if(count>35)
-  {
-    flag=1;
-  }
-  return flag;
+  if(flag >= 10)
+  	return 1;
+  else
+	  return 0;
 }
 
 
 int8 judge_bothlose(void)
 {
   int16 i=0,count=0,flag=0;
-  for(i=118;i>40;i--)
+  for(i=70;i>25;i--)
   {
     if(f1.leftlineflag[i]==0&&f1.rightlineflag[i]==0)  //如果左右边界均为0
     {
      count++;
     }
   }
-  if(count>10)      //且丢线场数大于10，这认定此时已经丢线
+  if(count>20)      //且丢线场数大于10，这认定此时已经丢线
+  {
+    flag=1;
+  }
+  return flag;
+}
+
+int8 Tyl_judge_leftlose(void)
+{
+  int16 i=0,count=0,flag=0;
+  for(i=80;i>30;i--)
+  {
+    if(f1.leftlineflag[i]==0)//左边界不存在
+    {
+     count++;        //计数加一
+    }
+  }
+  if(count>loselinecount)   
+  {
+    flag=1;
+  }
+  return flag;
+}
+int8 Tyl_judge_rightlose(void)
+{
+  int16 i=0,count=0,flag=0;
+  for(i=80;i>30;i--)
+  {
+    if(f1.rightlineflag[i]==0)//右边界不存在
+    {
+     count++;        //计数加一
+    }
+  }
+  if(count>loselinecount)   
   {
     flag=1;
   }
@@ -1115,3 +1700,197 @@ void bianxian(void)
     }
   }
 }
+
+
+/***************************************************************
+	*	@brief	判定左右边界没丢线部分是否为直线
+	*	@param	top：上边界
+	*	@note	下边界从没丢线的最低点开始（简单滤波）
+***************************************************************/
+int16 isLeftZhi(int16 top)
+{
+	int16 bottom = 118;
+	top = 6;
+	int16 max = 0, min = 0;
+	int16 xielv, xielv_last;
+	while(bottom != top)
+	{
+		if(f1.leftlineflag[bottom])
+		{
+			break;
+		}
+		else
+		{
+			bottom--;
+		}
+	}
+	for(int i = bottom; i > top; i--)
+	{
+		if(f1.leftline[i] > f1.leftline[i + 2] && abs(f1.leftline[i] - f1.leftline[i + 2]) < 10 &&
+			   f1.leftline[i] > f1.leftline[i - 2] && abs(f1.leftline[i] - f1.leftline[i - 2]) < 10 &&
+				   f1.leftline[i - 1] >= f1.leftline[i + 1] && abs(f1.leftline[i - 1] - f1.leftline[i + 1]) < 10 &&
+					   f1.leftline[i - 1] >= f1.leftline[i - 1] && abs(f1.leftline[i - 1] - f1.leftline[i - 1]) < 10 &&
+		   f1.leftline[i] > f1.leftline[i + 4] && abs(f1.leftline[i] - f1.leftline[i + 4]) < 12 &&
+			   f1.leftline[i] > f1.leftline[i - 4] && abs(f1.leftline[i] - f1.leftline[i - 4]) < 12 &&
+				   f1.leftline[i - 1] >= f1.leftline[i + 3] && abs(f1.leftline[i - 1] - f1.leftline[i + 3]) < 12 &&
+					   f1.leftline[i - 1] >= f1.leftline[i - 3] && abs(f1.leftline[i - 1] - f1.leftline[i - 3]) < 12 &&
+			f1.leftline[i] > f1.leftline[i + 6] && abs(f1.leftline[i] - f1.leftline[i + 6]) < 14 &&
+				f1.leftline[i] > f1.leftline[i - 6] && abs(f1.leftline[i] - f1.leftline[i - 6]) < 14 &&
+					f1.leftline[i - 1] >= f1.leftline[i + 5] && abs(f1.leftline[i - 1] - f1.leftline[i + 5]) < 14 &&
+						f1.leftline[i - 1] >= f1.leftline[i - 5] && abs(f1.leftline[i - 1] - f1.leftline[i - 5]) < 14)
+		{
+			max = i;
+		}
+		if(f1.leftline[i] < f1.leftline[i + 2] && abs(f1.leftline[i] - f1.leftline[i + 2]) < 10 &&
+			   f1.leftline[i] < f1.leftline[i - 2] && abs(f1.leftline[i] - f1.leftline[i - 2]) < 10 &&
+				   f1.leftline[i - 1] <= f1.leftline[i + 1] && abs(f1.leftline[i - 1] - f1.leftline[i + 1]) < 10 &&
+					   f1.leftline[i - 1] <= f1.leftline[i - 1] && abs(f1.leftline[i - 1] - f1.leftline[i - 1]) < 10 &&
+		   f1.leftline[i] < f1.leftline[i + 4] && abs(f1.leftline[i] - f1.leftline[i + 4]) < 12 &&
+			   f1.leftline[i] < f1.leftline[i - 4] && abs(f1.leftline[i] - f1.leftline[i - 4]) < 12 &&
+				   f1.leftline[i - 1] <= f1.leftline[i + 3] && abs(f1.leftline[i - 1] - f1.leftline[i + 3]) < 12 &&
+					   f1.leftline[i - 1] <= f1.leftline[i - 3] && abs(f1.leftline[i - 1] - f1.leftline[i - 3]) < 12 &&
+			f1.leftline[i] < f1.leftline[i + 6] && abs(f1.leftline[i] - f1.leftline[i + 6]) < 14 &&
+				f1.leftline[i] < f1.leftline[i - 6] && abs(f1.leftline[i] - f1.leftline[i - 6]) < 14 &&
+					f1.leftline[i - 1] <= f1.leftline[i + 5] && abs(f1.leftline[i - 1] - f1.leftline[i + 5]) < 14 &&
+						f1.leftline[i - 1] <= f1.leftline[i - 5] && abs(f1.leftline[i - 1] - f1.leftline[i - 5]) < 14)
+		{
+			min = i;
+		}
+	}
+	if(max && min)
+	{
+		if(max > min)
+		{
+			if(abs(f1.leftline[max] - f1.leftline[min] - f1.leftline[min] + f1.leftline[top]) > 5)
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			if(abs(f1.leftline[min] - f1.leftline[max] - f1.leftline[max] + f1.leftline[top]) > 5)
+			{
+				return 0;
+			}
+		}
+	}
+	else if(!max && min)
+	{
+		if(abs(f1.leftline[bottom] - f1.leftline[min] - f1.leftline[min] + f1.leftline[top]) > 5)
+		{
+			return 0;
+		}
+	}
+	else if(max && !min)
+	{
+		if(abs(f1.leftline[bottom] - f1.leftline[max] - f1.leftline[max] + f1.leftline[top]) > 5)
+		{
+			return 0;
+		}
+	}
+	do
+	{
+		xielv = f1.leftline[bottom] - f1.leftline[bottom - 10];
+		bottom--;
+	}while(xielv < -20);
+	for(int i = bottom - 4; i >= (top>21?top:21); i -= 4)
+	{
+		xielv_last = xielv;
+		xielv = f1.leftline[i] - f1.leftline[i - 10];
+		if(xielv < -20)
+		{
+			continue;
+		}
+		if(abs(xielv - xielv_last) > 6)
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int16 isRightZhi(int16 top)
+{
+	int16 bottom = 118;
+	top = 6;
+	int16 max = 0, min = 0;
+	int16 xielv, xielv_last;
+	while(bottom != top)
+	{
+		if(f1.rightlineflag[bottom])
+		{
+			break;
+		}
+		else
+		{
+			bottom--;
+		}
+	}
+	for(int i = bottom; i > top; i--)
+	{
+		if(f1.rightline[i] < f1.rightline[i + 2] && abs(f1.rightline[i] - f1.rightline[i + 2]) < 10 &&
+			   f1.rightline[i] < f1.rightline[i - 2] && abs(f1.rightline[i] - f1.rightline[i - 2]) < 10 &&
+				   f1.rightline[i - 1] <= f1.rightline[i + 1] && abs(f1.rightline[i - 1] - f1.rightline[i + 1]) < 10 &&
+					   f1.rightline[i - 1] <= f1.rightline[i - 1] && abs(f1.rightline[i - 1] - f1.rightline[i - 1]) < 10 &&
+		   f1.rightline[i] < f1.rightline[i + 4] && abs(f1.rightline[i] - f1.rightline[i + 4]) < 12 &&
+			   f1.rightline[i] < f1.rightline[i - 4] && abs(f1.rightline[i] - f1.rightline[i - 4]) < 12 &&
+				   f1.rightline[i - 1] <= f1.rightline[i + 3] && abs(f1.rightline[i - 1] - f1.rightline[i + 3]) < 12 &&
+					   f1.rightline[i - 1] <= f1.rightline[i - 3] && abs(f1.rightline[i - 1] - f1.rightline[i - 3]) < 12 &&
+			f1.rightline[i] < f1.rightline[i + 6] && abs(f1.rightline[i] - f1.rightline[i + 6]) < 14 &&
+				f1.rightline[i] < f1.rightline[i - 6] && abs(f1.rightline[i] - f1.rightline[i - 6]) < 14 &&
+					f1.rightline[i - 1] <= f1.rightline[i + 5] && abs(f1.rightline[i - 1] - f1.rightline[i + 5]) < 14 &&
+						f1.rightline[i - 1] <= f1.rightline[i - 5] && abs(f1.rightline[i - 1] - f1.rightline[i - 5]) < 14)
+		{
+			min = i;
+		}
+		if(f1.rightline[i] > f1.rightline[i + 2] && abs(f1.rightline[i] - f1.rightline[i + 2]) < 10 &&
+			   f1.rightline[i] > f1.rightline[i - 2] && abs(f1.rightline[i] - f1.rightline[i - 2]) < 10 &&
+				   f1.rightline[i - 1] >= f1.rightline[i + 1] && abs(f1.rightline[i - 1] - f1.rightline[i + 1]) < 10 &&
+					   f1.rightline[i - 1] >= f1.rightline[i - 1] && abs(f1.rightline[i - 1] - f1.rightline[i - 1]) < 10 &&
+		   f1.rightline[i] > f1.rightline[i + 4] && abs(f1.rightline[i] - f1.rightline[i + 4]) < 12 &&
+			   f1.rightline[i] > f1.rightline[i - 4] && abs(f1.rightline[i] - f1.rightline[i - 4]) < 12 &&
+				   f1.rightline[i - 1] >= f1.rightline[i + 3] && abs(f1.rightline[i - 1] - f1.rightline[i + 3]) < 12 &&
+					   f1.rightline[i - 1] >= f1.rightline[i - 3] && abs(f1.rightline[i - 1] - f1.rightline[i - 3]) < 12 &&
+			f1.rightline[i] > f1.rightline[i + 6] && abs(f1.rightline[i] - f1.rightline[i + 6]) < 14 &&
+				f1.rightline[i] > f1.rightline[i - 6] && abs(f1.rightline[i] - f1.rightline[i - 6]) < 14 &&
+					f1.rightline[i - 1] >= f1.rightline[i + 5] && abs(f1.rightline[i - 1] - f1.rightline[i + 5]) < 14 &&
+						f1.rightline[i - 1] >= f1.rightline[i - 5] && abs(f1.rightline[i - 1] - f1.rightline[i - 5]) < 14)
+		{
+			max = i;
+		}
+	}
+	if(max)
+	{
+		if(abs(f1.rightline[bottom] - f1.rightline[max] - f1.rightline[max] + f1.rightline[top]) > 5)
+		{
+			return 0;
+		}
+	}
+	if(min)
+	{
+		if(abs(f1.rightline[bottom] - f1.rightline[min] - f1.rightline[min] + f1.rightline[top]) > 5)
+		{
+			return 0;
+		}
+	}
+	do
+	{
+		xielv = f1.rightline[bottom] - f1.rightline[bottom - 10];
+		bottom--;
+	}while(xielv > 20);
+	for(int i = bottom - 4; i >= (top>20?top:20); i -= 4)
+	{
+		xielv_last = xielv;
+		xielv = f1.rightline[i] - f1.rightline[i - 10];
+		if(xielv > 20)
+		{
+			continue;
+		}
+		if(abs(xielv - xielv_last) > 6)
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+

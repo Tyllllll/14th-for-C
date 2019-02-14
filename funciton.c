@@ -197,20 +197,21 @@ float xielv(void)
 {
   int16 i,Sum1=0;
   float S=0,Av=0,Sum2=0;
-  for(i=100;i>30;i--)
+  for(i=80;i>30;i--)
   {
     Sum1+=f1.midline[i];
   }
-  Av=Sum1/70.0;
-  for(i=100;i>30;i--)
+  Av=Sum1/50.0;
+  for(i=80;i>30;i--)
   {
 //    Sum2+=(f1.midline[i]-Av)*(f1.midline[i]-Av);
     Sum2+=(f1.midline[i]*f1.midline[i]-Av*Av);//类似标准差 效率提升很多
   }
-  S=sqrt(Sum2/70.0);
+  S=sqrt(Sum2/50.0);
   return S;
 }
-
+	
+	
 /**************************实现函数********************************************
 *函数原型:	  Datadefault(void)
 *功　　能:	  跑前数据初始化	
@@ -348,22 +349,41 @@ float  least_square_method(void)
 
 }
 
+/***************************************************************
+	*	@brief	中线平均值
+	*	@param	无
+	*	@note	无
+***************************************************************/
+int16 midlineave(void)
+{
+	int16 sum = 0;
+	for(int i = 10; i < 119; i++)
+	{
+		sum += f1.midline[i];
+	}
+	return sum / 109;
+}
+
 void sendData_to_PC(void)
 {
+
       push(0,(uint16)MotorPID.SpeedSet);//
       push(1,(uint16)MotorPID.Speed_ave);//
-      push(2,(uint16)MotorPID.IntSum_all);//
-      push(3,(uint16)MotorPID.P_value);//
+      push(2,(uint16)magnetic.right_mag);//
+      push(3,(uint16)f2.huandaoflag);//
       push(4,(uint16)MotorPID.OutValue);//
       push(5,(uint16)servo_duty);//
       push(6,(uint16)S_p);//
       push(7,(uint16)S_d);//
+      push(8,(uint16)f2.huandaoflag);//
+//      push(9,(uint16)data1/3);//
+//      push(10,(uint16)data2/3);//
 //      push(5,(uint16)ramp);//
 //      push(6,(uint16)(ramp_pre*100));//
 //      push(7,(uint16)Gyroy);//
 //      push(8,(uint16)which_cross);//
 //      push(9,(uint16)shizhi_order);//
-      push(10,(uint16)MotorPID.Speed_test[0]);// 
+//      push(10,(uint16)MotorPID.Speed_test[0]);// 
 
 }
 

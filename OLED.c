@@ -716,12 +716,17 @@ void showimage(void)
     LED_P6x8Str(80, 2, (unsigned char*) "TOP");
      LED_PrintValueFPP(100, 2, f2.toppoint,3);
     //显示右拐点
-    LED_PrintValueFPP(80, 4, f1.midline[foresight],3);   
-//     LED_PrintValueFPP(100, 4, f1.midline[foresight+1],3);
-     LED_PrintValueFPP(100, 4, (int16)abs(error[0]),3);//显示偏差
-     
-     LED_PrintValueFPP(80, 6,f1.midline[foresight+2],3);
-     LED_PrintValueFPP(100,6, f1.midline[foresight+3], 3);
+//    LED_PrintValueFPP(80, 4, f1.midline[foresight],3);   
+//     LED_PrintValueFPP(100, 4, (int16)abs(error[0]),3);//显示偏差
+//     
+//     LED_PrintValueFPP(80, 6,f1.midline[foresight+2],3);
+//     LED_PrintValueFPP(100,6, f1.midline[foresight+3], 3);
+	 
+	 
+     LED_PrintValueFPP(80, 4,magnetic.left_mag,3);
+//	 LED_PrintValueFPP(100,4,f2.rightturnflag, 2);
+	 LED_PrintValueFPP(80, 6,magnetic.right_mag,3);
+	 LED_PrintValueFPP(100,6, road_type[0], 3);
      
     //显示当前判断行
 
@@ -760,21 +765,21 @@ void Welcome_page(void)
 //   LedOn(3);
 //   LedOff(2);
 //   LPLD_LPTMR_DelayMs(200);
-  LedOn(1);
-  LedOff(2);
-  LedOff(3);
+//  LedOn(1);
+//  LedOff(2);
+//  LedOff(3);
   LPLD_LPTMR_DelayMs(100);
-  LedOn(3);
-  LedOff(2);
-  LedOff(1);
+//  LedOn(3);
+//  LedOff(2);
+//  LedOff(1);
   LPLD_LPTMR_DelayMs(100);
-  LedOn(2);
-  LedOff(3);
-  LedOff(1);
+//  LedOn(2);
+//  LedOff(3);
+//  LedOff(1);
   LPLD_LPTMR_DelayMs(100);
-  LedOff(1);
-  LedOff(3);
-  LedOff(2);
+//  LedOff(1);
+//  LedOff(3);
+//  LedOff(2);
 //   LPLD_LPTMR_DelayMs(400);
 
 }

@@ -13,5 +13,6 @@
 #include "servo.h"
 #include "motor.h"
 #include "freecars.h"
+#include "magnetic.h"
 
 #endif

@@ -98,7 +98,7 @@
 	  { OV7725_UVADJ1, 0x02 },
 
   };
-  uint8 Camera_CNST = 105;//对比度 越大白色越多 根据场地调
+  uint8 Camera_CNST = 140;//对比度 越大白色越多 根据场地调
   uint8 ov7725_eagle_cfgnum = ARR_SIZE(ov7725_eagle_reg);
   uint8 Image_Buf[ROW + 10][COLUMN / 8], Image_Buf2[ROW + 10][COLUMN / 8];
   unsigned char Image[ROW][COLUMN];
@@ -217,54 +217,45 @@
     return 1;
   }
 
-
-
-  void img_extract(void) 
-  {
-    uint8 colour[2] = { 253,0 }; //253 白 0 黑
-    uint8 Which;
-    Which = WhichBuffer;
-    //注：野火的摄像头 0 表示 白色，1表示 黑色
-    uint8 i = 0, j = 0;
-    if (Which == 1) 
-    {
-      for (i = 0; i < 120; i++) 
-      {
-	for (j = 0; j < COLUMN / 8; j++) 
+void img_extract(void) 
+{
+	uint8 colour[2] = { 253,0 }; //253 白 0 黑
+	uint8 Which;
+	Which = WhichBuffer;
+	//注：野火的摄像头 0 表示 白色，1表示 黑色
+	int16 i = 0, j = 0;
+	if (Which == 1) 
 	{
-	  Image[i][j * 8 + 0] = colour[(Image_Buf[i][j] >> 7) & 0x01];
-	  Image[i][j * 8 + 1] = colour[(Image_Buf[i][j] >> 6) & 0x01];
-	  Image[i][j * 8 + 2] = colour[(Image_Buf[i][j] >> 5) & 0x01];
-	  Image[i][j * 8 + 3] = colour[(Image_Buf[i][j] >> 4) & 0x01];
-	  Image[i][j * 8 + 4] = colour[(Image_Buf[i][j] >> 3) & 0x01];
-	  Image[i][j * 8 + 5] = colour[(Image_Buf[i][j] >> 2) & 0x01];
-	  Image[i][j * 8 + 6] = colour[(Image_Buf[i][j] >> 1) & 0x01];
-	  Image[i][j * 8 + 7] = colour[(Image_Buf[i][j] >> 0) & 0x01];
-	}
-      }
-    } 
-    else 
-    {
-      for (i = 0; i < 120; i++) 
-      {
-	for (j = 0; j < COLUMN / 8; j++) 
+		for (i = 0; i < 120; i++) 
+		{
+			for (j = 0; j < COLUMN / 8; j++) 
+			{
+				Image[i][j * 8 + 0] = colour[(Image_Buf[i][j] >> 7) & 0x01];
+				Image[i][j * 8 + 1] = colour[(Image_Buf[i][j] >> 6) & 0x01];
+				Image[i][j * 8 + 2] = colour[(Image_Buf[i][j] >> 5) & 0x01];
+				Image[i][j * 8 + 3] = colour[(Image_Buf[i][j] >> 4) & 0x01];
+				Image[i][j * 8 + 4] = colour[(Image_Buf[i][j] >> 3) & 0x01];
+				Image[i][j * 8 + 5] = colour[(Image_Buf[i][j] >> 2) & 0x01];
+				Image[i][j * 8 + 6] = colour[(Image_Buf[i][j] >> 1) & 0x01];
+				Image[i][j * 8 + 7] = colour[(Image_Buf[i][j] >> 0) & 0x01];
+			}
+		}
+	} 
+	else 
 	{
-	  Image[i][j * 8 + 0] = colour[(Image_Buf2[i][j] >> 7) & 0x01];
-	  Image[i][j * 8 + 1] = colour[(Image_Buf2[i][j] >> 6) & 0x01];
-	  Image[i][j * 8 + 2] = colour[(Image_Buf2[i][j] >> 5) & 0x01];
-	  Image[i][j * 8 + 3] = colour[(Image_Buf2[i][j] >> 4) & 0x01];
-	  Image[i][j * 8 + 4] = colour[(Image_Buf2[i][j] >> 3) & 0x01];
-	  Image[i][j * 8 + 5] = colour[(Image_Buf2[i][j] >> 2) & 0x01];
-	  Image[i][j * 8 + 6] = colour[(Image_Buf2[i][j] >> 1) & 0x01];
-	  Image[i][j * 8 + 7] = colour[(Image_Buf2[i][j] >> 0) & 0x01];
+		for (i = 0; i < 120; i++) 
+		{
+			for (j = 0; j < COLUMN / 8; j++) 
+			{
+				Image[i][j * 8 + 0] = colour[(Image_Buf2[i][j] >> 7) & 0x01];
+				Image[i][j * 8 + 1] = colour[(Image_Buf2[i][j] >> 6) & 0x01];
+				Image[i][j * 8 + 2] = colour[(Image_Buf2[i][j] >> 5) & 0x01];
+				Image[i][j * 8 + 3] = colour[(Image_Buf2[i][j] >> 4) & 0x01];
+				Image[i][j * 8 + 4] = colour[(Image_Buf2[i][j] >> 3) & 0x01];
+				Image[i][j * 8 + 5] = colour[(Image_Buf2[i][j] >> 2) & 0x01];
+				Image[i][j * 8 + 6] = colour[(Image_Buf2[i][j] >> 1) & 0x01];
+				Image[i][j * 8 + 7] = colour[(Image_Buf2[i][j] >> 0) & 0x01];
+			}
+		}
 	}
-      }
-    }
-  }
-
-
-
-
-
-
-
+}

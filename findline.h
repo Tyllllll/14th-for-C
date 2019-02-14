@@ -4,7 +4,7 @@
 void bianxian(void);
 void find_toppoint(void);
 void find_curve1(void);//找弯一
-void find_curve3(void);
+int8 find_curve3(void);
 void find_guai(void);
 void shizi_judge(void);
 void findline1(void);
@@ -46,6 +46,8 @@ typedef struct
   int16 toppoint;
   int16 toppoint_flag;
   int16 shiziflag[2];
+  int16 huandaoflag;//0无 奇数左转 偶数右转
+  					//12 进环前		34 进环		56 环内		78 出环
   float zhizi_k_L;
   float zhizi_k_R;
 }Findline2_TypeDef;
@@ -55,4 +57,14 @@ extern int16  width[120];
 extern int16 width_real[120];
 extern int16 text_width[120];
 extern int16 column_start;
+
+void Tyl_judge_huandao(void);
+int8 Tyl_judge_leftlose(void);
+int8 Tyl_judge_rightlose(void);
+extern int16 state3to5column;
+extern int16 loselinecount;
+extern int16 xielvcha;
+extern int16 dianshu;
+int16 isLeftZhi(int16);
+int16 isRightZhi(int16);
 #endif

@@ -19,6 +19,7 @@ void Datadefault(void);
 int abs(int a);
 int16 MAX(int16 a,int16 b);
 int16 MIN(int16 a,int16 b);
+int16 midlineave(void);
 extern int16 FM_mode;
 extern int16 FM_flag;
 extern int16 nn;

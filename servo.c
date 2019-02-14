@@ -4,8 +4,8 @@ PID_InitTypeDef Ser_PID={1,0,5};
 int16 foresight1=46;//调试用
 
 //int16 fore_offset=12;//前瞻弯道随动量
-int16 fore_min=39;//使用中47
-int16 fore_max=47;//使用中63
+int16 fore_min=37;//使用中47
+int16 fore_max=42;//使用中63
 int16 foresight=55;//使用中61       U弯最大top58
 
 int16 mid_error[5];
@@ -21,8 +21,8 @@ int16 min=DEG_MIN;
 int16 speed_now=0;
 int16 index1=8;
 
-float S_kp=4.01;//实验室参数
-float S_kp_r=4.01;
+float S_kp=4;//实验室参数
+float S_kp_r=4;
 float S_kd=11.1;//16.9
 
 
@@ -62,7 +62,7 @@ void Sevor_control(void)
     {
       //    foresight=(int16)(fore_max+(float)(fore_min-fore_max)*(speed_now-200)/150);
       //    //一次函数拟合 speed为后面值时前瞻为max 为加上除数时前瞻为min 理论上效果不会好 因为前瞻越长时10cm对应行数变化越小
-      foresight=(int16)(fore_min+(float)(fore_max-fore_min)*(300-speed_now)*(300-speed_now)/(150*150));
+      foresight=(int16)(fore_min+(float)(fore_max-fore_min)*(400-speed_now)*(400-speed_now)/(150*150));
       //二次函数拟合 前瞻集中在fore_min
       
     }
@@ -126,7 +126,18 @@ void Sevor_control(void)
 void Sevor_pid(void)
 {
 
-/*******************Normal P***********/  
+/*******************Normal P***********/
+	if(road_type[1] == 1 || road_type[1] == 2)
+	{
+		S_kp = 3.2;
+		S_kp_r = 3.2;
+	}
+	else
+	{
+		S_kp = 4.1;
+		S_kp_r = 4.1;
+	}
+	
  if(error[0]>0)
   {//右边分离Kp
 	  if(error[0] < 25 )
@@ -188,16 +199,19 @@ void Sevor_pid(void)
   //  S_d=(int16)(Ser_PID.Kd*error_d);
   /************************************/  
  // servo_duty=abs(error[0])<Deadzone?(short)0:(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
+//  if(f2.huandaoflag == 3 || f2.huandaoflag == 7)
+//  {
+//	  servo_duty = 1570;
+//  }
+//  else if(f2.huandaoflag == 4 || f2.huandaoflag == 8)
+//  {
+//	  servo_duty = 1330;
+//  }
+//  else
+//  {
+//  	servo_duty = abs(error[0])<index1?(short)mid:(short)(-(S_d+S_p)+mid);
+//  }
   servo_duty = abs(error[0])<index1?(short)mid:(short)(-(S_d+S_p)+mid);
-  
-  if(servo_duty>max)
-  {//限幅
-    servo_duty=max;	
-  }
-  if(servo_duty<min)
-  {
-    servo_duty=min;
-  }  
   
   sudu_set();//速度设定 改变MotorPID.SpeedSet
 }
@@ -222,3 +236,17 @@ void Servo_PIT_Isr(void)
   PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 }
 
+
+/***************************************************************
+	*	@brief	舵机测试
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void servo_up10(void)
+{
+	servo_duty += 10;
+}
+void servo_down10(void)
+{
+	servo_duty -= 10;
+}

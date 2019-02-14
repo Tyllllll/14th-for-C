@@ -10,11 +10,18 @@ int16 super_zhidao=0;
 int16 shortstraight_flag;
 int16 crossstraight_flag;
 int16 stdDeviation=0;
-int16 s_zhi=260;//36 45 33 30 环30-34 35 障碍20-27 25 颠簸10-25
-int16 s_max=320;//
-int16 s_wan1=230;
-int16 s_wan2=220;
-int16 s_cross=220;  
+int16 s_zhi=300;//36 45 33 30 环30-34 35 障碍20-27 25 颠簸10-25
+int16 s_max=330;//
+int16 s_wan1=260;
+int16 s_wan2=240;
+int16 s_cross=240;  
+int16 s_huan=240;
+//int16 s_zhi=160;//36 45 33 30 环30-34 35 障碍20-27 25 颠簸10-25
+//int16 s_max=160;//
+//int16 s_wan1=160;
+//int16 s_wan2=160;
+//int16 s_cross=160;  
+//int16 s_huan=160;
 int16 g_HighestSpeed=0;
 int16 g_LowestSpeed=0;
 int16 Emergency_flag[20]={0};
@@ -91,32 +98,35 @@ void zhidao(void)
     flag2=1;//对丢线的要求
     for(i=100;i>zhidao_endrow;i--)
     {
-        if(f1.midline[i]>88||f1.midline[i]<72)
+        if(f1.midline[i]>85||f1.midline[i]<75)
         {
             lose_cnt++;
         }
     }
-    flag1 = lose_cnt<=3?1:0;
+    flag1 = lose_cnt<=5?1:0;
     lose_cnt = 0;
     if(flag1)
     {//丢线不能超过3
-        for(i=60;i>zhidao_endrow;i--)
+        for(i=50;i>zhidao_endrow;i--)
         { 
             if(f1.leftlineflag[i]==0||f1.rightlineflag[i]==0)
             {
                 lose_cnt++;
             }
         }
-        if(lose_cnt>3)
+        if(lose_cnt>10)
         {
             flag2=0;
         }
     }
-    if(f2.toppoint<=15&&flag1==1&&flag2==1)
+    if(f2.toppoint<=30&&flag1==1&&flag2==1)
     {
         super_zhidao=1;
     }
-    
+    else
+	{
+		super_zhidao = 0;
+	}
 }
 
 /**************************实现函数********************************************
@@ -181,22 +191,27 @@ void sudu_set(void)
     if(f2.shiziflag[1]==1)
     {  
         road_type[0]=5;
-        LedOff(1);
-        LedOff(3);
-        LedOff(2);
-        LedOn(3);
-        LedOn(2);//黄色
+//        LedOff(1);
+//        LedOff(3);
+//        LedOff(2);
+//        LedOn(3);
+//        LedOn(2);//黄色
         
         MotorPID.SpeedSet = s_cross; 
     }
-    
+    else if(f2.huandaoflag != 0)
+	{
+		road_type[0] = 4;
+		
+		MotorPID.SpeedSet = s_huan;
+	}
     else if(super_zhidao==1)
     {
         road_type[0]=1;
-        LedOff(1);
-        LedOff(3);
-        LedOff(2);
-        LedOn(3);//绿色
+//        LedOff(1);
+//        LedOff(3);
+//        LedOff(2);
+//        LedOn(3);//绿色
         
         if(road_type[40]==3&&road_type[41]==3&&road_type[42]==3&&road_type[43]==3&&road_type[44]==3)
             MotorPID.SpeedSet=s_max+100;//出弯加速 未测试 可视情况注释
@@ -207,16 +222,16 @@ void sudu_set(void)
     else if(f2.toppoint<=37)
     {
         road_type[0]=2;
-        LedOff(1);
-        LedOff(3);
-        LedOff(2);
-        LedOn(1);//蓝色
+//        LedOff(1);
+//        LedOff(3);
+//        LedOff(2);
+//        LedOn(1);//蓝色
         
         if(road_type[6]==1&&road_type[7]==1&&road_type[8]==1&&road_type[9]==1&&road_type[10]==1)
         {//前8帧是超长直道,先减猛一点
             MotorPID.SpeedSet=s_wan1-70;
         }
-        else if(road_type[3]==3&&road_type[4]==3&&road_type[5]==3)
+        if(road_type[3]==3&&road_type[4]==3&&road_type[5]==3)
         {//前3帧是弯道 避免欧姆弯内加速
             MotorPID.SpeedSet=s_wan1;
         }
@@ -230,11 +245,11 @@ void sudu_set(void)
     else 
     {
         road_type[0]=3;
-        LedOff(1);
-        LedOff(3);
-        LedOff(2);
-        LedOn(1);
-        LedOn(3);//蓝绿色
+//        LedOff(1);
+//        LedOff(3);
+//        LedOff(2);
+//        LedOn(1);
+//        LedOn(3);//蓝绿色
         
         if(road_type[9]==1&&road_type[10]==1&&road_type[11]==1&&road_type[12]==1&&road_type[13]==1)
         {//前6帧是超长直道,先减猛一点
@@ -251,7 +266,31 @@ void sudu_set(void)
         }
         
     }
-    
+//	zhidao();
+/*	if(f2.huandaoflag != 0)
+	{
+		road_type[0] = 4;
+		MotorPID.SpeedSet = s_huan;
+	}
+//	else if(super_zhidao)
+//	{
+//		road_type[0]=1;
+//		MotorPID.SpeedSet=s_max;
+//	}
+	else if(shortstraight_flag)
+	{
+		road_type[0]=2;
+		MotorPID.SpeedSet=s_zhi;
+	}
+	else if(f2.leftturnflag==1 || f2.rightturnflag == 1)
+	{
+		MotorPID.SpeedSet=s_wan1;
+	}
+	else
+	{
+		MotorPID.SpeedSet=s_wan2;
+	}*/
+		
     for(i=200;i>=1;i--)
     {
         road_type[i]=road_type[i-1];

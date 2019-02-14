@@ -21,8 +21,8 @@ void Pageinit(signed char sPageNum)
 {
   int i;
   PageNum = sPageNum;
-  sprintf(ScreenStr[0][0], "index1");
-  sprintf(ScreenStr[0][1], "times");
+  sprintf(ScreenStr[0][0], "MotorPID.OutValue");
+  sprintf(ScreenStr[0][1], "dianshu");
   sprintf(ScreenStr[0][2], "set_dist");
   sprintf(ScreenStr[0][7], "s_cross");
   
@@ -30,6 +30,8 @@ void Pageinit(signed char sPageNum)
   sprintf(ScreenStr[1][1], "s_max");
   sprintf(ScreenStr[1][2], "s_wan1");
   sprintf(ScreenStr[1][3], "s_wan2");
+  sprintf(ScreenStr[1][4], "s_cross");
+  sprintf(ScreenStr[1][5], "huan");
 
  
    
@@ -76,8 +78,8 @@ void Pageinit(signed char sPageNum)
   
   
 
-  ScreenData[0][0]=index1;
-  ScreenData[0][1]=times;
+  ScreenData[0][0]=MotorPID.OutValue;
+  ScreenData[0][1]=dianshu;
 //  ScreenData[0][2]=set_dist;
   ScreenData[0][7]=s_cross;
   
@@ -86,6 +88,8 @@ void Pageinit(signed char sPageNum)
   ScreenData[1][1]=s_max;
   ScreenData[1][2]=s_wan1;
   ScreenData[1][3]=s_wan2;
+  ScreenData[1][4]=s_cross;
+  ScreenData[1][5]=s_huan;
 
   
   ScreenData[2][1]=S_kp;
@@ -315,7 +319,6 @@ unsigned char key_scan(void)
   
   else if (key1==0)
   {
-     BUZZER_ON;
      key_delay();
      if (key1==0)
      {
@@ -326,7 +329,6 @@ unsigned char key_scan(void)
   
   else if (key2==0)
   {
-    BUZZER_ON;
      key_delay();
      if (key2==0)
      {
@@ -568,8 +570,8 @@ void Key_DataUp(void)    //改动加数值
   {
     switch (Course)
     {
-    case 0: ScreenData[PageNum][Course] += 1.0; break;
-    case 1: ScreenData[PageNum][Course] += 1.0; break;
+    case 0: ScreenData[PageNum][Course] += 200; break;
+    case 1: ScreenData[PageNum][Course] += 1; break;
     case 2: ScreenData[PageNum][Course] += 1.0; break;
     case 3: ScreenData[PageNum][Course] += 10.0; break;
     case 4: ScreenData[PageNum][Course] += 10.0; break;
@@ -698,8 +700,8 @@ void Key_DataDown(void)
   {
     switch (Course)
     {
-    case 0: ScreenData[PageNum][Course] -= 1.0f; break;
-    case 1: ScreenData[PageNum][Course] -= 1.0f; break;
+    case 0: ScreenData[PageNum][Course] -= 200; break;
+    case 1: ScreenData[PageNum][Course] -= 1; break;
     case 2: ScreenData[PageNum][Course] -= 1.0f; break;
     case 3: ScreenData[PageNum][Course] -= 10.0; break;
     case 4: ScreenData[PageNum][Course] -= 10.0; break;
@@ -830,8 +832,8 @@ void Key_DataDown(void)
 
 void SaveData(void)
 {
-  index1= (uint8)ScreenData[0][0]; 
-  times= (int)ScreenData[0][1];
+  MotorPID.OutValue = (int16)ScreenData[0][0]; 
+  dianshu= (int16)ScreenData[0][1];
   set_dist=ScreenData[0][2];
   s_cross=(int16)ScreenData[0][7];
   
@@ -840,6 +842,8 @@ void SaveData(void)
   s_max=(int16)ScreenData[1][1];
   s_wan1= (int16)ScreenData[1][2];
   s_wan2=(int16)ScreenData[1][3];
+  s_cross=(int16)ScreenData[1][3];
+  s_huan=(int16)ScreenData[1][3];
 
   
   

@@ -7,6 +7,7 @@ extern int16 s_max;
 extern int16 s_wan1;
 extern int16 s_wan2;
 extern int16 s_cross;
+extern int16 s_huan;
 
 extern int16 Emergency_flag[20];
 extern int16 Emergencystop_flag;

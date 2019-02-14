@@ -2,14 +2,19 @@
 #include "servo.h"
 #include "motor.h"
 #include "keyandswitch.h"
+#include "function.h"
+#include "distinguish.h"
 
-#define Max_neg_output  5000
-#define Max_output  5000
+#define Max_neg_output  6000
+#define Max_output  6000
 
 
 
-float M_Kp=130;
-float M_Ki=40;
+//float M_Kp=130;
+//float M_Ki=40;
+//float M_Kd=0;
+float M_Kp=65;
+float M_Ki=20;
 float M_Kd=0;
 float All_distance=0;
 float jl_distance=0;
@@ -22,12 +27,15 @@ int QD_value_L_test=0;
 int QD_value_R_test=0;
 //int all_Result=0;
 int16 duzhuan_cnt=0;
+float cc1 = 7.46;
+float cc2 = 5.48;
+
 void Motor_PIT(void)
 {//PIT 周期调用
 
   Qd_Result_L = (int16)(LPLD_FTM_GetCounter(FTM1));// 获取脉冲数
   Qd_Result_R = (int16)(LPLD_FTM_GetCounter(FTM2));// 获取脉冲数
-  Qd_Result_L = (Qd_Result_L>=0xF0)? 0 : Qd_Result_L;  // 刚转时会有FF的错误值
+  //Qd_Result_L = (Qd_Result_L>=0xF0)? 0 : Qd_Result_L;  // 刚转时会有FF的错误值
 //  all_Result=all_Result+Qd_Result_L;//编码器返回测试
   /*********计算速度和距离***********/
   MotorPID.Speed_test_L[0]=(Qd_Result_L==0)?0:((int)(10000*(((float)(Qd_Result_L))/((float)(QD_value_L)))));//单位cm/s
@@ -95,13 +103,13 @@ void Motor_control(void)
     
     if(MotorPID.OutValue_L<0)
     {
-      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0);//可电机预热
-      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, -MotorPID.OutValue_L); 
+      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, -MotorPID.OutValue_L);//可电机预热
+      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0); 
     }
     if(MotorPID.OutValue_R<0)
     {
-      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 0);//可电机预热
-      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, -MotorPID.OutValue_R);
+      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, -MotorPID.OutValue_R);//可电机预热
+      LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0);
     }
     if(MotorPID.OutValue_L>=0)
     {
@@ -169,7 +177,6 @@ MotorPID_TypeDef MotorPID={0,0,0,1,1,0,0,0,0,0,0,0,0,0};//Kp Ki Kd
 
 void Motor_pid(void)
 {
-  float h=0.018;
   MotorPID.Kp=M_Kp;
   MotorPID.Ki=M_Ki;
   MotorPID.Kd=M_Kd; 
@@ -187,79 +194,102 @@ void Motor_pid(void)
                            0.1*MotorPID.Speed_test[2]+
                            0.1*MotorPID.Speed_test[3]+
                            0.1*MotorPID.Speed_test[4]);//对速度进行滤波
+	if(MotorPID.Speed_ave < 0.9 * MotorPID.SpeedSet)
+	{
+		MotorPID.OutValue = 9000;
+	}
+	else if(MotorPID.Speed_ave > 1.1 * MotorPID.SpeedSet)
+	{
+		MotorPID.OutValue = -9000;
+	}
+  else
+  {
+	  MotorPID.Speed_Error=MotorPID.SpeedSet-MotorPID.Speed_ave;//目标速度减去实际速度获取速度偏差
+	 
+	  
+	  MotorPID.IntSum_now=(int)(MotorPID.Ki*MotorPID.Speed_Error);//无变速I项
+	  
+	  /*************************/
+	  /*积分抗饱和 可用积分项限幅代替*/
+	  if(MotorPID.OutValue>5000&&MotorPID.IntSum_now<0)
+	  {
+		MotorPID.IntSum_all+=MotorPID.IntSum_now;
+	  }
+	  else if(MotorPID.OutValue<-3000&&MotorPID.IntSum_now>0)
+	  {
+		MotorPID.IntSum_all+=MotorPID.IntSum_now;
+	  } 
+	  else if(MotorPID.OutValue>=-3000&&MotorPID.OutValue<=5000)
+	  {
+		MotorPID.IntSum_all+=MotorPID.IntSum_now;
+	  }
 
-  
-  MotorPID.Speed_Error=MotorPID.SpeedSet-MotorPID.Speed_ave;//目标速度减去实际速度获取速度偏差
- 
-  
-  MotorPID.IntSum_now=(int)(MotorPID.Ki*MotorPID.Speed_Error);//无变速I项
-  
-  /*************************/
-  /*积分抗饱和 可用积分项限幅代替*/
-  if(MotorPID.OutValue>5000&&MotorPID.IntSum_now<0)
-  {
-    MotorPID.IntSum_all+=MotorPID.IntSum_now;
-  }
-  else if(MotorPID.OutValue<-3000&&MotorPID.IntSum_now>0)
-  {
-    MotorPID.IntSum_all+=MotorPID.IntSum_now;
-  } 
-  else if(MotorPID.OutValue>=-3000&&MotorPID.OutValue<=5000)
-  {
-    MotorPID.IntSum_all+=MotorPID.IntSum_now;
-  }
+	  /**********************/
+	  /*减速积分退饱和*/ 
+	  //为了在KI项大的情况下减速
+	  if(MotorPID.Speed_Error<-20)
+	  {
+		if(MotorPID.IntSum_all>3000)
+		{//看示波器设值
+		  if(MotorPID.Speed_Error<-100)
+		  {
+			MotorPID.IntSum_all*=0.2;
+		  }
+		  else if(MotorPID.Speed_Error<-80)
+		  {
+			MotorPID.IntSum_all*=0.4;
+		  }
+		  else if(MotorPID.Speed_Error<-60)
+		  {
+			MotorPID.IntSum_all*=0.6;
+		  }
+		  else if(MotorPID.Speed_Error<-40)
+		  {
+			MotorPID.IntSum_all*=0.8;
+		  }
+		  else if(MotorPID.Speed_Error<-20)
+		  {
+			MotorPID.IntSum_all*=0.9;
+		  }
+		}
+	  }
+	  /**********************/
+	  MotorPID.IntSum_all=MotorPID.IntSum_all>5000?5000:MotorPID.IntSum_all;//积分项限幅
+	  MotorPID.IntSum_all=MotorPID.IntSum_all<-3000?-3000:MotorPID.IntSum_all;
 
-  /**********************/
-  /*减速积分退饱和*/ 
-  //为了在KI项大的情况下减速
-  if(MotorPID.Speed_Error<-20)
-  {
-    if(MotorPID.IntSum_all>3000)
-    {//看示波器设值
-      if(MotorPID.Speed_Error<-100)
-      {
-        MotorPID.IntSum_all*=0.2;
-      }
-      else if(MotorPID.Speed_Error<-80)
-      {
-        MotorPID.IntSum_all*=0.4;
-      }
-      else if(MotorPID.Speed_Error<-60)
-      {
-        MotorPID.IntSum_all*=0.6;
-      }
-      else if(MotorPID.Speed_Error<-40)
-      {
-        MotorPID.IntSum_all*=0.8;
-      }
-      else if(MotorPID.Speed_Error<-20)
-      {
-        MotorPID.IntSum_all*=0.9;
-      }
-    }
+	  
+	  MotorPID.P_value=MotorPID.Kp*MotorPID.Speed_Error;//计算kp项 
+	  
+ 	 MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
+//          MotorPID.OutValue = 3500;
   }
-  /**********************/
-  MotorPID.IntSum_all=MotorPID.IntSum_all>5000?5000:MotorPID.IntSum_all;//积分项限幅
-  MotorPID.IntSum_all=MotorPID.IntSum_all<-3000?-3000:MotorPID.IntSum_all;
-
   
-  MotorPID.P_value=MotorPID.Kp*MotorPID.Speed_Error;//计算kp项
-  
-  MotorPID.OutValue=(int)(MotorPID.IntSum_all+MotorPID.P_value);
   
   /****+*****差速控制方案*****/
-  if(error[0]>-20 && error[0]<20)
-      h = 0;
-  if(error[0]>=0)
+  if(error[0]>index1)
   {
-      MotorPID.OutValue_L=(int)(((h * error[0])+1) * MotorPID.OutValue);
-      MotorPID.OutValue_R=MotorPID.OutValue;    
-  }
-  else if(error[0]<0)
+      MotorPID.OutValue_L=(int)((-0.004435 * servo_duty + cc1) * (MotorPID.OutValue / 10 - 20) + 20) * 10;
+      MotorPID.OutValue_R=MotorPID.OutValue; 
+  }	  
+  else if(error[0]<-index1)
   {
      MotorPID.OutValue_L=MotorPID.OutValue;
-     MotorPID.OutValue_R=(int)(((h * (-error[0]))+1) * MotorPID.OutValue);  
+     MotorPID.OutValue_R=(int)((0.004435 * servo_duty - cc2) * (MotorPID.OutValue / 10 - 20) + 20) * 10;
   }
+	  
+  
+//  if(error[0]>-20 && error[0]<20)
+//      h = 0;
+//  if(error[0]>=0)
+//  {
+//      MotorPID.OutValue_L=(int)(((h * error[0])+1) * MotorPID.OutValue);
+//      MotorPID.OutValue_R=MotorPID.OutValue;    
+//  }
+//  else if(error[0]<0)
+//  {
+//     MotorPID.OutValue_L=MotorPID.OutValue;
+//     MotorPID.OutValue_R=(int)(((h * (-error[0]))+1) * MotorPID.OutValue);  
+//  }
   
   
   MotorPID.OutValue_L=MotorPID.OutValue_L>Max_output?Max_output:MotorPID.OutValue_L;
