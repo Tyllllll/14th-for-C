@@ -1,7 +1,5 @@
 #include "header.h"
 
-uint8 flag;
-
 Line_Class line;
 Feature_Class feature;
 
@@ -154,7 +152,6 @@ void Find_Inflection(void)
 					//大小条件
 					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] > line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5] &&
 					   line.left_line[i - 3] - line.left_line[i + 3] < 4)
-						//最后一个条件？？？
 					{
 						//存在性条件
 						if(line.left_line_flag[i] == 1 && line.left_line_flag[i + 3] == 1 && line.left_line_flag[i + 5] == 1)
@@ -181,7 +178,6 @@ void Find_Inflection(void)
 					//大小条件
 					if(line.right_line[i] < line.right_line[i + 3] && line.left_line[i] < line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5] &&
 					   line.right_line[i - 3] - line.right_line[i + 3] > -4)
-						//最后一个条件？？？
 					{
 						//存在性条件
 						if(line.right_line_flag[i] == 1 && line.right_line_flag[i + 3] == 1 && line.right_line_flag[i + 5] == 1)
@@ -340,7 +336,6 @@ void Judge_Curve(void)
 	//判深弯
 	if(feature.top_point < 95)
 	{
-		//扩大搜索范围
 		for(i = 118; i > 112; i--)
 		{
 			//左线118-112行有丢线
@@ -390,105 +385,105 @@ void Judge_Curve(void)
 			feature.turn_state = 0;
 		}
 	}
-	for(i = 100; i > feature.top_point + 3; i--)
-	{
-		//左丢线的一行
-		if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-		{
-			if(line.right_line_flag[i - 5] == 1 && i > 30)
-			{
-				//行数很靠前时防止在十字后远方看过去的时候误判
-				if(i < 40 && line.right_line[i - 5] > 100)
-				{
-					if(line.right_line[i - 5] - line.right_line[i] > 10)
-					{
-						feature.turn_state = 0;
-					}
-				}
-				else
-				{
-					feature.turn_state = 1;
-					feature.turn_row = i;
-				}
-			}
-		}
-		//右丢线的一行
-		if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-		{
-			if(line.left_line_flag[i - 5] == 1 && i > 30)
-			{
-				//行数很靠前时防止在十字后远方看过去的时候误判
-				if(i < 40 && line.left_line[i - 5] < 60)
-				{
-					if(line.left_line[i] - line.left_line[i - 5] > 10)
-					{
-						feature.turn_state = 0;
-					}
-				}
-				else
-				{
-					feature.turn_state = 2;
-					feature.turn_row = i;
-				}
-			}
-		}
-	}
-//	is_left_turn = 0;
-//	is_right_turn = 0;
-//	//判小弯
-//	if(feature.turn_state != 3 && feature.turn_state != 4)
+//	for(i = 100; i > feature.top_point + 3; i--)
 //	{
-//		if(feature.top_point < 70)
+//		//左丢线的一行
+//		if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
 //		{
-//			//扩大搜索范围
-//			for(i = 80; i > 70; i--)
+//			if(line.right_line_flag[i - 5] == 1 && i > 30)
 //			{
-//				//左线80-70行有丢线
-//				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
+//				//行数很靠前时防止在十字后远方看过去的时候误判
+//				if(i < 40 && line.right_line[i - 5] > 100)
 //				{
-//					is_left_turn = 1;
-//				}
-//				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
-//				{
-//					is_right_turn = 1;
-//				}
-//			}
-//			if(is_left_turn == 1)
-//			{
-//				for(i = 70; i > feature.top_point + 10; i--)
-//				{
-//					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
+//					if(line.right_line[i - 5] - line.right_line[i] > 10)
 //					{
-//						is_left_turn = 0;
+//						feature.turn_state = 0;
 //					}
 //				}
-//			}
-//			if(is_right_turn == 1)
-//			{
-//				for(i = 70; i > feature.top_point + 10; i--)
+//				else
 //				{
-//					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
-//					{
-//						is_right_turn = 0;
-//					}
+//					feature.turn_state = 1;
+//					feature.turn_row = i;
 //				}
 //			}
-//			if(is_left_turn == 1 && is_right_turn == 0)
+//		}
+//		//右丢线的一行
+//		if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+//		{
+//			if(line.left_line_flag[i - 5] == 1 && i > 30)
 //			{
-//				feature.turn_state = 1;
-//				feature.turn_row = i;
-//			}
-//			else if(is_left_turn == 0 && is_right_turn == 1)
-//			{
-//				feature.turn_state = 2;
-//				feature.turn_row = i;
-//			}
-//			else
-//			{
-//				feature.turn_state = 0;
+//				//行数很靠前时防止在十字后远方看过去的时候误判
+//				if(i < 40 && line.left_line[i - 5] < 60)
+//				{
+//					if(line.left_line[i] - line.left_line[i - 5] > 10)
+//					{
+//						feature.turn_state = 0;
+//					}
+//				}
+//				else
+//				{
+//					feature.turn_state = 2;
+//					feature.turn_row = i;
+//				}
 //			}
 //		}
 //	}
+	is_left_turn = 0;
+	is_right_turn = 0;
+	//判小弯
+	if(feature.turn_state != 3 && feature.turn_state != 4)
+	{
+		if(feature.top_point < 70)
+		{
+			//扩大搜索范围
+			for(i = 80; i > 70; i--)
+			{
+				//左线80-70行有丢线
+				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
+				{
+					is_left_turn = 1;
+				}
+				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
+				{
+					is_right_turn = 1;
+				}
+			}
+			if(is_left_turn == 1)
+			{
+				for(i = 70; i > feature.top_point + 10; i--)
+				{
+					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
+					{
+						is_left_turn = 0;
+					}
+				}
+			}
+			if(is_right_turn == 1)
+			{
+				for(i = 70; i > feature.top_point + 10; i--)
+				{
+					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
+					{
+						is_right_turn = 0;
+					}
+				}
+			}
+			if(is_left_turn == 1 && is_right_turn == 0)
+			{
+				feature.turn_state = 1;
+				feature.turn_row = i;
+			}
+			else if(is_left_turn == 0 && is_right_turn == 1)
+			{
+				feature.turn_state = 2;
+				feature.turn_row = i;
+			}
+			else
+			{
+				feature.turn_state = 0;
+			}
+		}
+	}
 }
 
 /***************************************************************

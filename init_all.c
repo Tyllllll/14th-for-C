@@ -9,18 +9,20 @@ void Init_All(void)
 {
     DisableInterrupts;
 	NVIC_Init();
-	Motor_Pit1_Init();
-	Led_Gpio_Init();
 	Uart_Init();
-	Servo_Gpio_Init();
-	Motor_Pwm_Init();
-	Encoder_Init();
+	Oled_Gpio_Init();
+	OLED_Put6x8Str(20, 2, "initializing...");
+	Led_Gpio_Init();
 	Key_Gpio_Init();
 	Switch_Gpio_Init();
-	Oled_Gpio_Init();
-	Magnetic_Adc_Init();
-	OLED_Put6x8Str(20, 2, "initializing...");
 	Buzzer_Gpio_Init();
+	Magnetic_Adc_Init();
+	Motor_Pit1_Init();
+	Motor_Pwm_Init();
+	Servo_Gpio_Init();
+	Encoder_Init();
+	Speed_Init();
+	OLED_Fill(0x00);
 	switch(ubyCamera_Init())
 	{
 	case 0:
@@ -42,9 +44,7 @@ void Init_All(void)
 		OLED_Put6x8Str(20, 2, "Error: Unkonwn.");
 		break;
 	}
-	Speed_Init();
 	EnableInterrupts;
-	OLED_Fill(0x00);
 }
 
 /***************************************************************

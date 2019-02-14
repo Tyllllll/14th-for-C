@@ -1,8 +1,6 @@
 #ifndef _IDENTIFY_H_
 #define _IDENTIFY_H_
 
-extern uint8 flag;
-
 typedef struct
 {
 	int16 left_line[120];

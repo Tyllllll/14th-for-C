@@ -16,9 +16,9 @@ uint8 half_width[120] = {14, 17, 19, 20, 22, 23, 24, 24, 25, 25,//0
 Speed_Class speed;
 Setting_Class setting;
 
-int16 error_ave=0;
-int16 error_last=0;
-int16 error_pre=0;
+//int16 error_ave=0;
+//int16 error_last=0;
+//int16 error_pre=0;
 
 /***************************************************************
 	*	@brief	速度数据初始化
@@ -166,7 +166,7 @@ void Cross_Fill(void)
 		//加权左线斜率
 		k_left = 0.6 * k_left_record[0] + 0.2 * k_left_record[1] + 0.2 * k_left_record[2];
 		//左补线
-		for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 10 : feature.top_point); i--)
+		for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 		{
 			line.left_line[i] = (int16)(line.left_line[feature.left_flection_row] + k_left * (feature.left_flection_row - i));
 			if(line.left_line[i] < 0)
@@ -192,7 +192,7 @@ void Cross_Fill(void)
 		//加权右线斜率
 		k_right = 0.6 * k_right_record[0] + 0.2 * k_right_record[1] + 0.2 * k_right_record[2];
 		//右补线
-		for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 10 : feature.top_point); i--)
+		for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 		{
 			line.right_line[i] = (int16)(line.right_line[feature.right_flection_row] + k_right * (feature.right_flection_row - i));
 			if(line.right_line[i] < 0)
@@ -212,21 +212,21 @@ void Cross_Fill(void)
 	//算中线
 	if(feature.left_flection_flag == 1 && feature.right_flection_row == 1)
 	{
-		for(i = feature.left_flection_row > feature.right_flection_row ? feature.left_flection_row: feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 10 : feature.top_point); i--)
+		for(i = (uint8)fmax(feature.left_flection_row, feature.right_flection_row); i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 		{
 			line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 		}
 	}
 	if(feature.left_flection_flag == 1 && feature.right_flection_flag == 0)
 	{
-		for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 10 : feature.top_point); i--)
+		for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 		{
 			line.midline[i] = line.left_line[i] + half_width[i] + 10;
 		}
 	}
 	if(feature.left_flection_flag == 0 && feature.right_flection_flag == 1)
 	{
-		for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 10 : feature.top_point); i--)
+		for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 		{
 			line.midline[i] = line.right_line[i] - half_width[i] - 10;
 		}

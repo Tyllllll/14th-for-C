@@ -274,10 +274,9 @@ void DMA_Complete_Isr(void)
 void Img_Extract(void)
 {
 	uint8 i, j, k;
-	uint8 which_buffer = camera.which_buffer;
 	camera.ready_read = 0;
 //	Mid_Filter();
-	if(which_buffer == 1)
+	if(camera.which_buffer == 1)
 	{
 		for(i = 0; i < ROW; i++)
 		{

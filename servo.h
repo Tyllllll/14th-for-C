@@ -38,7 +38,6 @@ void Servo_Output(void);
 void Servo_Control(void);
 void Servo_PID(void);
 
-int abs(int a);
 void servo_up1(void);
 void servo_up5(void);
 void servo_up10(void);

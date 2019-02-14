@@ -30,19 +30,20 @@ void Servo_Gpio_Init(void)
 	GPIO_InitStructure.GPIO_Pins = SERVO_Pinx;
 	LPLD_GPIO_Init(GPIO_InitStructure);
 	//PIT3定时中断，负责拉低电平
-	static PIT_InitTypeDef PIT_InitStructure;
-	PIT_InitStructure.PIT_Pitx = SERVO_LOW_PITx;
-	PIT_InitStructure.PIT_PeriodUs = 100000;
-	PIT_InitStructure.PIT_Isr = Servo_PIT_Isr;
-	LPLD_PIT_Init(PIT_InitStructure);
-	LPLD_PIT_EnableIrq(PIT_InitStructure);//使能中断
+	static PIT_InitTypeDef PIT_LOW_InitStructure;
+	PIT_LOW_InitStructure.PIT_Pitx = SERVO_LOW_PITx;
+	PIT_LOW_InitStructure.PIT_PeriodUs = 100000;
+	PIT_LOW_InitStructure.PIT_Isr = Servo_PIT_Isr;
+	LPLD_PIT_Init(PIT_LOW_InitStructure);
+	LPLD_PIT_EnableIrq(PIT_LOW_InitStructure);//使能中断
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 	//PIT0 20ms定时中断，负责拉高电平
-	PIT_InitStructure.PIT_Pitx = SERVO_HIGH_PITx;
-	PIT_InitStructure.PIT_PeriodMs = 20;
-	PIT_InitStructure.PIT_Isr = Servo_Output;
-	LPLD_PIT_Init(PIT_InitStructure);
-	LPLD_PIT_EnableIrq(PIT_InitStructure);//使能中断
+	static PIT_InitTypeDef PIT_HIGH_InitStructure;
+	PIT_HIGH_InitStructure.PIT_Pitx = SERVO_HIGH_PITx;
+	PIT_HIGH_InitStructure.PIT_PeriodMs = 20;
+	PIT_HIGH_InitStructure.PIT_Isr = Servo_Output;
+	LPLD_PIT_Init(PIT_HIGH_InitStructure);
+	LPLD_PIT_EnableIrq(PIT_HIGH_InitStructure);//使能中断
 }
 
 /***************************************************************
@@ -83,13 +84,13 @@ void Servo_PIT_Isr(void)
 ***************************************************************/
 void Servo_Control(void)
 {
-	int16 mid_error[4];
-	int16 speed = (int16)(0.6 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.2 * motor.speed_current[2]);//编码器的值会有高频抖动
-	if(speed > 400)
+//	int16 mid_error[4];
+//	int16 speed = (int16)(0.6 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.2 * motor.speed_current[2]);//编码器的值会有高频抖动
+	if(motor.speed_ave > 400)
 	{
 		servo.foresight = servo.fore_min;
 	}
-	else if(speed < 250)
+	else if(motor.speed_ave < 250)
 	{
 		servo.foresight = servo.fore_max;
 	}
@@ -97,13 +98,13 @@ void Servo_Control(void)
 	{
 		servo.foresight = (uint8)(servo.fore_min + (float)(servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
 	}
-	mid_error[0]=2*(line.midline[servo.foresight]-80);
-	mid_error[1]=2*(line.midline[servo.foresight+1]-80);
-	mid_error[2]=(line.midline[servo.foresight+2]-80);
-	mid_error[3]=(line.midline[servo.foresight-1]-80);
-	servo.error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);
-//	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0) + 
-//		(int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+//	mid_error[0]=2*(line.midline[servo.foresight]-80);
+//	mid_error[1]=2*(line.midline[servo.foresight+1]-80);
+//	mid_error[2]=(line.midline[servo.foresight+2]-80);
+//	mid_error[3]=(line.midline[servo.foresight-1]-80);
+//	servo.error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);
+	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0) + 
+		(int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;
@@ -175,25 +176,13 @@ void Servo_PID(void)
 	}
 	p_value = (int16)(servo.kp * servo.error[0]);
 	d_value = (int16)(servo.kd * servo.error_differ[0]);
-	servo.duty = abs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
+	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
 	Speed_Set();
 }
 
 
 
 /**********************a little funcitons**********************/
-int abs(int a)
-{ 
-	if(a >= 0)
-	{
-		a = a;
-	}
-	if(a < 0)
-	{
-		a = -a;
-	}
-	return a;
-}
 /***************************************************************
 	*	@brief	舵机调试
 	*	@param	无
