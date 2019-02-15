@@ -33,6 +33,7 @@ typedef struct
 	int16 output_value;
 	int16 output_value_left;
 	int16 output_value_right;
+	int8 is_open_loop;
 }Motor_Class;
 extern Motor_Class motor;
 

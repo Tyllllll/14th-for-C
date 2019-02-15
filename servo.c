@@ -6,21 +6,21 @@ Servo_Class servo;
 	*	@brief	舵机初始化
 	*	@param	无
 	*	@note	无
-
 ***************************************************************/
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
 	servo.fore_max = 42;
 	servo.fore_min = 37;
-	servo.kp_left = 4;
-	servo.kp_right = 4;
+	servo.kp_left = 4.5;
+	servo.kp_right = 4.5;
 	servo.ki = 0;
 	servo.kd = 11.1;
-	servo.dead_zone = 7;
+	servo.dead_zone = 5;
 	servo.dynamic_zone = 25;
-	servo.dif_const_left = 7.48;
-	servo.dif_const_right = 5.4;
+	servo.dif_const_left = 7.4;//7.28;
+	servo.dif_const_right = 5.2;//5.6;
+	servo.enable = 1;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	//舵机引脚初始化

@@ -87,17 +87,19 @@ void Judge_Feature(void)
 	feature.right_flection_flag = 0;
 	feature.right_flection_row = 0;
 	feature.left_flection2_flag = 0;
+	feature.left_flection2_antiflag = 0;
 	feature.left_flection2_row = 0;
 	feature.right_flection2_flag = 0;
+	feature.right_flection2_antiflag = 0;
 	feature.right_flection2_row = 0;
 	
 	Find_Top_Point();
 	Find_Inflection();
 	Find_Inflection2();
 	
-//	Judge_Roundabouts();
-//	Judge_Straight();
-//	Judge_Curve();
+	Judge_Roundabouts();
+	Judge_Straight();
+	Judge_Curve();
 //	Judge_Cross();
 }
 
@@ -147,7 +149,7 @@ void Find_Inflection(void)
 			if(feature.left_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 5 && line.left_line[i] < 155)
+				if(i > 28 && line.left_line[i] < 155)
 				{
 					//大小条件
 					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] > line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5] &&
@@ -161,6 +163,7 @@ void Find_Inflection(void)
 							{
 								feature.left_flection_row = i;
 								feature.left_flection_flag = 1;
+								break;
 							}
 						}
 					}
@@ -173,7 +176,7 @@ void Find_Inflection(void)
 			if(feature.right_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 5 && line.right_line[i] > 5)
+				if(i > 28 && line.right_line[i] > 5)
 				{
 					//大小条件
 					if(line.right_line[i] < line.right_line[i + 3] && line.left_line[i] < line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5] &&
@@ -187,6 +190,7 @@ void Find_Inflection(void)
 							{
 								feature.right_flection_row = i;
 								feature.right_flection_flag = 1;
+								break;
 							}
 						}
 					}
@@ -207,24 +211,30 @@ void Find_Inflection2(void)
 	//找左2拐点
 	if(feature.top_point < 100)
 	{
-		for(i = 100; i > feature.top_point + 4; i--)
+		for(i = 100; i > feature.top_point - 2; i--)
 		{
 			if(feature.left_flection2_flag == 0)
 			{
 				//位置条件
-				if(line.left_line[i] < 140)
+				if(line.left_line[i] > 15)
 				{
 					//大小条件
-					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] < line.left_line[i - 3] && line.left_line[i] < line.left_line[i - 5])
+					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] < line.left_line[i - 3])
 					{
 						//存在性条件
 						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1 && line.left_line_flag[i - 5] == 1 && line.left_line_flag[i + 5] == 0)
 						{
 							//斜率条件
-							if(line.left_line[i - 3] - line.left_line[i + 3] > 20)
+							if(line.left_line[i] - line.left_line[i + 2] > 20)
 							{
 								feature.left_flection2_row = i;
 								feature.left_flection2_flag = 1;
+								if(line.left_line[i - 4] - line.left_line[i - 1] > 10 && feature.left_flection2_row > 40)
+								{
+									//反拐点标记
+									feature.left_flection2_antiflag = 1;
+								}
+								break;
 							}
 						}
 					}
@@ -232,24 +242,30 @@ void Find_Inflection2(void)
 			}
 		}
 		//找右2拐点
-		for(i = 100; i > feature.top_point + 4; i--)
+		for(i = 100; i > feature.top_point - 2; i--)
 		{
 			if(feature.right_flection2_flag == 0)
 			{
 				//位置条件
-				if(line.right_line[i] > 20)
+				if(line.right_line[i] < 145)
 				{
 					//大小条件
-					if(line.right_line[i] < line.right_line[i + 3] && line.right_line[i] > line.right_line[i - 3] && line.right_line[i] > line.right_line[i - 5])
+					if(line.right_line[i] < line.right_line[i + 3] && line.right_line[i] > line.right_line[i - 3])
 					{
 						//存在性条件
-						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1 && line.right_line_flag[i - 5] == 1)
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1 && line.right_line_flag[i - 5] == 1 && line.right_line_flag[i + 5] == 0)
 						{
 							//斜率条件
-							if(line.right_line[i - 3] - line.right_line[i + 3] < -20)
+							if(line.right_line[i] - line.right_line[i + 2] < -20)
 							{
 								feature.right_flection2_row = i;
 								feature.right_flection2_flag = 1;
+								if(line.right_line[i - 4] - line.right_line[i - 1] < -10 && feature.right_flection2_row < 120)
+								{
+									//反拐点标记
+									feature.right_flection2_antiflag = 1;
+								}
+								break;
 							}
 						}
 					}
@@ -291,7 +307,7 @@ void Judge_Straight(void)
 		if(lose_cnt < 3)
 		{
 			//顶点要求
-			if(feature.top_point <= 30)
+			if(feature.top_point <= 15)
 			{
 				feature.straight_state = 1;
 			}
@@ -312,13 +328,16 @@ void Judge_Straight(void)
 	//短直道判断
 	if(feature.straight_state == 0)
 	{
-		if(Midline_Std_Deviation() < 7)
+		if(feature.top_point < 20)
 		{
-			feature.straight_state = 2;
-		}
-		else
-		{
-			feature.straight_state = 0;
+			if(Midline_Std_Deviation() < 7)
+			{
+				feature.straight_state = 2;
+			}
+			else
+			{
+				feature.straight_state = 0;
+			}
 		}
 	}
 }
@@ -373,61 +392,16 @@ void Judge_Curve(void)
 		if(is_left_turn == 1 && is_right_turn == 0)
 		{
 			feature.turn_state = 3;
-			feature.turn_row = i;
 		}
 		else if(is_left_turn == 0 && is_right_turn == 1)
 		{
 			feature.turn_state = 4;
-			feature.turn_row = i;
 		}
 		else
 		{
 			feature.turn_state = 0;
 		}
 	}
-//	for(i = 100; i > feature.top_point + 3; i--)
-//	{
-//		//左丢线的一行
-//		if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-//		{
-//			if(line.right_line_flag[i - 5] == 1 && i > 30)
-//			{
-//				//行数很靠前时防止在十字后远方看过去的时候误判
-//				if(i < 40 && line.right_line[i - 5] > 100)
-//				{
-//					if(line.right_line[i - 5] - line.right_line[i] > 10)
-//					{
-//						feature.turn_state = 0;
-//					}
-//				}
-//				else
-//				{
-//					feature.turn_state = 1;
-//					feature.turn_row = i;
-//				}
-//			}
-//		}
-//		//右丢线的一行
-//		if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
-//		{
-//			if(line.left_line_flag[i - 5] == 1 && i > 30)
-//			{
-//				//行数很靠前时防止在十字后远方看过去的时候误判
-//				if(i < 40 && line.left_line[i - 5] < 60)
-//				{
-//					if(line.left_line[i] - line.left_line[i - 5] > 10)
-//					{
-//						feature.turn_state = 0;
-//					}
-//				}
-//				else
-//				{
-//					feature.turn_state = 2;
-//					feature.turn_row = i;
-//				}
-//			}
-//		}
-//	}
 	is_left_turn = 0;
 	is_right_turn = 0;
 	//判小弯
@@ -435,10 +409,9 @@ void Judge_Curve(void)
 	{
 		if(feature.top_point < 70)
 		{
-			//扩大搜索范围
-			for(i = 80; i > 70; i--)
+			for(i = 50; i > 40; i--)
 			{
-				//左线80-70行有丢线
+				//左线50-40行有丢线
 				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
 				{
 					is_left_turn = 1;
@@ -450,7 +423,7 @@ void Judge_Curve(void)
 			}
 			if(is_left_turn == 1)
 			{
-				for(i = 70; i > feature.top_point + 10; i--)
+				for(i = 40; i > feature.top_point + 10; i--)
 				{
 					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
 					{
@@ -460,7 +433,7 @@ void Judge_Curve(void)
 			}
 			if(is_right_turn == 1)
 			{
-				for(i = 70; i > feature.top_point + 10; i--)
+				for(i = 40; i > feature.top_point + 10; i--)
 				{
 					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
 					{
@@ -471,12 +444,10 @@ void Judge_Curve(void)
 			if(is_left_turn == 1 && is_right_turn == 0)
 			{
 				feature.turn_state = 1;
-				feature.turn_row = i;
 			}
 			else if(is_left_turn == 0 && is_right_turn == 1)
 			{
 				feature.turn_state = 2;
-				feature.turn_row = i;
 			}
 			else
 			{
@@ -594,21 +565,73 @@ void Judge_Cross(void)
 void Judge_Roundabouts(void)
 {
 	Magnetic_GetAdc();
-	if(magnetic.left_mag > 45 || magnetic.right_mag > 45)
+	if(magnetic.left_mag > 55 || magnetic.right_mag > 55 && feature.roundabouts_state == 0)
 	{
 		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 		{
-			if(is_Right_Lose_Line(feature.left_flection2_row - 10))
+			if(is_Right_Lose_Line(feature.left_flection2_row + 10) == 0)
 			{
 				feature.roundabouts_state = 1;
 			}
 		}
 		if(feature.left_flection2_flag == 0 && feature.right_flection2_flag == 1)
 		{
-			if(is_Left_Lose_Line(feature.right_flection2_row - 10))
+			if(is_Left_Lose_Line(feature.right_flection2_row + 10) == 0)
 			{
 				feature.roundabouts_state = 2;
 			}
+		}
+	}
+	if(feature.roundabouts_state == 1)
+	{
+		if(feature.right_flection2_flag == 1)
+		{
+			servo.enable = 1;
+			feature.roundabouts_state = 3;
+		}
+	}
+	if(feature.roundabouts_state == 3)
+	{
+		if(feature.right_flection_flag == 1)
+		{
+			if(line.right_line[feature.right_flection_row] > 50)
+			{
+				feature.roundabouts_state = 5;
+			}
+		}
+	}
+	if(feature.roundabouts_state == 5)
+	{
+		if(feature.top_point < 12 && line.left_line_flag[feature.top_point] == 0 && line.right_line_flag[feature.top_point] == 1)
+		{
+			servo.enable = 1;
+			feature.roundabouts_state = 0;
+		}
+	}
+	if(feature.roundabouts_state == 2)
+	{
+		if(feature.left_flection2_flag == 1)
+		{
+			servo.enable = 1;
+			feature.roundabouts_state = 4;
+		}
+	}
+	if(feature.roundabouts_state == 4)
+	{
+		if(feature.left_flection_flag == 1)
+		{
+			if(line.left_line[feature.left_flection_row] < 110)
+			{
+				feature.roundabouts_state = 6;
+			}
+		}
+	}
+	if(feature.roundabouts_state == 6)
+	{
+		if(feature.top_point < 12 && line.left_line_flag[feature.top_point] == 1 && line.right_line_flag[feature.top_point] == 0)
+		{
+			servo.enable = 1;
+			feature.roundabouts_state = 0;
 		}
 	}
 }
@@ -723,6 +746,52 @@ uint8 is_Right_Point_Lose_Line(uint8 row)
 		}
 	}
 	if(lose_cnt < 2)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+/***************************************************************
+	*	@brief	判断某一行附近行是否全丢线
+	*	@param	row：行数
+	*	@note	上下7行判断
+***************************************************************/
+uint8 is_Left_Point_Lose_All_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row + 7; i > row - 7; i--)
+	{
+		if(line.left_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 13)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+uint8 is_Right_Point_Lose_All_Line(uint8 row)
+{
+	uint8 i = 0;
+	uint8 lose_cnt = 0;
+	for(i = row + 7; i > row - 7; i--)
+	{
+		if(line.right_line_flag[i] == 0)
+		{
+			lose_cnt++;
+		}
+	}
+	if(lose_cnt < 13)
 	{
 		return 0;
 	}

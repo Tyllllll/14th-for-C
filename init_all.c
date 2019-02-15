@@ -8,10 +8,10 @@
 void Init_All(void)
 {
     DisableInterrupts;
-	NVIC_Init();
-	Uart_Init();
 	Oled_Gpio_Init();
 	OLED_Put6x8Str(20, 2, "initializing...");
+	NVIC_Init();
+	Uart_Init();
 	Led_Gpio_Init();
 	Key_Gpio_Init();
 	Switch_Gpio_Init();
@@ -22,28 +22,28 @@ void Init_All(void)
 	Servo_Gpio_Init();
 	Encoder_Init();
 	Speed_Init();
-	OLED_Fill(0x00);
 	switch(ubyCamera_Init())
 	{
 	case 0:
-		OLED_Put6x8Str(20, 2, "initialized!!!");
+		OLED_Put6x8Str(20, 2, "initialized!!!  ");
 		break;
 	case 1:
 		OLED_Put6x8Str(20, 2, "Error: Camera 1.");
-		break;
+		while(1);
 	case 2:
 		OLED_Put6x8Str(20, 2, "Error: Camera 2.");
-		break;
+		while(1);
 	case 3:
 		OLED_Put6x8Str(20, 2, "Error: Camera 3.");
-		break;
+		while(1);
 	case 4:
 		OLED_Put6x8Str(20, 2, "Error: Camera 4.");
-		break;
+		while(1);
 	default:
 		OLED_Put6x8Str(20, 2, "Error: Unkonwn.");
-		break;
+		while(1);
 	}
+	OLED_Fill(0x00);
 	EnableInterrupts;
 }
 

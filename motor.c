@@ -12,6 +12,7 @@ void Motor_Pwm_Init(void)
 	motor.kp = 65;
 	motor.ki = 20;
 	motor.kd = 0;
+	motor.is_open_loop = 0;
 	
     static FTM_InitTypeDef FTM_InitStructure;
     FTM_InitStructure.FTM_Ftmx = MOTOR_FTMx;	//选择FTM通道
@@ -194,7 +195,7 @@ void Motor_PID(void)
 	motor.speed_ave = (int16)(0.5 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.1 * motor.speed_current[2] + 
 							  0.1 * motor.speed_current[3] + 0.1 * motor.speed_current[4]);
 	//开环加速
-	if(motor.speed_ave < 0.9 * motor.speed_set)
+	if(motor.speed_ave < 0.9 * motor.speed_set && motor.is_open_loop == 1)
 	{
 		motor.output_value = 9000;
 	}
@@ -248,11 +249,13 @@ void Motor_PID(void)
 	//转向差速控制
 	if(servo.error[0] > servo.dead_zone)
 	{
+		//右转
 		motor.output_value_left = (int16)((-0.004435 * servo.duty + servo.dif_const_left) * (motor.output_value / 10 - 20) + 20) * 10;
 		motor.output_value_right = motor.output_value;
 	}
 	else if(servo.error[0] < - servo.dead_zone)
 	{
+		//左转
 		motor.output_value_left = motor.output_value;
 		motor.output_value_right = (int16)((0.004435 * servo.duty - servo.dif_const_right) * (motor.output_value / 10 - 20) + 20) * 10;
 	}

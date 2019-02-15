@@ -29,6 +29,7 @@ typedef struct
 	uint8 dynamic_zone;
 	float32 dif_const_left;
 	float32 dif_const_right;
+	int8 enable;
 }Servo_Class;
 extern Servo_Class servo;
 

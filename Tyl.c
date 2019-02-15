@@ -18,7 +18,7 @@
  */
 #include "header.h"
 
-void main (void)
+void main(void)
 {
     Init_All();
     while(1)
@@ -29,10 +29,10 @@ void main (void)
 			Parameter_Setting();
 			feature.straight_state = 0;
 			feature.turn_state = 0;
-			feature.turn_row = 0;
 			feature.cross_state[0] = 0;
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
+			servo.enable = 1;
 		}
 		if(SWITCH4 == 1)
 		{
@@ -60,7 +60,7 @@ void main (void)
 			Key_Delay();
 			if(KEY2 == 0)
 			{
-				motor.stop = 1;
+				motor.stop = 5;
 			}
 		}
 		if(camera.ready_read == 1)
@@ -69,7 +69,10 @@ void main (void)
 			Find_Line();
 			Judge_Feature();
 			All_Fill();
-			Servo_Control();
+			if(servo.enable == 1)
+			{
+				Servo_Control();
+			}
 			if(motor.start != 0)
 			{
 				if(is_Lose_All() == 1)
@@ -82,6 +85,9 @@ void main (void)
 				OLED_ShowImage();
 			}
 		}
+//		Magnetic_GetAdc();
+//		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
+//		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
 //		if(KEY1 == 0)
 //		{
 //			Key_Delay();
@@ -130,8 +136,5 @@ void main (void)
 //				servo_down1();
 //			}
 //		}
-//		Magnetic_GetAdc();
-//		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
-//		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
     }
 }

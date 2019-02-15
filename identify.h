@@ -23,19 +23,26 @@ typedef struct
 	//钝角拐点（十字远拐点）
 	uint8 left_flection2_row;
 	uint8 left_flection2_flag;
+	uint8 left_flection2_antiflag;
 	uint8 right_flection2_row;
 	uint8 right_flection2_flag;
+	uint8 right_flection2_antiflag;
+	//斜率
+	float32 k_left_record[3];
+	float32 k_right_record[3];
+	float32 k_left_record2[3];
+	float32 k_right_record2[3];
 	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为障碍
 	uint8 road_type[200];
 	//直道标志
 	uint8 straight_state;
 	//左右转标志（12小弯34深弯）
 	uint8 turn_state;
-	uint8 turn_row;
 	//十字标志
 	uint8 cross_state[2];
 	//环岛标志
 	uint8 roundabouts_state;
+	float32 roundabouts_size;//0到1
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -54,5 +61,7 @@ uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_Line(uint8 row);
 uint8 is_Right_Point_Lose_Line(uint8 row);
+uint8 is_Left_Point_Lose_All_Line(uint8 row);
+uint8 is_Right_Point_Lose_All_Line(uint8 row);
 
 #endif

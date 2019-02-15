@@ -422,14 +422,13 @@ void OLED_ShowImage(void)
 	OLED_PrintUintValue(100, 4, feature.roundabouts_state);
 	OLED_Put6x8Str(80, 5, "rt");
 	OLED_PrintUintValue(100, 5, feature.road_type[0]);
+//	OLED_PrintUintValue(80, 6, feature.left_flection2_row);
+//	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
 	OLED_PrintUintValue(80, 6, feature.left_flection_row);
-	OLED_PrintUintValue(100, 6, feature.right_flection_row);
-	OLED_PrintUintValue(80, 7, feature.left_flection2_row);
-	OLED_PrintUintValue(100, 7, feature.right_flection2_row);
-//	OLED_Put6x8Str(80, 0, fs");
-//	OLED_PrintFloatValue(100, 0, servo.foresight);
-//	OLED_Put6x8Str(80, 2, "top");
-//	OLED_PrintFloatValue(100, 2, feature.top_point);
+	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection_row - 1]);
+	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
+	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
+//	OLED_PrintIntValue(80, 7, servo.duty);
 }
 
 /***************************************************************
