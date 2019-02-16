@@ -199,7 +199,7 @@ void Img_Isr(void);
 void DMA_Complete_Isr(void);
 void Camera_Delay(void);
 void Img_Extract(void);
-uint8 Get_Median(uint8 n1, uint8 n2, uint8 n3, uint8 n4, uint8 n5, uint8 n6, uint8 n7, uint8 n8, uint8 n9);
-void Mid_Filter(void);
+//uint8 Get_Median(uint8 n1, uint8 n2, uint8 n3, uint8 n4, uint8 n5, uint8 n6, uint8 n7, uint8 n8, uint8 n9);
+//void Mid_Filter(void);
 
 #endif

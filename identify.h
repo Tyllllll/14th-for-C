@@ -44,7 +44,7 @@ typedef struct
 	uint8 cross_state[2];
 	//环岛标志
 	uint8 roundabouts_state;
-	float32 roundabouts_size;//0到1
+	float32 roundabouts_size;
 }Feature_Class;
 extern Feature_Class feature;
 

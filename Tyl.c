@@ -79,7 +79,16 @@ void main(void)
 			{
 				if(is_Lose_All() == 1)
 				{
-					motor.stop = 25;
+					servo.stop++;
+					if(servo.stop == 5)
+					{
+						motor.stop = 5;
+						servo.stop = 0;
+					}
+				}
+				else
+				{
+					servo.stop = 0;
 				}
 			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)

@@ -175,7 +175,14 @@ void Motor_Control(void)
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
-		motor.start = 0;
+		if(motor.start < 0)
+		{
+			motor.start = 0;
+		}
+		if(motor.stop > 0)
+		{
+			motor.stop = 0;
+		}
 	}
 }
 
@@ -187,12 +194,8 @@ void Motor_Control(void)
 void Motor_PID(void)
 {
 	int16 integral_current = 0;
-	if(motor.stop >= 1)
-	{
-		motor.speed_set = 0;
-	}
-	motor.speed_ave = (int16)(0.5 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.1 * motor.speed_current[2] + 
-							  0.1 * motor.speed_current[3] + 0.1 * motor.speed_current[4]);
+	motor.speed_ave = (int16)(0.5 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.1 * motor.speed_current[2]
+							  + 0.1 * motor.speed_current[3] + 0.1 * motor.speed_current[4]);
 	//开环加速
 	if(motor.speed_ave < 0.9 * motor.speed_set && motor.is_open_loop == 1)
 	{

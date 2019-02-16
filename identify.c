@@ -368,31 +368,38 @@ void Judge_Curve(void)
 	uint8 is_right_turn = 0;
 	uint8 cnt_left = 0;
 	uint8 cnt_right = 0;
-	//判小弯
-	for(i = 100; i > feature.top_point + 3; i--)
-	{
-		if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
+	//判远小弯
+	if(feature.deep_turn_state == 0)
+	{	
+		for(i = 100; i > 30; i--)
 		{
-			if(line.right_line_flag[i - 4] == 1 && i > 20)
+			if(line.left_line_flag[i] == 0 && line.left_line_flag[i + 1] == 1 && line.left_line_flag[i + 2] == 1 && line.right_line_flag[i] == 1)
 			{
-				feature.turn_state = 1;
-				feature.turn_row = i;
+				if(line.right_line_flag[i - 4] == 1 && i > 20)
+				{
+					feature.turn_state = 1;
+					break;
+				}
+			}
+		}
+		for(i = 100; i > 30; i--)
+		{
+			if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.left_line_flag[i] == 1)
+			{
+				if(line.left_line_flag[i - 4] == 1 && i > 20)
+				{
+					feature.turn_state = 2;
+					break;
+				}
 			}
 		}
 	}
-	for(i = 100; i > feature.top_point + 3; i--)
+	if(feature.deep_turn_state != 0)
 	{
-		if(line.right_line_flag[i] == 0 && line.right_line_flag[i + 1] == 1 && line.right_line_flag[i + 2] == 1 && line.left_line_flag[i] == 1)
-		{
-			if(line.left_line_flag[i - 4] == 1 && i > 20)
-			{
-				feature.turn_state = 2;
-				feature.turn_row = i;
-			}
-		}
+		feature.turn_state = 0;
 	}
 	//救火
-	if(feature.top_point > 80)
+	if(feature.top_point > 70)
 	{
 		for(i = 118; i > feature.top_point; i--)
 		{
@@ -407,46 +414,38 @@ void Judge_Curve(void)
 		}
 		if(cnt_left < 2 && cnt_right > 118 - feature.top_point - 2)
 		{
-			feature.deep_turn_state = 3;
+			feature.deep_turn_state = 5;
 		}
 		else if(cnt_left > 118 - feature.top_point - 2 && cnt_right < 2)
 		{
-			feature.deep_turn_state = 4;
+			feature.deep_turn_state = 6;
 		}
 	}
 	else
 	{
 		feature.deep_turn_state = 0;
 	}
-	cnt_left = 0;
-	cnt_right = 0;
 	//判深弯
-	if(feature.deep_turn_state != 3 && feature.deep_turn_state != 4)
+	if(feature.deep_turn_state != 5 && feature.deep_turn_state != 6)
 	{
-		if(feature.top_point < 95)
+		cnt_left = 0;
+		cnt_right = 0;
+		if(feature.top_point < 105)
 		{
-			for(i = 118; i > 75; i--)
+			for(i = 118; i > 112; i--)
 			{
-				if(line.left_line_flag[i] == 1 && is_left_turn == 0)
+				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
 				{
-					cnt_left++;
+					is_left_turn = 1;
 				}
-				if(line.right_line_flag[i] == 1 && is_right_turn == 0)
+				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
 				{
-					cnt_right++;
+					is_right_turn = 1;
 				}
-			}
-			if(cnt_left < 2)
-			{
-				is_left_turn = 1;
-			}
-			if(cnt_right < 2)
-			{
-				is_right_turn = 1;
 			}
 			if(is_left_turn == 1)
 			{
-				for(i = 75; i > feature.top_point + 10; i--)
+				for(i = 100; i > feature.top_point + 10; i--)
 				{
 					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
 					{
@@ -456,7 +455,57 @@ void Judge_Curve(void)
 			}
 			if(is_right_turn == 1)
 			{
-				for(i = 75; i > feature.top_point + 10; i--)
+				for(i = 100; i > feature.top_point + 10; i--)
+				{
+					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
+					{
+						is_right_turn = 0;
+					}
+				}
+			}
+			if(is_left_turn == 1 && is_right_turn == 0)
+			{
+				feature.deep_turn_state = 3;
+			}
+			else if(is_left_turn == 0 && is_right_turn == 1)
+			{
+				feature.deep_turn_state = 4;
+			}
+			else
+			{
+				feature.deep_turn_state = 0;
+			}
+		}
+	}
+	if(feature.deep_turn_state != 3 && feature.deep_turn_state != 4 && feature.deep_turn_state != 5 && feature.deep_turn_state != 6)
+	{
+		if(feature.top_point < 70)
+		{
+			for(i = 50; i > 40; i--)
+			{
+				//左线50-40行有丢线
+				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
+				{
+					is_left_turn = 1;
+				}
+				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
+				{
+					is_right_turn = 1;
+				}
+			}
+			if(is_left_turn == 1)
+			{
+				for(i = 40; i > feature.top_point + 7; i--)
+				{
+					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
+					{
+						is_left_turn = 0;
+					}
+				}
+			}
+			if(is_right_turn == 1)
+			{
+				for(i = 40; i > feature.top_point + 7; i--)
 				{
 					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
 					{
@@ -478,53 +527,6 @@ void Judge_Curve(void)
 			}
 		}
 	}
-//		if(feature.top_point < 70)
-//		{
-//			for(i = 40; i > 30; i--)
-//			{
-//				//左线40-30行有丢线
-//				if(line.left_line_flag[i] == 0 && is_left_turn == 0)
-//				{
-//					is_left_turn = 1;
-//				}
-//				if(line.right_line_flag[i] == 0 && is_right_turn == 0)
-//				{
-//					is_right_turn = 1;
-//				}
-//			}
-//			if(is_left_turn == 1)
-//			{
-//				for(i = 30; i > feature.top_point + 10; i--)
-//				{
-//					if(line.left_line_flag[i] == 1 || line.right_line_flag[i] == 0)
-//					{
-//						is_left_turn = 0;
-//					}
-//				}
-//			}
-//			if(is_right_turn == 1)
-//			{
-//				for(i = 30; i > feature.top_point + 10; i--)
-//				{
-//					if(line.left_line_flag[i] == 0 || line.right_line_flag[i] == 1)
-//					{
-//						is_right_turn = 0;
-//					}
-//				}
-//			}
-//			if(is_left_turn == 1 && is_right_turn == 0)
-//			{
-//				feature.turn_state = 1;
-//			}
-//			else if(is_left_turn == 0 && is_right_turn == 1)
-//			{
-//				feature.turn_state = 2;
-//			}
-//			else
-//			{
-//				feature.turn_state = 0;
-//			}
-//		}
 }
 
 /***************************************************************
@@ -646,7 +648,7 @@ void Judge_Roundabouts(void)
 	if(cnt == 0)
 	{
 		Magnetic_GetAdc();
-		if(magnetic.left_mag > 55 || magnetic.right_mag > 55 && feature.roundabouts_state == 0)
+		if(magnetic.left_mag > 50 || magnetic.right_mag > 50 && feature.roundabouts_state == 0)
 		{
 			if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 			{
@@ -676,7 +678,7 @@ void Judge_Roundabouts(void)
 	{
 		if(feature.right_flection_flag == 1)
 		{
-			if(line.right_line[feature.right_flection_row] > 50)
+			if(line.right_line[feature.right_flection_row] > 140)
 			{
 				feature.roundabouts_state = 5;
 			}
@@ -684,7 +686,8 @@ void Judge_Roundabouts(void)
 	}
 	if(feature.roundabouts_state == 5)
 	{
-		if(feature.top_point < 12 && line.left_line_flag[feature.top_point] == 0 && line.right_line_flag[feature.top_point] == 1)
+		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 0 && line.right_line_flag[feature.top_point] == 1
+		|| feature.deep_turn_state == 1)
 		{
 			servo.enable = 1;
 			feature.roundabouts_state = 0;
@@ -702,7 +705,7 @@ void Judge_Roundabouts(void)
 	{
 		if(feature.left_flection_flag == 1)
 		{
-			if(line.left_line[feature.left_flection_row] < 110)
+			if(line.left_line[feature.left_flection_row] < 20)
 			{
 				feature.roundabouts_state = 6;
 			}
@@ -710,7 +713,8 @@ void Judge_Roundabouts(void)
 	}
 	if(feature.roundabouts_state == 6)
 	{
-		if(feature.top_point < 12 && line.left_line_flag[feature.top_point] == 1 && line.right_line_flag[feature.top_point] == 0)
+		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 1 && line.right_line_flag[feature.top_point] == 0
+		|| feature.deep_turn_state == 2)
 		{
 			servo.enable = 1;
 			feature.roundabouts_state = 0;

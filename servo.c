@@ -12,12 +12,12 @@ void Servo_Gpio_Init(void)
 	servo.duty = DEG_MID;
 	servo.fore_max = 42;
 	servo.fore_min = 37;
-	servo.kp_left = 4.5;
-	servo.kp_right = 4.5;
+	servo.kp_left = 3.9;
+	servo.kp_right = 3.9;
 	servo.ki = 0;
 	servo.kd = 11.1;
-	servo.dead_zone = 5;
-	servo.dynamic_zone = 25;
+	servo.dead_zone = 2;
+	servo.dynamic_zone = 30;
 	servo.dif_const_left = 7.4;//7.28;
 	servo.dif_const_right = 5.2;//5.6;
 	servo.enable = 1;
@@ -86,18 +86,19 @@ void Servo_Control(void)
 {
 //	int16 mid_error[4];
 //	int16 speed = (int16)(0.6 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.2 * motor.speed_current[2]);//编码器的值会有高频抖动
-	if(motor.speed_ave > 400)
-	{
-		servo.foresight = servo.fore_min;
-	}
-	else if(motor.speed_ave < 250)
-	{
-		servo.foresight = servo.fore_max;
-	}
-	else
-	{
-		servo.foresight = (uint8)(servo.fore_min + (float)(servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
-	}
+//	if(motor.speed_ave > 400)
+//	{
+//		servo.foresight = servo.fore_min;
+//	}
+//	else if(motor.speed_ave < 250)
+//	{
+//		servo.foresight = servo.fore_max;
+//	}
+//	else
+//	{
+//		servo.foresight = (uint8)(servo.fore_min + (float)(servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
+//	}
+	servo.foresight = servo.fore_max;
 	if(servo.foresight < feature.top_point)
 	{
 		servo.foresight = feature.top_point - 2;
@@ -107,8 +108,8 @@ void Servo_Control(void)
 //	mid_error[2]=(line.midline[servo.foresight+2]-80);
 //	mid_error[3]=(line.midline[servo.foresight-1]-80);
 //	servo.error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);
-	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0) + 
-		(int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0)
+		+ (int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;

@@ -8,9 +8,9 @@
 #define SERVO_HIGH_PITx PIT0
 
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
-#define DEG_MAX  1612
-#define DEG_MID  1452
-#define DEG_MIN  1287
+#define DEG_MAX  1631
+#define DEG_MID  1451
+#define DEG_MIN  1271
 
 typedef struct
 {
@@ -30,6 +30,8 @@ typedef struct
 	float32 dif_const_left;
 	float32 dif_const_right;
 	int8 enable;
+	int16 duty_record[20];
+	int8 stop;
 }Servo_Class;
 extern Servo_Class servo;
 

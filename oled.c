@@ -424,10 +424,14 @@ void OLED_ShowImage(void)
 	OLED_PrintUintValue(100, 5, feature.road_type[0]);
 //	OLED_PrintUintValue(80, 6, feature.left_flection_row);
 //	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection_row - 1]);
-	OLED_PrintUintValue(80, 6, feature.left_flection2_row);
-	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
-	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
-	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
+//	OLED_PrintUintValue(80, 6, feature.left_flection2_row);
+//	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
+//	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
+//	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
+//	OLED_PrintUintValue(80, 7, (uint32)magnetic.left_mag);
+//	OLED_PrintUintValue(100, 7, (uint32)magnetic.right_mag);
+	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
+	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);
 }
 
