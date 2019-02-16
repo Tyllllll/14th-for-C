@@ -34,6 +34,9 @@ typedef struct
 	int16 output_value_left;
 	int16 output_value_right;
 	int8 is_open_loop;
+	
+	float32 dif_const;
+	float32 dif_fore;
 }Motor_Class;
 extern Motor_Class motor;
 

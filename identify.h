@@ -36,8 +36,10 @@ typedef struct
 	uint8 road_type[200];
 	//直道标志
 	uint8 straight_state;
-	//左右转标志（12小弯34深弯）
+	//左右转标志
 	uint8 turn_state;
+	uint8 turn_row;
+	uint8 deep_turn_state;
 	//十字标志
 	uint8 cross_state[2];
 	//环岛标志

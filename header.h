@@ -3,6 +3,9 @@
 #include "common.h"
 #include "math.h"
 
+#define MODEL_WIDTH		15
+#define MODEL_LENGTH	20
+
 #include "init_all.h"
 #include "motor.h"
 #include "led.h"

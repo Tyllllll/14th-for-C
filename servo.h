@@ -9,7 +9,7 @@
 
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
 #define DEG_MAX  1612
-#define DEG_MID  1454
+#define DEG_MID  1452
 #define DEG_MIN  1287
 
 typedef struct

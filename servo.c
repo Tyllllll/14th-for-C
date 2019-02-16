@@ -63,7 +63,7 @@ void Servo_Output(void)
 	}
 	PIT->CHANNEL[3].LDVAL = (servo.duty) * (g_bus_clock / 1000000) - 1;
 	SERVO = 1;
-	PIT->CHANNEL[3].TCTRL |= PIT_TCTRL_TEN_MASK;//开始计时 
+	PIT->CHANNEL[3].TCTRL |= PIT_TCTRL_TEN_MASK;//开始计时
 }
 
 /***************************************************************
@@ -97,6 +97,10 @@ void Servo_Control(void)
 	else
 	{
 		servo.foresight = (uint8)(servo.fore_min + (float)(servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
+	}
+	if(servo.foresight < feature.top_point)
+	{
+		servo.foresight = feature.top_point - 2;
 	}
 //	mid_error[0]=2*(line.midline[servo.foresight]-80);
 //	mid_error[1]=2*(line.midline[servo.foresight+1]-80);

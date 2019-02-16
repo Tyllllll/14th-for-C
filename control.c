@@ -27,10 +27,10 @@ Setting_Class setting;
 ***************************************************************/
 void Speed_Init(void)
 {
-	speed.straight = 200;
-	speed.long_straight = 220;
-	speed.curve_high = 180;
-	speed.curve_low = 170;
+	speed.straight = 240;
+	speed.long_straight = 270;
+	speed.curve_high = 220;
+	speed.curve_low = 180;
 	speed.cross = 170;
 	speed.roundabouts = 170;
 //	speed.straight = 280;
@@ -53,7 +53,10 @@ void All_Fill(void)
 		Cross_Fill();
 	}
 	Roundabouts_Fill();
-	Curve_Fill();
+	if(feature.straight_state == 0)
+	{
+//		Curve_Fill();
+	}
 }
 
 /***************************************************************
@@ -69,7 +72,7 @@ void Curve_Fill(void)
 		//×óÐ¡Íä
 		if(feature.turn_state == 1)
 		{
-			for(i = 45; i > feature.top_point; i--)
+			for(i = feature.turn_row; i > feature.top_point; i--)
 			{
 				if(line.right_line[i] == 159)
 				{
@@ -92,7 +95,7 @@ void Curve_Fill(void)
 		//ÓÒÐ¡Íä
 		else if(feature.turn_state == 2)
 		{
-			for(i = 45; i > feature.top_point; i--)
+			for(i = feature.turn_row; i > feature.top_point; i--)
 			{
 				if(line.left_line[i] == 0)
 				{
@@ -112,8 +115,11 @@ void Curve_Fill(void)
 				}
 			}
 		}
+	}
+	if(feature.deep_turn_state != 0)
+	{
 		//×óÉîÍä
-		else if(feature.turn_state == 3)
+		if(feature.deep_turn_state == 1)
 		{
 			for(i = 118; i > feature.top_point; i--)
 			{
@@ -135,7 +141,7 @@ void Curve_Fill(void)
 			}
 		}
 		//ÓÒÉîÍä
-		else if(feature.turn_state == 4)
+		else if(feature.deep_turn_state == 2)
 		{
 			for(i = 118; i > feature.top_point; i--)
 			{
@@ -156,6 +162,20 @@ void Curve_Fill(void)
 				}
 			}
 		}
+		else if(feature.deep_turn_state == 3)
+		{
+			for(i = 118; i > 35; i--)
+			{
+				line.midline[i] = 0;
+			}
+		}
+		else if(feature.deep_turn_state == 4)
+		{
+			for(i = 118; i > 35; i--)
+			{
+				line.midline[i] = 159;
+			}
+		}
 	}
 }
 
@@ -171,7 +191,7 @@ void Cross_Fill(void)
 	float32 k_right;
 	float32 k_left2;
 	float32 k_right2;
-	if(feature.left_flection_flag == 1 || feature.right_flection_flag == 1)
+	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row] > 15  || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row] < 145)
 	{
 		if(feature.left_flection_flag == 1)
 		{
@@ -230,53 +250,75 @@ void Cross_Fill(void)
 	{
 		if(feature.left_flection2_flag == 1)
 		{
-			if(feature.left_flection2_row - 6 > 6)
+			if(feature.left_flection2_row - 9 > 6)
 			{
-				feature.k_left_record2[0] = (line.left_line[feature.left_flection2_row - 6] - line.left_line[feature.left_flection2_row - 1]) / 5.0;
+				feature.k_left_record2[0] = (line.left_line[feature.left_flection2_row - 9] - line.left_line[feature.left_flection2_row - 1]) / 8.0;
 			}
 			else
 			{
 				feature.k_left_record2[0] = (line.left_line[6] - line.left_line[feature.left_flection2_row - 1]) / (feature.left_flection2_row - 7);
 			}
 			k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
-			for(i = 110; i > feature.left_flection2_row; i--)
+			if(feature.left_flection2_antiflag == 0)
 			{
-				if(feature.left_flection2_antiflag == 0)
+				for(i = 110; i > feature.left_flection2_row; i--)
 				{
 					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] + k_left2 * (feature.left_flection2_row - 2 - i));
+					if(line.left_line[i] < 0)
+					{
+						line.left_line[i] = 0;
+					}
+					if(line.left_line[i] > 159)
+					{
+						line.left_line[i] = 159;
+					}
 				}
-				else
+			}
+			else
+			{
+				for(i = 110; i > 30; i--)
 				{
 					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - k_left2 * (feature.left_flection2_row - 2 - i));
-				}
-				if(line.left_line[i] < 0)
-				{
-					line.left_line[i] = 0;
-				}
-				if(line.left_line[i] > 159)
-				{
-					line.left_line[i] = 159;
+					if(line.left_line[i] < 0)
+					{
+						line.left_line[i] = 0;
+					}
+					if(line.left_line[i] > 159)
+					{
+						line.left_line[i] = 159;
+					}
 				}
 			}
 		}
 		if(feature.right_flection2_flag == 1)
 		{
-			if(feature.right_flection2_row - 6 > 6)
+			if(feature.right_flection2_row - 9 > 6)
 			{
-				feature.k_right_record2[0] = (line.right_line[feature.right_flection2_row - 6] - line.right_line[feature.right_flection2_row - 1]) / 5.0;
+				feature.k_right_record2[0] = (line.right_line[feature.right_flection2_row - 9] - line.right_line[feature.right_flection2_row - 1]) / 8.0;
 			}
 			else
 			{
 				feature.k_right_record2[0] = (line.right_line[6] - line.right_line[feature.right_flection2_row - 1]) / (feature.right_flection2_row - 7);
 			}
 			k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
-			for(i = 110; i > feature.right_flection2_row; i--)
+			if(feature.right_flection2_antiflag == 0)
 			{
-				if(feature.right_flection2_antiflag == 0)
+				for(i = 110; i > feature.right_flection2_row; i--)
 				{
 					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + k_right2 * (feature.right_flection2_row - 2 - i));
 				}
-				else
+				if(line.right_line[i] < 0)
+				{
+					line.right_line[i] = 0;
+				}
+				if(line.right_line[i] > 159)
+				{
+					line.right_line[i] = 159;
+				}
+			}
+			else
+			{
+				for(i = 110; i > 30; i--)
 				{
 					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] - k_right2 * (feature.right_flection2_row - 2 - i));
 				}
@@ -573,15 +615,26 @@ void Speed_Set(void)
 	else
 	{
 		feature.road_type[0] = 3;
-		error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
-		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
-		if(motor.speed_set > speed.curve_high)
+		if(feature.turn_state == 5 || feature.turn_state == 6)
 		{
-			motor.speed_set = speed.curve_high;
+			motor.speed_set = 50;
 		}
-		if(motor.speed_set < speed.curve_low)
+		else if(feature.turn_state == 3 || feature.turn_state == 4)
 		{
 			motor.speed_set = speed.curve_low;
+		}
+		else
+		{
+			error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
+			motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
+			if(motor.speed_set > speed.curve_high)
+			{
+				motor.speed_set = speed.curve_high;
+			}
+			if(motor.speed_set < speed.curve_low)
+			{
+				motor.speed_set = speed.curve_low;
+			}
 		}
 	}
 }
@@ -643,14 +696,14 @@ void Parameter_Setting(void)
 				setting.page_num--;
 				if(setting.page_num < 0)
 				{
-					setting.page_num = 3;
+					setting.page_num = 4;
 				}
 				Setting_Paint();
 				break;
 				//ÏÂÇÐÒ³
 			case 6:
 				setting.page_num++;
-				if(setting.page_num > 3)
+				if(setting.page_num > 4)
 				{
 					setting.page_num = 0;
 				}
@@ -690,6 +743,9 @@ void Parameter_Setting(void)
 				case 3:
 					setting.data[setting.page_num][setting.course] += 1;
 					break;
+				case 4:
+					setting.data[setting.page_num][setting.course] += 0.01;
+					break;
 				}
 				Save_Data();
 				OLED_Put6x8Str(70, setting.course, "      ");
@@ -711,6 +767,9 @@ void Parameter_Setting(void)
 				case 3:
 					setting.data[setting.page_num][setting.course] -= 1;
 					break;
+				case 4:
+					setting.data[setting.page_num][setting.course] -= 0.01;
+					break;
 				}
 				Save_Data();
 				OLED_Put6x8Str(70, setting.course, "      ");
@@ -718,7 +777,7 @@ void Parameter_Setting(void)
 				break;
 			}
 		}
-		LPLD_LPTMR_DelayMs(200);
+		LPLD_LPTMR_DelayMs(50);
 	}
 	EnableInterrupts;
 }
@@ -779,6 +838,12 @@ void Parameter_Setting_Init(void)
 	setting.data[3][3] = (float32)motor.kd;
 	sprintf(setting.string[3][4], "openloop");
 	setting.data[3][4] = (float32)motor.is_open_loop;
+	
+	sprintf(setting.string[4][0], "MOTOR_DIF");
+	sprintf(setting.string[4][1], "const");
+	setting.data[4][1] = (float32)motor.dif_const;
+	sprintf(setting.string[4][2], "fore");
+	setting.data[4][2] = (float32)motor.dif_fore;
 }
 
 /***************************************************************
@@ -826,6 +891,16 @@ void Setting_Paint(void)
 		{
 			OLED_Put6x8Str(8, i, setting.string[3][i]);
 			OLED_PrintFloatValue(70, i, setting.data[3][i]);
+		}
+		break;
+		break;
+	case 4:
+		OLED_Put6x8Str(8, 0, setting.string[4][0]);
+		OLED_Put6x8Str(115, 0, "P5");
+		for(i = 1; i < 8; i++)
+		{
+			OLED_Put6x8Str(8, i, setting.string[4][i]);
+			OLED_PrintFloatValue(70, i, setting.data[4][i]);
 		}
 		break;
 	}
@@ -943,4 +1018,6 @@ void Save_Data(void)
 	motor.ki = setting.data[3][2];
 	motor.kd = setting.data[3][3];
 	motor.is_open_loop = (int8)setting.data[3][4];
+	motor.dif_const = setting.data[4][1];
+	motor.dif_fore = setting.data[4][2];
 }

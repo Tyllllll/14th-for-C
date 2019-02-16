@@ -51,6 +51,8 @@ void main(void)
 				{
 					motor.start = 50;
 					motor.error_integral = 0;
+//					motor.error_integral_left = 0;
+//					motor.error_integral_right = 0;
 				}
 			}
 		}
