@@ -257,7 +257,7 @@ void DMA_Complete_Isr(void)
 	camera.ready_write = 1;
 	if(camera.which_buffer == 1)
 	{
-		camera.which_buffer = 1;
+		camera.which_buffer = 0;
 	}
 	else
 	{
