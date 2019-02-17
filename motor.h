@@ -37,6 +37,14 @@ typedef struct
 	
 	float32 dif_const;
 	float32 dif_fore;
+	int16 speed_ave_left;
+	int16 speed_ave_right;
+	int16 speed_set_left;
+	int16 speed_set_right;
+	int16 error_left;
+	int16 error_right;
+	int16 error_integral_left;
+	int16 error_integral_right;
 }Motor_Class;
 extern Motor_Class motor;
 

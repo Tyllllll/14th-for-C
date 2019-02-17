@@ -154,7 +154,7 @@ static void Camera_Gpio_Init(void)
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 75;
+	camera.contrast = 100;
 	camera.ready_write = 1;
 
 	uint16 i = 0;

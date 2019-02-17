@@ -205,7 +205,7 @@ void Cross_Fill(void)
 				{
 					line.left_line[i] = 0;
 				}
-				if(line.left_line[i] > 159)
+				else if(line.left_line[i] > 159)
 				{
 					line.left_line[i] = 159;
 				}
@@ -231,7 +231,7 @@ void Cross_Fill(void)
 				{
 					line.right_line[i] = 0;
 				}
-				if(line.right_line[i] > 159)
+				else if(line.right_line[i] > 159)
 				{
 					line.right_line[i] = 159;
 				}
@@ -261,7 +261,7 @@ void Cross_Fill(void)
 					{
 						line.left_line[i] = 0;
 					}
-					if(line.left_line[i] > 159)
+					else if(line.left_line[i] > 159)
 					{
 						line.left_line[i] = 159;
 					}
@@ -276,7 +276,7 @@ void Cross_Fill(void)
 					{
 						line.left_line[i] = 0;
 					}
-					if(line.left_line[i] > 159)
+					else if(line.left_line[i] > 159)
 					{
 						line.left_line[i] = 159;
 					}
@@ -303,7 +303,7 @@ void Cross_Fill(void)
 					{
 						line.right_line[i] = 0;
 					}
-					if(line.right_line[i] > 159)
+					else if(line.right_line[i] > 159)
 					{
 						line.right_line[i] = 159;
 					}
@@ -318,7 +318,7 @@ void Cross_Fill(void)
 					{
 						line.right_line[i] = 0;
 					}
-					if(line.right_line[i] > 159)
+					else if(line.right_line[i] > 159)
 					{
 						line.right_line[i] = 159;
 					}
@@ -347,7 +347,7 @@ void Cross_Fill(void)
 				{
 					line.midline[i] = 0;
 				}
-				if(line.midline[i] > 159)
+				else if(line.midline[i] > 159)
 				{
 					line.midline[i] = 159;
 				}
@@ -362,7 +362,7 @@ void Cross_Fill(void)
 				{
 					line.midline[i] = 0;
 				}
-				if(line.midline[i] > 159)
+				else if(line.midline[i] > 159)
 				{
 					line.midline[i] = 159;
 				}
@@ -377,7 +377,7 @@ void Cross_Fill(void)
 				{
 					line.midline[i] = 0;
 				}
-				if(line.midline[i] > 159)
+				else if(line.midline[i] > 159)
 				{
 					line.midline[i] = 159;
 				}
@@ -396,7 +396,7 @@ void Cross_Fill(void)
 				{
 					line.midline[i] = 0;
 				}
-				if(line.midline[i] > 159)
+				else if(line.midline[i] > 159)
 				{
 					line.midline[i] = 159;
 				}
@@ -413,7 +413,7 @@ void Cross_Fill(void)
 					{
 						line.midline[i] = 0;
 					}
-					if(line.midline[i] > 159)
+					else if(line.midline[i] > 159)
 					{
 						line.midline[i] = 159;
 					}
@@ -425,7 +425,7 @@ void Cross_Fill(void)
 					{
 						line.midline[i] = 0;
 					}
-					if(line.midline[i] > 159)
+					else if(line.midline[i] > 159)
 					{
 						line.midline[i] = 159;
 					}
@@ -457,7 +457,7 @@ void Cross_Fill(void)
 					{
 						line.midline[i] = 0;
 					}
-					if(line.midline[i] > 159)
+					else if(line.midline[i] > 159)
 					{
 						line.midline[i] = 159;
 					}
@@ -469,7 +469,7 @@ void Cross_Fill(void)
 					{
 						line.midline[i] = 0;
 					}
-					if(line.midline[i] > 159)
+					else if(line.midline[i] > 159)
 					{
 						line.midline[i] = 159;
 					}
@@ -695,7 +695,7 @@ void Speed_Set(void)
 				{
 					motor.speed_set = speed.curve_high;
 				}
-				if(motor.speed_set < speed.curve_low)
+				else if(motor.speed_set < speed.curve_low)
 				{
 					motor.speed_set = speed.curve_low;
 				}
@@ -755,7 +755,7 @@ void Speed_Set(void)
 			{
 				motor.speed_set = speed.curve_high;
 			}
-			if(motor.speed_set < speed.curve_low)
+			else if(motor.speed_set < speed.curve_low)
 			{
 				motor.speed_set = speed.curve_low;
 			}

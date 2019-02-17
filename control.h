@@ -1,6 +1,9 @@
 #ifndef _CONTROL_H_
 #define _CONTROL_H_
 
+#define SPEED_MAX 500
+#define SPEED_MIN 0
+
 typedef struct
 {
 	int16 straight;
