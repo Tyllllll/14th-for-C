@@ -45,14 +45,14 @@ void main(void)
 			if(KEY1 == 0)
 			{
 				BUZZER_ON;
-				LPLD_LPTMR_DelayMs(200);
+                                LPLD_LPTMR_DelayMs(200);
 				BUZZER_OFF;
 				if(motor.start == 0)
 				{
 					motor.start = 50;
 					motor.error_integral = 0;
-//					motor.error_integral_left = 0;
-//					motor.error_integral_right = 0;
+					motor.error_integral_L = 0;
+					motor.error_integral_R = 0;
 				}
 			}
 		}
@@ -77,7 +77,7 @@ void main(void)
 			}
 			if(motor.start != 0)
 			{
-				if(is_Lose_All() == 1)
+				if(is_Lose_All() == 1 && feature.breakage_state[1] == 0)
 				{
 					servo.stop++;
 					if(servo.stop == 5)
@@ -96,7 +96,7 @@ void main(void)
 				OLED_ShowImage();
 			}
 		}
-//		Magnetic_GetAdc();
+		Magnetic_GetAdc();
 //		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
 //		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
 //		if(KEY1 == 0)

@@ -45,9 +45,11 @@ typedef struct
 	//环岛标志
 	uint8 roundabouts_state;
 	float32 roundabouts_size;
+    //断路标志
+    uint8 breakage_state[2]; //[1]:0=无断路 1=即将进入或已进入断路  
+    uint8 breakage_row;
 }Feature_Class;
 extern Feature_Class feature;
-
 void Find_Line(void);
 void Judge_Feature(void);
 void Find_Top_Point(void);
@@ -57,8 +59,9 @@ void Judge_Straight(void);
 void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
+void Judge_Breakage(void);
 
-float Midline_Std_Deviation(void);
+float Midline_Std_Deviation(uint8 row_max,uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_Line(uint8 row);

@@ -1,7 +1,32 @@
 #include "header.h"
 
 Motor_Class motor;
+int16 P_value;
+int16 I_value;
+int16 D_value;
+int8 deltaKpMatrix[7][7]={{PB,PB,PM,PM,PS,ZO,ZO},
+                          {PB,PB,PM,PS,PS,ZO,NS},
+                          {PM,PM,PM,PS,ZO,NS,NS},
+                          {PM,PM,PS,ZO,NS,NM,NM},
+                          {PS,PS,ZO,NS,NS,NM,NM},
+                          {PS,ZO,NS,NM,NM,NM,NB},
+                          {ZO,ZO,NM,NM,NM,NB,NB}};
+int8 deltaKiMatrix[7][7]={{NB,NB,NM,NM,NS,ZO,ZO},
+                          {NB,NB,NM,NS,NS,ZO,ZO},
+                          {NB,NM,NS,NS,ZO,PS,PS},
+                          {NM,NM,NS,ZO,PS,PM,PM},
+                          {NM,NS,ZO,PS,PS,PM,PB},
+                          {ZO,ZO,PS,PS,PM,PB,PB},
+                          {ZO,ZO,PS,PM,PM,PB,PB}};
+int8 deltaKdMatrix[7][7]={{PS,NS,NB,NB,NB,NM,PS},
+                          {PS,NS,NB,NM,NM,NS,ZO},
+                          {ZO,NS,NM,NM,NS,NS,ZO},
+                          {ZO,NS,NS,NS,NS,NS,ZO},
+                          {ZO,ZO,ZO,ZO,ZO,ZO,ZO},
+                          {PB,NS,PS,PS,PS,PS,PB},
+                          {PB,PM,PM,PM,PS,PS,PB}};
 
+int8 mf_paras[]={-3,-3,-2,-3,-2,-1,-2,-1,0,-1,0,1,0,1,2,1,2,3,2,3,3};
 /***************************************************************
 	*	@brief	电机初始化
 	*	@param	无
@@ -9,13 +34,16 @@ Motor_Class motor;
 ***************************************************************/
 void Motor_Pwm_Init(void)
 {
-	motor.kp = 65;
-	motor.ki = 20;
-	motor.kd = 0;
+	motor.kp = 16;
+	motor.ki = 3.4;
+	motor.kd = 0.7;
 	motor.is_open_loop = 0;
-	motor.dif_const = 1;
+	motor.dif_const = 0.96;
 	motor.dif_fore = 1;
-	
+    motor.delta_kp = 0;
+    motor.delta_kp_max = 50;
+    motor.diff_error_max = 20;
+    motor.error_max = 180;	
     static FTM_InitTypeDef FTM_InitStructure;
     FTM_InitStructure.FTM_Ftmx = MOTOR_FTMx;	//选择FTM通道
     FTM_InitStructure.FTM_Mode = FTM_MODE_PWM;	//FTM0的工作模式是PWM波输出
@@ -59,25 +87,27 @@ void Motor_PIT(void)
 	//实时速度，单位cm/s
 	if(encoder.left_num != 0)
 	{
-		motor.speed_current_left[0] = (int16)(10000 * (float32)encoder.left_num / ENCODER_NUM_PER_METER_LEFT);
+		motor.speed_current_L[0] = (int16)(10000 * (float32)encoder.left_num / ENCODER_NUM_PER_METER_LEFT);
 	}
 	else
 	{
-		motor.speed_current_left[0] = 0;
+		motor.speed_current_L[0] = 0;
 	}
 	if(encoder.right_num != 0)
 	{
-		motor.speed_current_right[0] = (int16)(10000 * (float32)encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);
+		motor.speed_current_R[0] = (int16)(10000 * (float32)encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);
 	}
 	else
 	{
-		motor.speed_current_right[0] = 0;
+		motor.speed_current_R[0] = 0;
 	}
-	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
+	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_L[0] + 0.5 * motor.speed_current_R[0]);
 	Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
 	{
 		motor.speed_current[i] = motor.speed_current[i - 1];
+		motor.speed_current_L[i] = motor.speed_current_L[i - 1];
+		motor.speed_current_R[i] = motor.speed_current_R[i - 1];
 	}
 	//清空计数器
 	LPLD_FTM_ClearCounter(FTM2);
@@ -96,42 +126,42 @@ void Motor_Control(void)
 	{
 		if(motor.speed_ave >= 0.9 * motor.speed_set)
 		{
-			if(motor.output_value_left > MOTOR_MAX_OUTPUT)
+			if(motor.output_value_L > MOTOR_MAX_OUTPUT)
 			{
-				motor.output_value_left = MOTOR_MAX_OUTPUT;
+				motor.output_value_L = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
+			if(motor.output_value_L < -MOTOR_MAX_OUTPUT)
 			{
-				motor.output_value_left = -MOTOR_MAX_OUTPUT;
+				motor.output_value_L = -MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_right > MOTOR_MAX_OUTPUT)
+			if(motor.output_value_R > MOTOR_MAX_OUTPUT)
 			{
-				motor.output_value_right = MOTOR_MAX_OUTPUT;
+				motor.output_value_R = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
+			if(motor.output_value_R < -MOTOR_MAX_OUTPUT)
 			{
-				motor.output_value_right = -MOTOR_MAX_OUTPUT;
+				motor.output_value_R = -MOTOR_MAX_OUTPUT;
 			}
 		}
-		if(motor.output_value_left >= 0)
+		if(motor.output_value_L >= 0)
 		{
-			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, motor.output_value_left);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, motor.output_value_L);
 			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0); 
 		}
 		else
 		{
 			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
-			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, -motor.output_value_left); 
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, -motor.output_value_L); 
 		}
-		if(motor.output_value_right >= 0)
+		if(motor.output_value_R >= 0)
 		{
-			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, motor.output_value_right);
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, motor.output_value_R);
 			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, 0); 
 		}
 		else
 		{
 			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch7, 0);
-			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, -motor.output_value_right); 
+			LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch6, -motor.output_value_R); 
 		}
 		if(motor.start > 1)
 		{
@@ -176,63 +206,67 @@ void Motor_Control(void)
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
 		motor.start = 0;
+        motor.stop = 0;
 	}
 }
 
 /***************************************************************
 	*	@brief	电机pid计算
 	*	@param	无
-	*	@note	Motor_Control调用
+	*	@note	Motor_Control调用，还没有根据示波器来测常数
 ***************************************************************/
 void Motor_PID(void)
 {
-	int16 integral_current = 0;
-	int16 integral_current_left = 0;
-	int16 integral_current_right = 0;
+	int16 integral_current_L = 0;
+	int16 integral_current_R = 0;
+	int16 index_L = 0;
+	int16 index_R = 0;
 	if(motor.stop >= 1)
 	{
 		motor.speed_set = 0;
 	}
+	//差速速度设定
 	if(motor.speed_set != 0)
 	{
-		if(servo.error[0] < - 2 * servo.dead_zone)
+		if(servo.error[0] < - 2 * servo.dead_zone)   //左转
 		{
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
+			motor.speed_set_L = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
+			motor.speed_set_R = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
 		}
-		else if(servo.error[0] > 2 * servo.dead_zone)
+		else if(servo.error[0] > 2 * servo.dead_zone) //右转
 		{
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
+			motor.speed_set_L = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
+			motor.speed_set_R = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 		}
 		else
 		{
-			motor.speed_set_left = motor.speed_set;
-			motor.speed_set_right = motor.speed_set;
+			motor.speed_set_L = motor.speed_set;
+			motor.speed_set_R = motor.speed_set;
 		}
-		if(motor.speed_set_left > SPEED_MAX)
+		if(motor.speed_set_L > SPEED_MAX)
 		{
-			motor.speed_set_left = SPEED_MAX;
+			motor.speed_set_L = SPEED_MAX;
 		}
-		else if(motor.speed_set_left < SPEED_MIN)
+		else if(motor.speed_set_L < SPEED_MIN)
 		{
-			motor.speed_set_left = SPEED_MIN;
+			motor.speed_set_L = SPEED_MIN;
 		}
-		if(motor.speed_set_right > SPEED_MAX)
+		if(motor.speed_set_R > SPEED_MAX)
 		{
-			motor.speed_set_right = SPEED_MAX;
+			motor.speed_set_R = SPEED_MAX;
 		}
-		else if(motor.speed_set_right < SPEED_MIN)
+		else if(motor.speed_set_R < SPEED_MIN)
 		{
-			motor.speed_set_right = SPEED_MIN;
+			motor.speed_set_R = SPEED_MIN;
 		}
 	}
+	
 	motor.speed_ave = (int16)(0.5 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.1 * motor.speed_current[2] + 
 							  0.1 * motor.speed_current[3] + 0.1 * motor.speed_current[4]);
-	motor.speed_ave_left = (int16)(0.5 * motor.speed_current_left[0] + 0.2 * motor.speed_current_left[1] + 0.1 * motor.speed_current_left[2] + 
-							  0.1 * motor.speed_current_left[3] + 0.1 * motor.speed_current_left[4]);
-	motor.speed_ave_right = (int16)(0.5 * motor.speed_current_right[0] + 0.2 * motor.speed_current_right[1] + 0.1 * motor.speed_current_right[2] + 
-							  0.1 * motor.speed_current_right[3] + 0.1 * motor.speed_current_right[4]);
+	motor.speed_ave_L = (int16)(0.5 * motor.speed_current_L[0] + 0.2 * motor.speed_current_L[1] + 0.1 * motor.speed_current_L[2] + 
+							  0.1 * motor.speed_current_L[3] + 0.1 * motor.speed_current_L[4]);
+	motor.speed_ave_R = (int16)(0.5 * motor.speed_current_R[0] + 0.2 * motor.speed_current_R[1] + 0.1 * motor.speed_current_R[2] + 
+							  0.1 * motor.speed_current_R[3] + 0.1 * motor.speed_current_R[4]);
 	//开环加速
 	if(motor.speed_ave < 0.9 * motor.speed_set && motor.is_open_loop == 1)
 	{
@@ -241,155 +275,219 @@ void Motor_PID(void)
 	//闭环pid控制
 	else
 	{
-		motor.error = motor.speed_set - motor.speed_ave;
-		motor.error_left = motor.speed_set_left - motor.speed_ave_left;
-		motor.error_right = motor.speed_set_right - motor.speed_ave_right;
-		integral_current = (int16)(motor.ki * motor.error);
-		integral_current_left = (int16)(motor.ki * motor.error_left);
-		integral_current_right = (int16)(motor.ki * motor.error_right);
+
+		//计算delta_kp并更新kp
+//		motor.delta_kp = (float32)(0.001 * deltaFuzzyPID(1));
+//		motor.kp = (float32)(motor.kp - motor.delta_kp);
+		motor.error_L = motor.speed_set_L - motor.speed_ave_L;
+		motor.error_R = motor.speed_set_R - motor.speed_ave_R;
+		motor.diff_error_L = motor.error_pre_2_L - motor.error_pre_1_L;
+		motor.diff_error_R = motor.error_pre_2_R - motor.error_pre_1_R;
+		
+		
+		
+		integral_current_L = (int16)(motor.ki * motor.error_L);
+		integral_current_R = (int16)(motor.ki * motor.error_R);
 		//积分抗饱和，可用积分限幅代替
-		if(motor.output_value > 5000 && integral_current < 0)
+		
+		if(motor.output_value_L > 5000 && motor.error_L < 0) // 加速度a>0 & speed>speed_set 只累加负偏差  
 		{
-			motor.error_integral += integral_current;
+			if(motor.error_L < -80)
+			{
+				index_L = 0;
+			}
+			else
+			{
+				index_L = 1;
+				motor.error_integral_L += integral_current_L;
+			}
 		}
-		else if(motor.output_value < -3000 && integral_current > 0)
+		else if(motor.output_value_L < -3000 && motor.error_L > 0) // a<0 & speed<speed_set 只累加正偏差
 		{
-			motor.error_integral += integral_current;
+			if(motor.error_L > 80)
+			{
+				index_L = 0;
+			}
+			else
+			{
+				index_L = 1;
+				motor.error_integral_L += integral_current_L;
+			}
 		}
-		else if(motor.output_value >= -3000 && motor.output_value <= 5000)
+		else if(motor.output_value_L >= -3000 && motor.output_value_L <= 5000)
 		{
-			motor.error_integral += integral_current;
+			if(fabs(motor.error_L) > 80)
+			{
+				index_L = 0;
+			}
+			else
+			{
+				index_L = 1;
+				motor.error_integral_L += integral_current_L;
+			}
 		}
-		if(motor.output_value_left > 5000 && integral_current_left < 0)
+		
+		if(motor.output_value_R > 5000 && motor.error_R < 0) // 加速度a>0 & speed>speed_set 只累加负偏差  
 		{
-			motor.error_integral_left += integral_current_left;
+			if(motor.error_R < -80)
+			{
+				index_R = 0;
+			}
+			else
+			{
+				index_R = 1;
+				motor.error_integral_R += integral_current_R;
+			}
 		}
-		else if(motor.output_value_left < -3000 && integral_current_left > 0)
+		else if(motor.output_value_R < -3000 && motor.error_R > 0) // a<0 & speed<speed_set 只累加正偏差
 		{
-			motor.error_integral_left += integral_current_left;
+			if(motor.error_R > 80)
+			{
+				index_R = 0;
+			}
+			else
+			{
+				index_R = 1;
+				motor.error_integral_R += integral_current_R;
+			}
 		}
-		else if(motor.output_value_left >= -3000 && motor.output_value_left <= 5000)
+		else if(motor.output_value_R >= -3000 && motor.output_value_R <= 5000)
 		{
-			motor.error_integral_left += integral_current_left;
-		}
-		if(motor.output_value_right > 5000 && integral_current_right < 0)
-		{
-			motor.error_integral_right += integral_current_right;
-		}
-		else if(motor.output_value_right < -3000 && integral_current_right > 0)
-		{
-			motor.error_integral_right += integral_current_right;
-		}
-		else if(motor.output_value_right >= -3000 && motor.output_value_right <= 5000)
-		{
-			motor.error_integral_right += integral_current_right;
-		}
+			if(fabs(motor.error_R) > 80)
+			{
+				index_R = 0;
+			}
+			else
+			{
+				index_R = 1;
+				motor.error_integral_R += integral_current_R;
+			}
+		}		
+		
 		//减速积分退饱和
-		if(motor.error < -20)
-		{
-			if(motor.error_integral > 3000)
+		if(motor.error_L < -20)  //speed_set < speed 减速
+ 		{
+			if(motor.error_integral_L > 3000)
 			{
-				if(motor.error < -100)
+				if(motor.error_L < -100)
 				{
-					motor.error_integral *= 0.2;
+					motor.error_integral_L *= 0.2;
 				}
-				else if(motor.error < -80)
+				else if(motor.error_L < -80)
 				{
-					motor.error_integral *= 0.4;
+					motor.error_integral_L *= 0.4;
 				}
-				else if(motor.error < -60)
+				else if(motor.error_L < -60)
 				{
-					motor.error_integral *= 0.6;
+					motor.error_integral_L *= 0.6;
 				}
-				else if(motor.error < -40)
+				else if(motor.error_L < -40)
 				{
-					motor.error_integral *= 0.8;
+					motor.error_integral_L *= 0.8;
 				}
-				else if(motor.error < -20)
+				else if(motor.error_L < -20)
 				{
-					motor.error_integral *= 0.9;
+					motor.error_integral_L *= 0.9;
 				}
 			}
 		}
-		if(motor.error_left < -20)
+		if(motor.error_R < -20)
 		{
-			if(motor.error_integral_left > 3000)
+			if(motor.error_integral_R > 3000)
 			{
-				if(motor.error_left < -100)
+				if(motor.error_R < -100)
 				{
-					motor.error_integral_left *= 0.2;
+					motor.error_integral_R *= 0.2;
 				}
-				else if(motor.error_left < -80)
+				else if(motor.error_R < -80)
 				{
-					motor.error_integral_left *= 0.4;
+					motor.error_integral_R *= 0.4;
 				}
-				else if(motor.error_left < -60)
+				else if(motor.error_R < -60)
 				{
-					motor.error_integral_left *= 0.6;
+					motor.error_integral_R *= 0.6;
 				}
-				else if(motor.error_left < -40)
+				else if(motor.error_R < -40)
 				{
-					motor.error_integral_left *= 0.8;
+					motor.error_integral_R *= 0.8;
 				}
-				else if(motor.error_left < -20)
+				else if(motor.error_R < -20)
 				{
-					motor.error_integral_left *= 0.9;
+					motor.error_integral_R *= 0.9;
 				}
 			}
 		}
-		if(motor.error_right < -20)
-		{
-			if(motor.error_integral_right > 3000)
-			{
-				if(motor.error_right < -100)
-				{
-					motor.error_integral_right *= 0.2;
-				}
-				else if(motor.error_right < -80)
-				{
-					motor.error_integral_right *= 0.4;
-				}
-				else if(motor.error_right < -60)
-				{
-					motor.error_integral_right *= 0.6;
-				}
-				else if(motor.error_right < -40)
-				{
-					motor.error_integral_right *= 0.8;
-				}
-				else if(motor.error_right < -20)
-				{
-					motor.error_integral_right *= 0.9;
-				}
-			}
-		}
-		motor.output_value = (int16)(motor.kp * motor.error + motor.error_integral);
-		motor.output_value_left = (int16)(motor.kp * motor.error_left + motor.error_integral_left);
-		motor.output_value_right = (int16)(motor.kp * motor.error_right + motor.error_integral_right);
+
+
+		motor.output_value_L = (int16)(motor.kp * motor.error_L + index_L * motor.ki * motor.error_integral_L + motor.kd * motor.diff_error_L);
+		motor.output_value_R = (int16)(motor.kp * motor.error_R + index_R * motor.ki * motor.error_integral_R + motor.kd * motor.diff_error_R);
 	}
-	//转向差速控制
-//	if(servo.error[0] < -servo.dead_zone)
-//	{
-//		//左转
-//		motor.output_value_left = (int16)(motor.dif_const * motor.output_value * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-//		motor.output_value_right = (int16)(motor.dif_const * motor.output_value * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-//	}
-//	else if(servo.error[0] > servo.dead_zone)
-//	{
-//		//右转
-//		motor.output_value_left = (int16)(motor.dif_const * motor.output_value * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-//		motor.output_value_right = (int16)(motor.dif_const * motor.output_value * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-//	}
-//	if(servo.error[0] > servo.dead_zone)
-//	{
-//		//右转
-//		motor.output_value_left = (int16)((-0.004435 * servo.duty + servo.dif_const_left) * (motor.output_value / 10 - 20) + 20) * 10;
-//		motor.output_value_right = motor.output_value;
-//	}
-//	else if(servo.error[0] < - servo.dead_zone)
-//	{
-//		//左转
-//		motor.output_value_left = motor.output_value;
-//		motor.output_value_right = (int16)((0.004435 * servo.duty - servo.dif_const_right) * (motor.output_value / 10 - 20) + 20) * 10;
-//	}
+	motor.error_pre_2_L = motor.error_pre_1_L;
+	motor.error_pre_1_L = motor.error_L;
+	motor.error_pre_2_R = motor.error_pre_1_R;
+	motor.error_pre_1_R = motor.error_R;
+		
+}
+
+/***************************************************************
+        *	@brief	三角隶属度计算
+        *	@param	x：归一化到[-3,3]的值,abc:边界值
+	*	@note	无
+***************************************************************/
+float32 trimf(float32 x,int8 a,int8 b,int8 c)
+{
+        float32 u;
+        if(x>=a&&x<=b)
+                u = (x-a)/(b-a);
+        else if(x>b&&x<=c)
+                u = (c-x)/(c-b);
+        else
+                u = 0.0;
+        return u;
+}
+
+/***************************************************************
+        *	@brief	模糊pid计算
+	*	@param	type=1 delta_kp,type=2 delta_ki,type=3 delta_kd
+	*	@note	Motor_PID调用，
+***************************************************************/
+int16 deltaFuzzyPID(int8 type,int8 e_mark[3],int8 ec_mark[3],float32 error_mf[7],float32 diff_error_mf[7])
+{
+        float32 sum=0,outvalue=0;
+        int16 delta;
+        if(type == 1)
+        {
+                for(int8 m=0;m<3;m++)
+                        for(int8 n=0;n<3;n++)
+                        {
+                                sum+=error_mf[e_mark[m]]*diff_error_mf[ec_mark[n]]*deltaKpMatrix[e_mark[m]][ec_mark[n]];
+                        }
+                outvalue = sum*motor.diff_error_max/3;
+                if(outvalue>=motor.delta_kp_max)        outvalue = motor.delta_kp_max;
+                else if(outvalue<=-motor.delta_kp_max)  outvalue = -motor.delta_kp_max;
+        }
+        else if(type == 2)
+        {
+                for(int8 m=0;m<3;m++)
+                        for(int8 n=0;n<3;n++)
+                        {
+                                sum+=error_mf[e_mark[m]]*diff_error_mf[ec_mark[n]]*deltaKiMatrix[e_mark[m]][ec_mark[n]];
+                        }
+                outvalue = sum*motor.diff_error_max/3;
+                if(outvalue>=motor.delta_ki_max)        outvalue = motor.delta_ki_max;
+                else if(outvalue<=-motor.delta_ki_max)  outvalue = -motor.delta_ki_max;         
+        }
+        else if(type == 3)
+        {
+                for(int8 m=0;m<3;m++)
+                        for(int8 n=0;n<3;n++)
+                        {
+                                sum+=error_mf[e_mark[m]]*diff_error_mf[ec_mark[n]]*deltaKdMatrix[e_mark[m]][ec_mark[n]];
+                        }
+                outvalue = sum*motor.diff_error_max/3;
+                if(outvalue>=motor.delta_kd_max)        outvalue = motor.delta_kd_max;
+                else if(outvalue<=-motor.delta_kd_max)  outvalue = -motor.delta_kd_max;         
+        }
+        delta = (int16)(1000 * outvalue);
+        return delta;
 }

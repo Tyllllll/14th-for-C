@@ -35,10 +35,11 @@ void Speed_Init(void)
 //	speed.roundabouts = 220;
 	speed.straight = 290;
 	speed.long_straight = 330;
-	speed.curve_high = 260;
+	speed.curve_high = 240;
 	speed.curve_low = 230;
 	speed.cross = 220;
 	speed.roundabouts = 240;
+    speed.breakage = 150;
 }
 
 /***************************************************************
@@ -671,19 +672,19 @@ void Speed_Set(void)
 //        feature.road_type[i]=feature.road_type[i-1];
 //    }
 	int16 error_ave;
-	if(feature.roundabouts_state != 0)
+	if(feature.roundabouts_state != 0)  //环岛速度设定
 	{
-		if(feature.roundabouts_state == 1 || feature.roundabouts_state == 2)
+		if(feature.roundabouts_state == 1 || feature.roundabouts_state == 2)    //入环
 		{
 			motor.speed_set = speed.roundabouts;
 		}
-		else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
+		else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)  //环内巡线
 		{
-			if(feature.turn_state == 5 || feature.turn_state == 6)
-			{
-				motor.speed_set = 50;
-			}
-			else if(feature.turn_state == 3 || feature.turn_state == 4)
+//			if(feature.turn_state == 5 || feature.turn_state == 6)
+//			{
+//				motor.speed_set = 50;
+//			}
+			if(feature.turn_state == 3 || feature.turn_state == 4)
 			{
 				motor.speed_set = speed.curve_low;
 			}
@@ -701,18 +702,18 @@ void Speed_Set(void)
 				}
 			}
 		}
-		else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)
+		else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)      //出环
 		{
 			motor.speed_set = speed.straight + 50;
 		}
 		feature.road_type[0] = 4;
 	}
-	else if(feature.cross_state[1] == 1)
+	else if(feature.cross_state[1] == 1)    //弯道速度设定
 	{
 		feature.road_type[0] = 5;
 		motor.speed_set = speed.cross;
 	}
-	else if(feature.straight_state == 1)
+	else if(feature.straight_state == 1)    //长直道速度设定
 	{
 		feature.road_type[0] = 1;
 		if(feature.turn_state == 0)
@@ -724,8 +725,8 @@ void Speed_Set(void)
 			motor.speed_set = speed.long_straight - 50;
 		}
 	}
-	else if(feature.straight_state == 2)
-	{
+	else if(feature.straight_state == 2)    //短直道速度设定
+	{   
 		feature.road_type[0] = 2;
 		if(feature.turn_state == 0)
 		{
@@ -736,14 +737,26 @@ void Speed_Set(void)
 			motor.speed_set = speed.straight - 20;
 		}
 	}
-	else
+	else if(feature.breakage_state[1] == 1) //断路速度设定
+    {
+        feature.road_type[0] = 8;
+        if(fabs(servo.duty - DEG_MID)> 130)
+        {
+            motor.speed_set = speed.breakage - 70;
+        }
+        else
+        {
+            motor.speed_set = speed.breakage;
+        }
+    }
+    else
 	{
 		feature.road_type[0] = 3;
-		if(feature.turn_state == 5 || feature.turn_state == 6)
-		{
-			motor.speed_set = 50;
-		}
-		else if(feature.turn_state == 3 || feature.turn_state == 4)
+//		if(feature.turn_state == 5 || feature.turn_state == 6)
+//		{
+//			motor.speed_set = 50;
+//		}
+		if(feature.turn_state == 3 || feature.turn_state == 4)
 		{
 			motor.speed_set = speed.curve_low;
 		}
@@ -791,14 +804,14 @@ void Parameter_Setting(void)
 				setting.page_num--;
 				if(setting.page_num < 0)
 				{
-					setting.page_num = 4;
+					setting.page_num = 5;
 				}
 				Setting_Paint();
 				break;
 				//下切页
 			case 6:
 				setting.page_num++;
-				if(setting.page_num > 4)
+				if(setting.page_num > 5)
 				{
 					setting.page_num = 0;
 				}
@@ -841,6 +854,9 @@ void Parameter_Setting(void)
 				case 4:
 					setting.data[setting.page_num][setting.course] += 0.01;
 					break;
+                case 5:
+					setting.data[setting.page_num][setting.course] += 1;
+					break;
 				}
 				Save_Data();
 				OLED_Put6x8Str(70, setting.course, "      ");
@@ -864,6 +880,8 @@ void Parameter_Setting(void)
 					break;
 				case 4:
 					setting.data[setting.page_num][setting.course] -= 0.01;
+                case 5:
+                    setting.data[setting.page_num][setting.course] -= 1;
 					break;
 				}
 				Save_Data();
@@ -939,6 +957,11 @@ void Parameter_Setting_Init(void)
 	setting.data[4][1] = (float32)motor.dif_const;
 	sprintf(setting.string[4][2], "fore");
 	setting.data[4][2] = (float32)motor.dif_fore;
+    sprintf(setting.string[4][3], "error_max");
+
+    sprintf(setting.string[5][0], "OTHER");
+    sprintf(setting.string[5][1],"breakage");
+    setting.data[5][1] = (float32)speed.breakage;
 }
 
 /***************************************************************
@@ -996,6 +1019,15 @@ void Setting_Paint(void)
 		{
 			OLED_Put6x8Str(8, i, setting.string[4][i]);
 			OLED_PrintFloatValue(70, i, setting.data[4][i]);
+		}
+		break;
+    case 5:
+        OLED_Put6x8Str(8, 0, setting.string[5][0]);
+		OLED_Put6x8Str(115, 0, "P6");
+		for(i = 1; i < 8; i++)
+		{
+			OLED_Put6x8Str(8, i, setting.string[5][i]);
+			OLED_PrintFloatValue(70, i, setting.data[5][i]);
 		}
 		break;
 	}
@@ -1115,6 +1147,7 @@ void Save_Data(void)
 	motor.is_open_loop = (int8)setting.data[3][4];
 	motor.dif_const = setting.data[4][1];
 	motor.dif_fore = setting.data[4][2];
+    speed.breakage = (int16)setting.data[5][1];
 }
 
 

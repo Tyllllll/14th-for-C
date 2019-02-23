@@ -12,10 +12,22 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-	push(0, (uint16)servo.duty);
-	push(1, (uint16)feature.roundabouts_state);
+        push(0, (uint16));
+        push(1, (uint16)magnetic.left1_mag);
+        push(2, (uint16)magnetic.right1_mag);
+        push(3, (uint16)magnetic.right2_mag);
+//        push(4, (uint16)P_value);
+//        push(5, (uint16)I_value);
+//        push(6, (uint16)D_value);
+//        push(6, (uint16));
+//        push(7, (uint16));
+//        push(8, (uint16));
+//        push(9, (uint16));
+//        push(10, (uint16));
+        
 	Send_Data_To_Scope();
 }
+
 
 /***************************************************************
 	*	@brief	接收上位机发送数据并赋值
@@ -28,6 +40,14 @@ void UartDebug(void)
 	if(UartData[0] != 0)
 	{
 		motor.kp = (int16)UartData[0];
+	}
+	if(UartData[1] != 0)
+	{
+		motor.ki = (int16)UartData[1];
+	}    
+    if(UartData[2] != 0)
+	{
+		motor.kd = (int16)UartData[2];
 	}
 	BUZZER_ON;
 	LPLD_LPTMR_DelayMs(100);
