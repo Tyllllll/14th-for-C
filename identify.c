@@ -345,7 +345,7 @@ void Judge_Straight(void)
 	{
 		if(feature.top_point < 17)
 		{
-			if(Midline_Std_Deviation() < 7)
+			if(Midline_Std_Deviation(60, 30) < 7)
 			{
 				feature.straight_state = 2;
 			}
@@ -772,25 +772,25 @@ void Judge_Breakage(void)
 /**********************a little funcitons**********************/
 /***************************************************************
 	*	@brief	求60-30行范围内中线标准差
-	*	@param	无
+	*	@param	row_max：行数最大值，row_min：行数最小值
 	*	@note	无
 ***************************************************************/
-float Midline_Std_Deviation(void)
+float Midline_Std_Deviation(uint8 row_max, uint8 row_min)
 {
 	uint8 i = 0;
 	uint16 sum1 = 0;
 	float32 ave = 0;
 	float32 sum2 = 0;
-	for(i = 60; i > 30; i--)
+	for(i = row_max; i > row_min; i--)
 	{
 		sum1 += line.midline[i];
 	}
-	ave = sum1 / 30.0;
-	for(i = 60; i > 30; i--)
+	ave = sum1 / (float32)(row_max - row_min);
+	for(i = row_max; i > row_min; i--)
 	{
 		sum2 += (line.midline[i] * line.midline[i] - ave * ave);
 	}
-	return sqrt(sum2 / 30.0);
+	return sqrt(sum2 / (float32)(row_max - row_min));
 }
 
 /***************************************************************

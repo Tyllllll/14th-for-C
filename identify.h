@@ -66,7 +66,7 @@ void Judge_Cross(void);
 void Judge_Roundabouts(void);
 void Judge_Breakage(void);
 
-float Midline_Std_Deviation(void);
+float Midline_Std_Deviation(uint8 row_max, uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_Line(uint8 row);
