@@ -12,8 +12,7 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-	push(0, (uint16)servo.duty);
-	push(1, (uint16)feature.roundabouts_state);
+	push(0, (uint16)feature.breakage_state);
 	Send_Data_To_Scope();
 }
 

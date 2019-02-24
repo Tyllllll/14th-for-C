@@ -51,8 +51,8 @@ void main(void)
 				{
 					motor.start = 50;
 					motor.error_integral = 0;
-//					motor.error_integral_left = 0;
-//					motor.error_integral_right = 0;
+					motor.error_integral_left = 0;
+					motor.error_integral_right = 0;
 				}
 			}
 		}
@@ -75,6 +75,7 @@ void main(void)
 			{
 				Servo_Control();
 			}
+			Speed_Set();
 			if(motor.start != 0)
 			{
 				if(is_Lose_All() == 1)
@@ -96,9 +97,12 @@ void main(void)
 				OLED_ShowImage();
 			}
 		}
-//		Magnetic_GetAdc();
-//		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
-//		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
+//		Magnetic_Get_Result();
+//		OLED_PrintIntValue(40, 1, magnetic.left1_mag);
+//		OLED_PrintIntValue(40, 3, magnetic.right1_mag);
+//		OLED_PrintIntValue(40, 5, magnetic.left2_mag);
+//		OLED_PrintIntValue(40, 7, magnetic.right2_mag);
+//		LPLD_LPTMR_DelayMs(100);
 //		if(KEY1 == 0)
 //		{
 //			Key_Delay();

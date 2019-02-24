@@ -28,6 +28,10 @@ typedef struct
 	uint8 right_flection2_flag;
 	uint8 right_flection2_antiflag;
 	//斜率
+	float32 k_left;
+	float32 k_left2;
+	float32 k_right;
+	float32 k_right2;
 	float32 k_left_record[3];
 	float32 k_right_record[3];
 	float32 k_left_record2[3];
@@ -44,7 +48,10 @@ typedef struct
 	uint8 cross_state[2];
 	//环岛标志
 	uint8 roundabouts_state;
+	float32 roundabouts_k_record[3];
 	float32 roundabouts_size;
+	//断路标志
+	uint8 breakage_state;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -57,6 +64,7 @@ void Judge_Straight(void);
 void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
+void Judge_Breakage(void);
 
 float Midline_Std_Deviation(void);
 uint8 is_Left_Lose_Line(uint8 row);
@@ -65,5 +73,6 @@ uint8 is_Left_Point_Lose_Line(uint8 row);
 uint8 is_Right_Point_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_All_Line(uint8 row);
 uint8 is_Right_Point_Lose_All_Line(uint8 row);
+float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int16 point_By, int16 point_Cx, int16 point_Cy);
 
 #endif

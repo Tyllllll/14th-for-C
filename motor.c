@@ -78,10 +78,10 @@ void Motor_PIT(void)
 	for(uint8 i = 4; i > 0; i--)
 	{
 		motor.speed_current[i] = motor.speed_current[i - 1];
+		motor.speed_current_left[i] = motor.speed_current_left[i - 1];
+		motor.speed_current_right[i] = motor.speed_current_right[i - 1];
 	}
-	//Çå¿Õ¼ÆÊýÆ÷
-	LPLD_FTM_ClearCounter(FTM2);
-	LPLD_FTM_ClearCounter(FTM1);
+	Encoder_FTM_Clear();
 }
 
 /***************************************************************
@@ -176,6 +176,7 @@ void Motor_Control(void)
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch5, 0);
 		LPLD_FTM_PWM_ChangeDuty(FTM0, FTM_Ch4, 0);
 		motor.start = 0;
+		motor.stop = 0;
 	}
 }
 

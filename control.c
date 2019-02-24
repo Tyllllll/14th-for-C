@@ -27,18 +27,26 @@ Setting_Class setting;
 ***************************************************************/
 void Speed_Init(void)
 {
+	speed.straight = 220;
+	speed.long_straight = 250;
+	speed.curve_high = 200;
+	speed.curve_low = 170;
+	speed.cross = 220;
+	speed.roundabouts = 190;
+	
 //	speed.straight = 260;
 //	speed.long_straight = 300;
 //	speed.curve_high = 240;
 //	speed.curve_low = 220;
 //	speed.cross = 170;
 //	speed.roundabouts = 220;
-	speed.straight = 290;
-	speed.long_straight = 330;
-	speed.curve_high = 260;
-	speed.curve_low = 230;
-	speed.cross = 220;
-	speed.roundabouts = 240;
+	
+//	speed.straight = 290;
+//	speed.long_straight = 330;
+//	speed.curve_high = 260;
+//	speed.curve_low = 230;
+//	speed.cross = 220;
+//	speed.roundabouts = 240;
 }
 
 /***************************************************************
@@ -178,12 +186,43 @@ void Curve_Fill(void)
 void Cross_Fill(void)
 {
 	uint8 i = 0;
-	float32 k_left;
-	float32 k_right;
-	float32 k_left2;
-	float32 k_right2;
-	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row] > 15
-	   || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row] < 145)
+	uint8 j = 0;
+//	if(feature.left_flection_flag == 1 && feature.left_flection2_flag == 1)
+//	{
+//		feature.k_left_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.left_line[feature.left_flection_row]) / (feature.left_flection_row - feature.left_flection2_row);
+//		feature.k_left = 0.6 * feature.k_left_record[0] + 0.2 * feature.k_left_record[1] + 0.2 * feature.k_left_record[2];
+//		for(i = feature.left_flection2_row; i < feature.left_flection_row; i++)
+//		{
+//			line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] + feature.k_left * (feature.left_flection2_row - i));
+//			if(line.left_line[i] < 0)
+//			{
+//				line.left_line[i] = 0;
+//			}
+//			else if(line.left_line[i] > 159)
+//			{
+//				line.left_line[i] = 159;
+//			}
+//		}
+//	}
+//	else if(feature.right_flection_flag == 1 && feature.right_flection2_flag == 1)
+//	{
+//		feature.k_right_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.right_line[feature.right_flection_row]) / (feature.right_flection_row - feature.right_flection2_row);
+//		feature.k_right = 0.6 * feature.k_right_record[0] + 0.2 * feature.k_right_record[1] + 0.2 * feature.k_right_record[2];
+//		for(i = feature.right_flection2_row; i < feature.right_flection_row; i++)
+//		{
+//			line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] + feature.k_right * (feature.right_flection2_row - i));
+//			if(line.right_line[i] < 0)
+//			{
+//				line.right_line[i] = 0;
+//			}
+//			else if(line.right_line[i] > 159)
+//			{
+//				line.right_line[i] = 159;
+//			}
+//		}
+//	}
+	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row + 8] > 0
+			|| feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row + 8] < 159)
 	{
 		if(feature.left_flection_flag == 1)
 		{
@@ -196,11 +235,11 @@ void Cross_Fill(void)
 				feature.k_left_record[0] = (line.left_line[feature.left_flection_row] - line.left_line[118]) / (118.0 - feature.left_flection_row);
 			}
 			//加权左线斜率
-			k_left = 0.6 * feature.k_left_record[0] + 0.2 * feature.k_left_record[1] + 0.2 * feature.k_left_record[2];
+			feature.k_left = 0.6 * feature.k_left_record[0] + 0.2 * feature.k_left_record[1] + 0.2 * feature.k_left_record[2];
 			//左补线
 			for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				line.left_line[i] = (int16)(line.left_line[feature.left_flection_row] + k_left * (feature.left_flection_row - i));
+				line.left_line[i] = (int16)(line.left_line[feature.left_flection_row] + feature.k_left * (feature.left_flection_row - i));
 				if(line.left_line[i] < 0)
 				{
 					line.left_line[i] = 0;
@@ -222,11 +261,11 @@ void Cross_Fill(void)
 				feature.k_right_record[0] = (line.right_line[feature.right_flection_row] - line.right_line[118]) / (118.0 - feature.right_flection_row);
 			}
 			//加权右线斜率
-			k_right = 0.6 * feature.k_right_record[0] + 0.2 * feature.k_right_record[1] + 0.2 * feature.k_right_record[2];
+			feature.k_right = 0.6 * feature.k_right_record[0] + 0.2 * feature.k_right_record[1] + 0.2 * feature.k_right_record[2];
 			//右补线
 			for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				line.right_line[i] = (int16)(line.right_line[feature.right_flection_row] + k_right * (feature.right_flection_row - i));
+				line.right_line[i] = (int16)(line.right_line[feature.right_flection_row] + feature.k_right * (feature.right_flection_row - i));
 				if(line.right_line[i] < 0)
 				{
 					line.right_line[i] = 0;
@@ -238,8 +277,8 @@ void Cross_Fill(void)
 			}
 		}
 	}
-	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 15
-			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row - 1] < 145)
+	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
+			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row - 1] < 140)
 	{
 		if(feature.left_flection2_flag == 1)
 		{
@@ -251,12 +290,12 @@ void Cross_Fill(void)
 			{
 				feature.k_left_record2[0] = (line.left_line[6] - line.left_line[feature.left_flection2_row - 1]) / (feature.left_flection2_row - 7);
 			}
-			k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
+			feature.k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
 			if(feature.left_flection2_antiflag == 0)
 			{
 				for(i = 110; i > feature.left_flection2_row; i--)
 				{
-					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] + k_left2 * (feature.left_flection2_row - 2 - i));
+					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] + feature.k_left2 * (feature.left_flection2_row - 2 - i));
 					if(line.left_line[i] < 0)
 					{
 						line.left_line[i] = 0;
@@ -271,7 +310,7 @@ void Cross_Fill(void)
 			{
 				for(i = 110; i > 30; i--)
 				{
-					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - k_left2 * (feature.left_flection2_row - 2 - i));
+					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - feature.k_left2 * (feature.left_flection2_row - 2 - i));
 					if(line.left_line[i] < 0)
 					{
 						line.left_line[i] = 0;
@@ -293,12 +332,12 @@ void Cross_Fill(void)
 			{
 				feature.k_right_record2[0] = (line.right_line[6] - line.right_line[feature.right_flection2_row - 1]) / (feature.right_flection2_row - 7);
 			}
-			k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
+			feature.k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
 			if(feature.right_flection2_antiflag == 0)
 			{
 				for(i = 110; i > feature.right_flection2_row; i--)
 				{
-					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + k_right2 * (feature.right_flection2_row - 2 - i));
+					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + feature.k_right2 * (feature.right_flection2_row - 2 - i));
 					if(line.right_line[i] < 0)
 					{
 						line.right_line[i] = 0;
@@ -313,7 +352,7 @@ void Cross_Fill(void)
 			{
 				for(i = 110; i > 30; i--)
 				{
-					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] - k_right2 * (feature.right_flection2_row - 2 - i));
+					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] - feature.k_right2 * (feature.right_flection2_row - 2 - i));
 					if(line.right_line[i] < 0)
 					{
 						line.right_line[i] = 0;
@@ -335,8 +374,23 @@ void Cross_Fill(void)
 	feature.k_right_record2[2] = feature.k_right_record2[1];
 	feature.k_right_record2[1] = feature.k_right_record2[0];
 	//算中线
-	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row] > 15 
-	   || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row] < 145)
+//	if(feature.left_flection_flag == 1 && feature.left_flection2_flag == 1)
+//	{
+//		for(i = feature.left_flection2_row; i < feature.left_flection_row; i++)
+//		{
+//			line.midline[i] = line.left_line[i] + half_width[i];
+//			if(line.midline[i] < 0)
+//			{
+//				line.midline[i] = 0;
+//			}
+//			else if(line.midline[i] > 159)
+//			{
+//				line.midline[i] = 159;
+//			}
+//		}
+//	}
+	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row] > 20 
+	   || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row] < 140)
 	{
 		if(feature.left_flection_flag == 1 && feature.right_flection_row == 1)
 		{
@@ -384,8 +438,8 @@ void Cross_Fill(void)
 			}
 		}
 	}
-	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 15
-			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row  - 1] < 145)
+	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
+			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row  - 1] < 140)
 	{
 		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 1)
 		{
@@ -416,6 +470,11 @@ void Cross_Fill(void)
 					else if(line.midline[i] > 159)
 					{
 						line.midline[i] = 159;
+						for(j = i; j > 5; j--)
+						{
+							line.midline[j] = 159;
+						}
+						break;
 					}
 				}
 				else
@@ -431,18 +490,11 @@ void Cross_Fill(void)
 					}
 				}
 			}
-			if(line.left_line[feature.left_flection2_row] > 85 && feature.left_flection2_antiflag == 1)
+			if(feature.left_flection2_antiflag == 1)
 			{
-				for(i = 6; i < feature.left_flection2_row; i++)
+				for(i = feature.left_flection2_row; i > 5; i--)
 				{
-					if(feature.left_flection2_antiflag == 0)
-					{
-						line.midline[i] = 159;
-					}
-					else
-					{
-						line.midline[i] = 0;
-					}
+					line.midline[i] = 0;
 				}
 			}
 		}
@@ -456,6 +508,11 @@ void Cross_Fill(void)
 					if(line.midline[i] < 0)
 					{
 						line.midline[i] = 0;
+						for(j = i; j > 5; j--)
+						{
+							line.midline[i] = 0;
+						}
+						break;
 					}
 					else if(line.midline[i] > 159)
 					{
@@ -475,18 +532,11 @@ void Cross_Fill(void)
 					}
 				}
 			}
-			if(line.right_line[feature.right_flection2_row] < 95 && feature.right_flection2_antiflag == 1)
+			if(feature.right_flection2_antiflag == 1)
 			{
-				for(i = 6; i < feature.right_flection2_row; i++)
+				for(i = feature.right_flection2_row; i > 5; i--)
 				{
-					if(feature.right_flection2_antiflag == 0)
-					{
-						line.midline[i] = 0;
-					}
-					else
-					{
-						line.midline[i] = 159;
-					}
+					line.midline[i] = 159;
 				}
 			}
 		}
@@ -498,29 +548,91 @@ void Cross_Fill(void)
 /***************************************************************
 	*	@brief	环岛补线
 	*	@param	无
-	*	@note	补边线
+	*	@note	入环补边线，出环打死
 ***************************************************************/
 void Roundabouts_Fill(void)
 {
+	uint8 i = 0;
+	float32 state12_k;
+	uint8 state12_fill_row = 80;
 	if(feature.roundabouts_state == 1)
 	{
-		servo.enable = 0;
+		if(feature.left_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.right_line[state12_fill_row]) / (state12_fill_row - feature.left_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
+			{
+				line.right_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
+				if(line.right_line[i] < 0)
+				{
+					line.right_line[i] = 0;
+				}
+				else if(line.right_line[i] > 159)
+				{
+					line.right_line[i] = 159;
+				}
+				line.midline[i] = line.right_line[i] - half_width[i];
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+			for(i = feature.left_flection2_row; i > 5; i--)
+			{
+				line.midline[i] = 0;
+			}
+		}
+		else if(feature.right_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.right_line[state12_fill_row]) / (state12_fill_row - feature.right_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
+			{
+				line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
+				if(line.right_line[i] < 0)
+				{
+					line.right_line[i] = 0;
+				}
+				else if(line.right_line[i] > 159)
+				{
+					line.right_line[i] = 159;
+				}
+				line.midline[i] = line.right_line[i] - half_width[i];
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+		}
+		feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+		feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+		Find_Top_Point();
+//		servo.enable = 0;
 		if(feature.left_flection2_flag == 1)
 		{
 			if(feature.left_flection2_row > 16 || feature.left_flection2_row == 0)
 			{
 				feature.roundabouts_size = 2;
-				servo.duty = DEG_MID + 60 + 60;
+//				servo.duty = DEG_MID + 60 + 60;
 			}
 			else if(feature.left_flection2_row < 12)
 			{
 				feature.roundabouts_size = -1;
-				servo.duty = DEG_MID + 60;
+//				servo.duty = DEG_MID + 60;
 			}
 			else if(feature.roundabouts_size <= 0 || feature.roundabouts_size >= 1)
 			{
 				feature.roundabouts_size = (float32)(feature.left_flection2_row - 12) / 4;
-				servo.duty = (int16)(DEG_MID + 60 + feature.roundabouts_size * 60);
+//				servo.duty = (int16)(DEG_MID + 60 + feature.roundabouts_size * 60);
 			}
 		}
 	}
@@ -542,23 +654,78 @@ void Roundabouts_Fill(void)
 	}
 	else if(feature.roundabouts_state == 2)
 	{
-		servo.enable = 0;
+		if(feature.right_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.left_line[state12_fill_row]) / (state12_fill_row - feature.right_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
+			{
+				line.left_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
+				if(line.left_line[i] < 0)
+				{
+					line.left_line[i] = 0;
+				}
+				else if(line.left_line[i] > 159)
+				{
+					line.left_line[i] = 159;
+				}
+				line.midline[i] = line.left_line[i] + half_width[i];
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+			for(i = feature.right_flection2_row; i > 5; i--)
+			{
+				line.midline[i] = 0;
+			}
+		}
+		else if(feature.left_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.left_line[state12_fill_row]) / (state12_fill_row - feature.left_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
+			{
+				line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
+				if(line.left_line[i] < 0)
+				{
+					line.left_line[i] = 0;
+				}
+				else if(line.left_line[i] > 159)
+				{
+					line.left_line[i] = 159;
+				}
+				line.midline[i] = line.left_line[i] + half_width[i];
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+		}
 		if(feature.right_flection2_flag == 1)
 		{
 			if(feature.right_flection2_row > 16 || feature.right_flection2_row == 0)
 			{
 				feature.roundabouts_size = 2;
-				servo.duty = DEG_MID - 60 - 60;
+//				servo.duty = DEG_MID - 60 - 60;
 			}
 			else if(feature.right_flection2_row < 12)
 			{
 				feature.roundabouts_size = -1;
-				servo.duty = DEG_MID - 60;
+//				servo.duty = DEG_MID - 60;
 			}
 			else if(feature.roundabouts_size <= 0 || feature.roundabouts_size >= 1)
 			{
 				feature.roundabouts_size = (float32)(feature.right_flection2_row - 12) / 4;
-				servo.duty = (int16)(DEG_MID - 60 - feature.roundabouts_size * 60);
+//				servo.duty = (int16)(DEG_MID - 60 - feature.roundabouts_size * 60);
 			}
 		}
 	}
@@ -600,76 +767,6 @@ void Roundabouts_Fill(void)
 ***************************************************************/
 void Speed_Set(void)
 {
-//	int16 i=0;
-//	int16 g_HighestSpeed = 0;
-//	int16 g_LowestSpeed = 0;
-//    error_ave=(int16)(0.6*servo.error[0]+0.2*error_last+0.2*error_pre);//滤波
-//    error_pre=error_last;
-//    error_last=error_ave;
-////    super_zhidao=0;
-////    
-////    if(feature.cross_state[1]==0)
-////        zhidao();//直道判定
-///**********速度给定*************/
-//    if(feature.cross_state[1]==1)
-//    {  
-//        feature.road_type[0]=5;
-//        motor.speed_set = speed.cross; 
-//    }
-//    else if(feature.roundabouts_state != 0)
-//	{
-//		feature.road_type[0] = 4;
-//		
-//		motor.speed_set = speed.roundabouts;
-//	}
-////    else if(super_zhidao==1)
-////    {
-////        feature.road_type[0]=1;
-////        if(feature.road_type[40]==3&&feature.road_type[41]==3&&feature.road_type[42]==3&&feature.road_type[43]==3&&feature.road_type[44]==3)
-////            motor.speed_set=s_max+100;//出弯加速 未测试 可视情况注释
-////        else
-////            motor.speed_set=s_max;
-////    }
-//    
-//    else if(feature.top_point<=37)
-//    {
-//        feature.road_type[0]=2;
-//        if(feature.road_type[6]==1&&feature.road_type[7]==1&&feature.road_type[8]==1&&feature.road_type[9]==1&&feature.road_type[10]==1)
-//        {//前8帧是超长直道,先减猛一点
-//            motor.speed_set=speed.curve_high-70;
-//        }
-//        if(feature.road_type[3]==3&&feature.road_type[4]==3&&feature.road_type[5]==3)
-//        {//前3帧是弯道 避免欧姆弯内加速
-//            motor.speed_set=speed.curve_high;
-//        }
-//        else
-//        { 
-//            motor.speed_set=(int16)(speed.straight-(speed.straight-speed.curve_high)*(abs(error_ave)/35));//偏差大于35给最低速度
-//            motor.speed_set=motor.speed_set<speed.curve_high?speed.curve_high:motor.speed_set; 
-//        }
-//    }
-//    else 
-//    {
-//        feature.road_type[0]=3;
-//        if(feature.road_type[9]==1&&feature.road_type[10]==1&&feature.road_type[11]==1&&feature.road_type[12]==1&&feature.road_type[13]==1)
-//        {//前6帧是超长直道,先减猛一点
-//            motor.speed_set=speed.curve_high-50;
-//        }
-//        else
-//        {
-//            g_HighestSpeed=speed.curve_high;
-//            g_LowestSpeed=speed.curve_low;    
-//            //动态给定最高速度和最低速度，尽量发挥直道的潜能
-//            motor.speed_set=g_HighestSpeed-(g_HighestSpeed-g_LowestSpeed)*(error_ave*error_ave)/(40*40);//偏差大于40给最低速度
-//            motor.speed_set=motor.speed_set<g_LowestSpeed?g_LowestSpeed:motor.speed_set;
-//            motor.speed_set=motor.speed_set>g_HighestSpeed?g_HighestSpeed:motor.speed_set;//最小s_wan2最大s_wan1
-//        }
-//        
-//    }
-//    for(i=200;i>=1;i--)
-//    {
-//        feature.road_type[i]=feature.road_type[i-1];
-//    }
 	int16 error_ave;
 	if(feature.roundabouts_state != 0)
 	{

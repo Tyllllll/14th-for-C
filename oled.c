@@ -412,28 +412,27 @@ void OLED_ShowImage(void)
 	}
 	OLED_Put6x8Str(80, 0, "top");
 	OLED_PrintUintValue(100, 0, feature.top_point);
-	OLED_Put6x8Str(80, 1, "zh");
-	OLED_PrintUintValue(100, 1, feature.straight_state);
-	OLED_Put6x8Str(80, 2, "wa");
-	OLED_PrintUintValue(100, 2, feature.turn_state);
-	OLED_Put6x8Str(80, 3, "dw");
-	OLED_PrintUintValue(100, 3, feature.deep_turn_state);
-	OLED_Put6x8Str(80, 4, "hu");
-	OLED_PrintUintValue(100, 4, feature.roundabouts_state);
-	OLED_Put6x8Str(80, 5, "rt");
-	OLED_PrintUintValue(100, 5, feature.road_type[0]);
-//	OLED_PrintUintValue(80, 6, feature.left_flection_row);
-//	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection_row - 1]);
+	OLED_Put6x8Str(80, 1, "wa");
+	OLED_PrintUintValue(100, 1, feature.deep_turn_state);
+	OLED_Put6x8Str(80, 2, "hu");
+	OLED_PrintUintValue(100, 2, feature.roundabouts_state);
+	OLED_Put6x8Str(80, 3, "du");
+	OLED_PrintUintValue(100, 3, feature.breakage_state);
+	OLED_PrintIntValue(80, 4, feature.breakage_state);
+//	OLED_Put6x8Str(80, 4, "rt");
+//	OLED_PrintUintValue(100, 4, feature.road_type[0]);
+//	OLED_PrintUintValue(80, 4, feature.left_flection_row);
+//	OLED_PrintUintValue(100, 4, line.left_line[feature.left_flection_row - 1]);
+//	OLED_PrintUintValue(80, 5, feature.right_flection_row);
+//	OLED_PrintUintValue(100, 5, line.right_line[feature.right_flection_row - 1]);
 //	OLED_PrintUintValue(80, 6, feature.left_flection2_row);
 //	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
 //	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
-//	OLED_PrintUintValue(80, 7, (uint32)magnetic.left_mag);
-//	OLED_PrintUintValue(100, 7, (uint32)magnetic.right_mag);
-	OLED_PrintUintValue(80, 6, motor.speed_set_left);
-	OLED_PrintUintValue(100, 6, motor.speed_set_right);
-	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
-	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
+//	OLED_PrintUintValue(80, 6, motor.speed_set_left);
+//	OLED_PrintUintValue(100, 6, motor.speed_set_right);
+//	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
+//	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);
 }
 

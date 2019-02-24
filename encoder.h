@@ -26,5 +26,6 @@ extern Encoder_Class encoder;
 
 void Encoder_Init(void);
 void Encoder_Get(void);
+void Encoder_FTM_Clear(void);
 
 #endif

@@ -11,7 +11,7 @@ Feature_Class feature;
 void Find_Line(void)
 {
 	uint8 i = 0, j = 0;
-	uint8 column_start = 80;//基础寻线每行起始搜索列
+	int16 column_start = 80;//基础寻线每行起始搜索列
 	for(i = 118; i >5; i--)
 	{
 		line.left_line[i] = 0;
@@ -67,17 +67,17 @@ void Find_Line(void)
 			else
 			{
 				line.midline[i] = line.midline[i + 1];
-				if(i > 40 && i < 120)
+				if(line.midline[i] > 40 && line.midline[i] < 120)
 				{
-					if(camera.image[i][line.midline[i]] != 0 && (camera.image[i - 1][line.midline[i]] == 0 || camera.image[i - 3][line.midline[i]] == 0 || camera.image[i - 5][line.midline[i]] == 0))
+					if(camera.image[i - 5][line.midline[i]] != 0 && (camera.image[i - 6][line.midline[i]] == 0 || camera.image[i - 8][line.midline[i]] == 0 || camera.image[i - 10][line.midline[i]] == 0))
 					{
-						if(camera.image[i + 30][line.midline[i]] != 0)
+						if(camera.image[i - 5][line.midline[i] + 20] != 0)
 						{
-							line.midline[i] += 30;
+							line.midline[i] += 20;
 						}
-						else if(camera.image[i - 30][line.midline[i]] != 0)
+						else if(camera.image[i - 5][line.midline[i] - 20] != 0)
 						{
-							line.midline[i] -= 30;
+							line.midline[i] -= 20;
 						}
 					}
 				}
@@ -114,6 +114,7 @@ void Judge_Feature(void)
 	Judge_Roundabouts();
 	Judge_Straight();
 	Judge_Curve();
+	Judge_Breakage();
 //	Judge_Cross();
 }
 
@@ -638,7 +639,7 @@ void Judge_Roundabouts(void)
 {
 	uint8 i = 0;
 	uint8 cnt = 0;
-	for(i = 0; i < 30; i++)
+	for(i = 0; i < 80; i++)
 	{
 		if(feature.road_type[i] == 4)
 		{
@@ -647,8 +648,8 @@ void Judge_Roundabouts(void)
 	}
 	if(cnt == 0)
 	{
-		Magnetic_GetAdc();
-		if(magnetic.left_mag > 50 || magnetic.right_mag > 50 && feature.roundabouts_state == 0)
+//		Magnetic_Get_Result();
+		if(magnetic.left1_mag > 50 || magnetic.right1_mag > 50 && feature.roundabouts_state == 0)
 		{
 			if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 			{
@@ -668,9 +669,8 @@ void Judge_Roundabouts(void)
 	}
 	if(feature.roundabouts_state == 1)
 	{
-		if(feature.right_flection2_flag == 1)
+		if(line.right_line[feature.right_flection2_row] > 125)
 		{
-			servo.enable = 1;
 			feature.roundabouts_state = 3;
 		}
 	}
@@ -678,7 +678,7 @@ void Judge_Roundabouts(void)
 	{
 		if(feature.right_flection_flag == 1)
 		{
-			if(line.right_line[feature.right_flection_row] > 140)
+			if(line.right_line[feature.right_flection_row] > 120)
 			{
 				feature.roundabouts_state = 5;
 			}
@@ -697,7 +697,6 @@ void Judge_Roundabouts(void)
 	{
 		if(feature.left_flection2_flag == 1)
 		{
-			servo.enable = 1;
 			feature.roundabouts_state = 4;
 		}
 	}
@@ -705,7 +704,7 @@ void Judge_Roundabouts(void)
 	{
 		if(feature.left_flection_flag == 1)
 		{
-			if(line.left_line[feature.left_flection_row] < 20)
+			if(line.left_line[feature.left_flection_row] < 40)
 			{
 				feature.roundabouts_state = 6;
 			}
@@ -721,6 +720,53 @@ void Judge_Roundabouts(void)
 		}
 	}
 }
+
+/***************************************************************
+	*	@brief	判断路
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Judge_Breakage(void)
+{
+	uint8 i;
+	uint8 bottom_row;
+	if(feature.top_point > 40)
+	{	
+		//直入
+		if(line.midline[feature.top_point + 3] > 80 && line.midline[feature.top_point + 3] < 100)
+		{
+			feature.breakage_state = 1;
+		}
+		else
+		{
+			for(i = 110; i > feature.top_point; i--)
+			{
+				if(line.right_line_flag[i] == 1)
+				{
+					bottom_row = i;
+					break;
+				}
+			}
+			//左入
+			if(line.midline[feature.top_point + 3] < 80)
+			{
+				if(Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row) > 1700)
+				{
+					feature.breakage_state = 2;
+				}
+			}
+			//右入
+			else if(line.midline[feature.top_point + 3] > 80)
+			{
+				if(Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row) > 1700)
+				{
+					feature.breakage_state = 3;
+				}
+			}
+		}
+	}
+}
+
 
 
 /**********************a little funcitons**********************/
@@ -885,4 +931,31 @@ uint8 is_Right_Point_Lose_All_Line(uint8 row)
 	{
 		return 1;
 	}
+}
+
+/***************************************************************
+	*	@brief	算三点曲率半径
+	*	@param	三点坐标
+	*	@note	无
+***************************************************************/
+float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int16 point_By, int16 point_Cx, int16 point_Cy)
+{
+	float32 a = 0, b = 0, c = 0, curvature = 0;
+	int32 PF_ab = 0, PF_ac = 0, PF_bc = 0;
+	PF_ab = (point_Ax - point_Bx) * (point_Ax - point_Bx) + (point_Ay - point_By) * (point_Ay - point_By);//直线AB的距离平方项
+	c = sqrt(PF_ab);//直线AB的距离
+	PF_ac = (point_Ax - point_Cx) * (point_Ax - point_Cx) + (point_Ay - point_Cy) * (point_Ay - point_Cy);//直线AC的距离平方项
+	b = sqrt(PF_ac);//直线AC的距离
+	PF_bc = (point_Bx - point_Cx) * (point_Bx - point_Cx) + (point_By - point_Cy) * (point_By - point_Cy);//直线BC的距离平方项
+	a = sqrt(PF_bc);//直线BC的距离
+	if(c * b * a == 0)
+	{
+		return -1;
+	}
+	curvature = a / 2 / sin(acos((b * b + c * c - a * a) / 2 / b / c));
+	if(curvature > 9999)
+	{
+		curvature = 9999;
+	}
+	return curvature;
 }

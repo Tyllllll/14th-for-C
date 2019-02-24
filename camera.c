@@ -154,8 +154,9 @@ static void Camera_Gpio_Init(void)
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 100;
+	camera.contrast = 68;
 	camera.ready_write = 1;
+	camera.which_buffer = 1;
 
 	uint16 i = 0;
 	uint8 ubyDeviceID = 0;
@@ -257,7 +258,7 @@ void DMA_Complete_Isr(void)
 	camera.ready_write = 1;
 	if(camera.which_buffer == 1)
 	{
-		camera.which_buffer = 0;
+		camera.which_buffer = 2;
 	}
 	else
 	{
