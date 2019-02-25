@@ -15,6 +15,7 @@ typedef struct
 {
 	//顶点
 	uint8 top_point;
+    uint8 toppoint_err;
 	//锐角拐点（十字近拐点）
 	uint8 left_flection_row;
 	uint8 left_flection_flag;
@@ -32,7 +33,7 @@ typedef struct
 	float32 k_right_record[3];
 	float32 k_left_record2[3];
 	float32 k_right_record2[3];
-	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为障碍
+	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为断路，9为障碍
 	uint8 road_type[200];
 	//直道标志
 	uint8 straight_state;
@@ -47,6 +48,9 @@ typedef struct
 	float32 roundabouts_size;
     //断路标志
     uint8 breakage_state[2]; //[1]:0=无断路 1=即将进入或已进入断路  
+    //障碍标志
+    uint8 block_state[2];   //
+    uint8 ramp_state[2];
     uint8 breakage_row;
 }Feature_Class;
 extern Feature_Class feature;
@@ -60,7 +64,8 @@ void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
 void Judge_Breakage(void);
-
+void Judge_Block(void);
+void Judge_ramp(void);
 float Midline_Std_Deviation(uint8 row_max,uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);

@@ -111,9 +111,11 @@ void Judge_Feature(void)
 	Find_Inflection2();
 	
     Judge_Breakage();
+  //  Judge_Block();
 	Judge_Roundabouts();
 	Judge_Straight();
 	Judge_Curve();
+    Judge_ramp();
 //	Judge_Cross();
 }
 
@@ -130,6 +132,7 @@ void Find_Top_Point(void)
 	{
 		if(camera.image[i][line.midline[i]] != 0 && (camera.image[i - 1][line.midline[i]] == 0 || camera.image[i - 3][line.midline[i]] == 0 ))
 		{
+            feature.toppoint_err = i - feature.top_point;
 			feature.top_point = i;
 			break;
 		}
@@ -140,7 +143,8 @@ void Find_Top_Point(void)
 		{
 			if(line.midline[i] > 150 || line.midline[i] < 10)
 			{
-				feature.top_point = i;
+				feature.toppoint_err = i - feature.top_point;
+                feature.top_point = i;
 				break;
 			}
 		}
@@ -289,6 +293,81 @@ void Find_Inflection2(void)
 	}
 }
 
+/***************************************************************
+	*	@brief	路障控制
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Judge_Block(void)
+{
+    int16 servoturn = 130;
+    float32 d1 = 20.0, d2 = 20.0, d3 = 20.0; //d1:转弯距离 d2：车身摆直距离 d3：平行于赛道直行距离
+    if(feature.block_state[1] == 0)   //检测路障
+    {
+        //激光测距
+        if(motor.alldist > 10.0)
+        {
+            feature.block_state[1] = 1;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 1)        //左转
+    {
+        servo.enable = 0;
+        servo.duty = (int16)(DEG_MID + servoturn);
+        if(motor.alldist >= d1)
+        {
+            feature.block_state[1] = 2;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 2)        //摆直
+    {
+        servo.duty = (int16)(DEG_MID);
+        if(motor.alldist >= d2)
+        {
+            feature.block_state[1] = 3;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 3)        //右转
+    {
+        servo.duty = (int16)(DEG_MID - servoturn);
+        if(motor.alldist >= 2*d1)
+        {
+            feature.block_state[1] = 4;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 4)        //摆直
+    {
+        servo.duty = (int16)(DEG_MID);
+        if(motor.alldist >= d2)
+        {
+            feature.block_state[1] = 5;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 5)        //平行于赛道直行
+    {
+        servo.duty = (int16)(DEG_MID);
+        if(motor.alldist >= d3)
+        {
+            feature.block_state[1] = 6;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state[1] == 6)        //右转 回到赛道
+    {
+        servo.duty = (int16)(DEG_MID - servoturn);
+        if(magnetic.right2_mag >= 10)   
+        {
+            feature.block_state[1] = 0;
+            servo.enable = 1;
+        }
+    }
+    
+}
 /***************************************************************
 	*	@brief	判直道
 	*	@param	无
@@ -529,7 +608,70 @@ void Judge_Curve(void)
 	}
 }
 
-
+/***************************************************************
+	*	@brief	判坡道
+	*	@param	无
+	*	@note   无
+***************************************************************/
+void Judge_ramp(void)
+{
+    uint8 cnt1 = 0, cnt2 =0;
+    if(feature.ramp_state[1]==0 && feature.roundabouts_state==0)        //判断坡道
+    { 
+        if((line.right_line[40]-line.left_line[40])>100 && line.left_line_flag[40]==1 && line.right_line_flag[40] ==1)      //车身处于赛道中间上坡    赛道宽度远大于正常值  中线较直
+        {
+            if(Midline_Std_Deviation((uint8)(feature.top_point+35),(uint8)(feature.top_point+5)) < 7)
+            {
+                feature.ramp_state[1] = 1;
+            }
+        }
+        else                                                                                                            //车身倾斜上赛道  一侧边线完整另一侧完全丢线  边线斜率小         
+        {
+            for(uint8 i=40;i<100;i++)
+            {
+                cnt1 += line.left_line_flag[i];
+                cnt2 += line.right_line_flag[i];
+            }
+            
+            if(fabs(cnt1-cnt2) >= 55)
+            {
+                if(cnt1 > cnt2)
+                {
+                    if((line.left_line[90]-line.left_line[80])<=10 && (line.left_line[60]-line.left_line[50])<=10)
+                        feature.ramp_state[1] = 1;
+                }
+                else
+                {
+                    if((line.right_line[90]-line.right_line[80])<=10 && (line.right_line[60]-line.right_line[50])<=10)
+                        feature.ramp_state[1] = 1;
+                }
+            }
+            
+        }
+    }
+    else if(feature.ramp_state[1]==1)       //上坡过程切电磁巡线 检测是否到达坡顶  上坡过程中toppoint先减后增 结合toppoint范围 
+    {
+        servo.sensor = 2;
+        if(feature.toppoint_err > 0)
+        {
+            feature.ramp_state[0]++;
+        }
+        else
+        {
+            feature.ramp_state[0] = 0;
+        }
+        if(feature.top_point>70 && feature.ramp_state[0]>2)
+        {
+            feature.ramp_state[1] = 2;
+            feature.ramp_state[0] = 0;
+        }
+    }
+    else if(feature.ramp_state[1]==2)       //下坡处理 暂无
+    {
+        servo.sensor = 1;
+        
+    }
+}
 /***************************************************************
 	*	@brief	判断路
 	*	@param	无
@@ -551,9 +693,9 @@ void Judge_Breakage(void)
     }
     if(feature.breakage_state[1] == 0 && cnt == 0) 
     {
-        if(feature.top_point > 30 && feature.roundabouts_state == 0)
+        if(feature.top_point>50 && feature.roundabouts_state==0 && feature.ramp_state[1]==0)
         {
-            if(Midline_Std_Deviation((uint8)(feature.top_point+30),(uint8)(feature.top_point+5)) < 7)
+            if(Midline_Std_Deviation((uint8)(feature.top_point+30),(uint8)(feature.top_point)) < 7)
             {
                 breakage = 1;
             }
@@ -561,18 +703,18 @@ void Judge_Breakage(void)
             {
                 for(uint8 i=feature.top_point + 20 ; i > 5 ;i--)
                 {
-                    if(line.left_line_flag[i+1]==1 && line.left_line_flag[i]==1 && line.left_line_flag[i-1]==0)
+                    if(line.left_line_flag[i+1]==1 && line.left_line_flag[i]==1 && line.left_line_flag[i-1]==0 && line.left_line_flag[i-2]==0)
                     {
                         TOP_LINE = i;
                         break;
                     }
-                    else if(line.right_line_flag[i+1]==1 && line.right_line_flag[i]==1 && line.right_line_flag[i-1]==0)
+                    else if(line.right_line_flag[i+1]==1 && line.right_line_flag[i]==1 && line.right_line_flag[i-1]==0 && line.right_line_flag[i-2]==0)
                     {
                         TOP_LINE = i;
                         break;
                     }
                 }
-                for(uint8 i=TOP_LINE + 50 ; i > TOP_LINE ; i--)
+                for(uint8 i=TOP_LINE + 20 ; i > TOP_LINE ; i--)
                 {
                     miderror = (uint8)fabs(line.midline[i] - 80);
                     if(miderror > miderrormax)
@@ -599,6 +741,9 @@ void Judge_Breakage(void)
         {
             feature.breakage_state[1] = 1;
             feature.breakage_state[0] = 0;
+            BUZZER_ON;
+            LPLD_LPTMR_DelayMs(100);
+            BUZZER_OFF;
         }
         else
         {
@@ -606,7 +751,9 @@ void Judge_Breakage(void)
         }
     }
     else if(feature.breakage_state[1] == 1)
-    {   //判断前方赛道宽度是否正常
+    {
+        servo.sensor = 2;
+        //判断前方赛道宽度是否正常
         int16 width;
         width = line.right_line[40] - line.left_line[40];
         if(width > 110 && width < 140)
@@ -621,6 +768,9 @@ void Judge_Breakage(void)
         {
             feature.breakage_state[1] = 2;
             feature.breakage_state[0] = 0;
+            BUZZER_ON;
+            LPLD_LPTMR_DelayMs(100);
+            BUZZER_OFF;
         }
     }
     else if(feature.breakage_state[1] == 2)
@@ -638,6 +788,10 @@ void Judge_Breakage(void)
         {
             feature.breakage_state[0] = 0;
             feature.breakage_state[1] = 0;
+            servo.sensor = 1;
+            BUZZER_ON;
+            LPLD_LPTMR_DelayMs(100);
+            BUZZER_OFF;
         }
     }
 }

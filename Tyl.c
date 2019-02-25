@@ -10,7 +10,7 @@
  * mail:support@lpld.cn
  * 硬件平台:  LPLD K60 Card / LPLD K60 Nano
  *
- * 本工程基于"拉普兰德K60底层库V3"开发，
+ * 本工程基于"拉普兰德K60底层库V3"开发，8
  * 所有开源代码均在"lib"文件夹下，用户不必更改该目录下代码，
  * 所有用户工程需保存在"project"文件夹下，以工程名定义文件夹名，
  * 底层库使用方法见相关文档。 
@@ -41,11 +41,11 @@ void main(void)
 		//按键发车
 		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
-			Key_Delay();
+			LPLD_LPTMR_DelayMs(100);
 			if(KEY1 == 0)
 			{
 				BUZZER_ON;
-                                LPLD_LPTMR_DelayMs(200);
+                LPLD_LPTMR_DelayMs(200);
 				BUZZER_OFF;
 				if(motor.start == 0)
 				{
@@ -60,6 +60,7 @@ void main(void)
 		if(KEY2 == 0)
 		{
 			Key_Delay();
+            motor.alldist = 0;
 			if(KEY2 == 0)
 			{
 				motor.stop = 5;
@@ -73,7 +74,7 @@ void main(void)
 			All_Fill();
 			if(servo.enable == 1)
 			{
-				Servo_Control();
+                Servo_Control();
 			}
 			if(motor.start != 0)
 			{
@@ -91,20 +92,21 @@ void main(void)
 					servo.stop = 0;
 				}
 			}
-			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
+			
+            
+            if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
 				OLED_ShowImage();
 			}
 		}
 		Magnetic_GetAdc();
-//		OLED_PrintFloatValue(40, 3, magnetic.left_mag);
-//		OLED_PrintFloatValue(40, 6, magnetic.right_mag);
 //		if(KEY1 == 0)
 //		{
 //			Key_Delay();
 //			if(KEY1 == 0)
 //			{
 //				servo_up1();
+//                motor.alldist = 0;
 //			}
 //		}
 //		if(KEY2 == 0)
@@ -145,6 +147,7 @@ void main(void)
 //			if(KEY6 == 0)
 //			{
 //				servo_down1();
+//                motor.alldist = 0;
 //			}
 //		}
     }

@@ -12,12 +12,12 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-        push(0, (uint16));
-        push(1, (uint16)magnetic.left1_mag);
-        push(2, (uint16)magnetic.right1_mag);
-        push(3, (uint16)magnetic.right2_mag);
-//        push(4, (uint16)P_value);
-//        push(5, (uint16)I_value);
+        push(0, (uint16)motor.speed_set_L);
+        push(1, (uint16)motor.speed_ave_L);
+        push(2, (uint16)motor.output_value_L);
+        push(3, (uint16)motor.p_valu);
+        push(4, (uint16)motor.i_valu);
+        push(5, (uint16)motor.d_valu);
 //        push(6, (uint16)D_value);
 //        push(6, (uint16));
 //        push(7, (uint16));

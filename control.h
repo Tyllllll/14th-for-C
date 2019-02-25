@@ -13,6 +13,7 @@ typedef struct
 	int16 cross;
 	int16 roundabouts;
     int16 breakage;
+    int16 ramp;
 }Speed_Class;
 extern Speed_Class speed;
 

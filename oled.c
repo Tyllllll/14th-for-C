@@ -432,13 +432,12 @@ void OLED_ShowImage(void)
 //	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
 //	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
-//	OLED_PrintUintValue(80, 7, (uint32)magnetic.left_mag);
-//	OLED_PrintUintValue(100, 7, (uint32)magnetic.right_mag);
 	OLED_PrintUintValue(80, 6, (uint32)magnetic.left2_mag);
 	OLED_PrintUintValue(100, 6, (uint32)magnetic.left1_mag);
 	OLED_PrintUintValue(80, 7, (uint32)magnetic.right1_mag);
 	OLED_PrintUintValue(100, 7, (uint32)magnetic.right2_mag);
 //	OLED_PrintIntValue(80, 7, servo.duty);
+//    OLED_PrintUintValue(80, 6, (uint32)motor.alldist);
 
 }
 

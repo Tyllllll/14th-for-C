@@ -40,6 +40,7 @@ void Speed_Init(void)
 	speed.cross = 220;
 	speed.roundabouts = 240;
     speed.breakage = 150;
+    speed.ramp = 200;
 }
 
 /***************************************************************
@@ -111,7 +112,7 @@ void Curve_Fill(void)
 //			}
 //		}
 //	}
-	//左深弯
+//左深弯
 	if(feature.deep_turn_state == 3)
 	{
 		for(i = 118; i > feature.top_point; i--)
@@ -737,7 +738,8 @@ void Speed_Set(void)
 			motor.speed_set = speed.straight - 20;
 		}
 	}
-	else if(feature.breakage_state[1] == 1) //断路速度设定
+	
+    if(feature.breakage_state[1] == 1) //断路速度设定
     {
         feature.road_type[0] = 8;
         if(fabs(servo.duty - DEG_MID)> 130)
@@ -747,6 +749,14 @@ void Speed_Set(void)
         else
         {
             motor.speed_set = speed.breakage;
+        }
+    }
+    else if(feature.ramp_state[1] == 1)
+    {
+        feature.road_type[0] = 6;
+        if(motor.speed_ave < speed.ramp)
+        {
+            motor.speed_set = speed.ramp + (speed.ramp - motor.speed_ave);
         }
     }
     else
@@ -775,6 +785,7 @@ void Speed_Set(void)
 		}
 	}
 }
+
 
 /***************************************************************
 	*	@brief	参数设置

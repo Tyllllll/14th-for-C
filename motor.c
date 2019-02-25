@@ -4,6 +4,8 @@ Motor_Class motor;
 int16 P_value;
 int16 I_value;
 int16 D_value;
+int16 QD_value_L_test;
+int16 QD_value_R_test;
 int8 deltaKpMatrix[7][7]={{PB,PB,PM,PM,PS,ZO,ZO},
                           {PB,PB,PM,PS,PS,ZO,NS},
                           {PM,PM,PM,PS,ZO,NS,NS},
@@ -83,6 +85,7 @@ void Motor_Pit1_Init(void)
 ***************************************************************/
 void Motor_PIT(void)
 {
+    float32 distance;
 	Encoder_Get();
 	//实时速度，单位cm/s
 	if(encoder.left_num != 0)
@@ -109,6 +112,30 @@ void Motor_PIT(void)
 		motor.speed_current_L[i] = motor.speed_current_L[i - 1];
 		motor.speed_current_R[i] = motor.speed_current_R[i - 1];
 	}
+    distance = motor.speed_current[0] * 0.01; //单位cm
+    motor.alldist += distance;  
+    //测量1m距离对应编码器脉冲数
+  QD_value_L_test += encoder.left_num;
+  QD_value_R_test += encoder.right_num;
+  if (KEY1 == 0)
+  {
+    Key_Delay();
+    if (KEY1 == 0)
+    {LPLD_UART_PutChar(UART0,QD_value_L_test );
+    LPLD_UART_PutChar(UART0,QD_value_R_test );
+    QD_value_L_test = 0;
+    QD_value_R_test = 0;
+    }
+  }
+//  //向PC传编码器测得速度
+//    LPLD_UART_PutChar(UART0,encoder.left_num );
+//    LPLD_UART_PutChar(UART0,encoder.right_num );
+//    LPLD_UART_PutChar(UART0,'/n');
+    
+    
+    
+    
+    
 	//清空计数器
 	LPLD_FTM_ClearCounter(FTM2);
 	LPLD_FTM_ClearCounter(FTM1);
@@ -417,8 +444,10 @@ void Motor_PID(void)
 				}
 			}
 		}
-
-
+        motor.p_valu = (int16)motor.kp * motor.error_L;
+        motor.i_valu = (int16)motor.ki * motor.error_integral_L;
+        motor.d_valu = (int16)motor.kd * motor.diff_error_L;
+        
 		motor.output_value_L = (int16)(motor.kp * motor.error_L + index_L * motor.ki * motor.error_integral_L + motor.kd * motor.diff_error_L);
 		motor.output_value_R = (int16)(motor.kp * motor.error_R + index_R * motor.ki * motor.error_integral_R + motor.kd * motor.diff_error_R);
 	}

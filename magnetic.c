@@ -16,8 +16,17 @@ void Magnetic_Adc_Init(void)
 	ADC_InitStructure.ADC_SampleTimeCfg = SAMTIME_SHORT;
 	ADC_InitStructure.ADC_HwAvgSel = HW_4AVG;
 	ADC_InitStructure.ADC_CalEnable = TRUE;
+    
+    static ADC_InitTypeDef ADC_InitStructure0;
+	ADC_InitStructure0.ADC_Adcx = ADC0;
+	ADC_InitStructure0.ADC_DiffMode = ADC_SE;
+	ADC_InitStructure0.ADC_BitMode = SE_12BIT;
+	ADC_InitStructure0.ADC_SampleTimeCfg = SAMTIME_SHORT;
+	ADC_InitStructure0.ADC_HwAvgSel = HW_4AVG;
+	ADC_InitStructure0.ADC_CalEnable = TRUE;
 	LPLD_ADC_Init(ADC_InitStructure);
-	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH1x);
+    LPLD_ADC_Init(ADC_InitStructure0);
+	LPLD_ADC_Chn_Enable(ADC0, MAGNETIC_CH1x);
 	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH2x);
 	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH3x);
 	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH4x);
@@ -34,7 +43,7 @@ void Magnetic_GetAdc(void)
 	float32 data = 0;
 	for(i = 0; i < 5; i++)
 	{
-		data += LPLD_ADC_Get(MAGNETIC_ADCx, MAGNETIC_CH1x);
+		data += LPLD_ADC_Get(ADC0, MAGNETIC_CH1x);
 	}
 	magnetic.left1_mag = (data / 5) * 100 / 4095;
 	data = 0;
@@ -48,13 +57,13 @@ void Magnetic_GetAdc(void)
 	{
 		data += LPLD_ADC_Get(MAGNETIC_ADCx, MAGNETIC_CH3x);
 	}
-	magnetic.left2_mag = (data / 5) * 100 / 4095;
+	magnetic.right2_mag = (data / 5) * 100 / 4095;
 	data = 0;
 	for(i = 0; i < 5; i++)
 	{
 		data += LPLD_ADC_Get(MAGNETIC_ADCx, MAGNETIC_CH4x);
 	}
-	magnetic.right2_mag = (data / 5) * 100 / 4095;
+	magnetic.left2_mag = (data / 5) * 100 / 4095;
 }
 
 ///***************************************************************

@@ -154,7 +154,7 @@ void Servo_Control(void)
 ***************************************************************/
 void Servo_PID(void)
 {
-    if(feature.breakage_state[1] == 0)
+    if(servo.sensor == 1)
     {
         int16 p_value;
         int16 d_value;
@@ -186,7 +186,7 @@ void Servo_PID(void)
         d_value = (int16)(servo.kd * servo.error_differ[0]);
         servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);        
     }
-    else
+    else if(servo.sensor == 2)
     {
         int16 p_valu;
         int16 d_valu;
@@ -211,7 +211,7 @@ void Servo_PID(void)
 ***************************************************************/
 void servo_up1(void)
 {
-	servo.duty += 1;
+	servo.duty += 130;
 }
 void servo_up5(void)
 {
@@ -223,7 +223,7 @@ void servo_up10(void)
 }
 void servo_down1(void)
 {
-	servo.duty -= 1;
+	servo.duty -= 130;
 }
 void servo_down5(void)
 {

@@ -2,10 +2,10 @@
 #define _MAGNETIC_H_
 
 #define MAGNETIC_ADCx ADC1
-#define MAGNETIC_CH1x AD19	//DM0
-#define MAGNETIC_CH2x DAD0	//DP0
-#define MAGNETIC_CH3x DAD1	//DP1
-#define MAGNETIC_CH4x AD20	//DM1
+#define MAGNETIC_CH1x AD19	//DM0  ×ó1
+#define MAGNETIC_CH2x DAD0	//DP0  ÓÒ1
+#define MAGNETIC_CH3x DAD1	//DP1  ÓÒ2
+#define MAGNETIC_CH4x AD20	//DM1  ×ó2
 
 typedef struct
 {
