@@ -14,8 +14,8 @@
 #define ENCODER2_PORTPin1x PTB18
 #define ENCODER2_PORTPin2x PTB19
 
-#define ENCODER_NUM_PER_METER_LEFT  5700 //编码器一米累加的脉冲数
-#define ENCODER_NUM_PER_METER_RIGHT  5723 //编码器一米累加的脉冲数
+#define ENCODER_NUM_PER_METER_LEFT  5746 //编码器一米累加的脉冲数
+#define ENCODER_NUM_PER_METER_RIGHT  5746 //编码器一米累加的脉冲数
 
 typedef struct
 {
@@ -26,5 +26,6 @@ extern Encoder_Class encoder;
 
 void Encoder_Init(void);
 void Encoder_Get(void);
+void Encoder_FTM_Clear(void);
 
 #endif

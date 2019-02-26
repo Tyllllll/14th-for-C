@@ -45,35 +45,7 @@ void Init_All(void)
 	}
 	OLED_Fill(0x00);
 	EnableInterrupts;
-    servo.duty = DEG_MID;
-	servo.fore_max = 47;
-	servo.fore_min = 42;
-	servo.kp_left = 3.9;
-	servo.kp_right = 3.9;
-	servo.ki = 0;
-	servo.kd = 11.1;
-	servo.dead_zone = 2;
-	servo.dynamic_zone = 30;
-	servo.dif_const_left = 7.4;//7.28;
-	servo.dif_const_right = 5.2;//5.6;
-	servo.enable = 1;
-    servo.sensor = 1;
-	magnetic.servo_kp = 10.0;
-    magnetic.servo_kd = 20.0;
-    motor.kp = 16;
-	motor.ki = 3.4;
-	motor.kd = 0.7;
-	motor.is_open_loop = 0;
-	motor.dif_const = 0.96;
-	motor.dif_fore = 1;
-    motor.delta_kp = 0;
-    motor.delta_kp_max = 50;
-    motor.diff_error_max = 20;
-    motor.error_max = 180;	
 }
-
-
-
 
 /***************************************************************
 	*	@brief	中断优先级分配

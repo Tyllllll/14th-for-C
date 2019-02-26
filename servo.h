@@ -8,17 +8,13 @@
 #define SERVO_HIGH_PITx PIT0
 
 //偏大左偏，偏小右偏
-#define DEG_MAX  1587   //1632            
-#define DEG_MID  1427  //新车1462
-#define DEG_MIN  1257   //1292
-//#define DEG_MAX  1632   //1632            
-//#define DEG_MID  1462  //新车1462
-//#define DEG_MIN  1292   //1292
+#define DEG_MAX  1620
+#define DEG_MID  1450
+#define DEG_MIN  1280
 
 typedef struct
 {
 	int16 duty;
-    uint8 sensor;   //1=摄像头引导   2=电磁引导
 	uint8 foresight;
 	uint8 fore_min;
 	uint8 fore_max;

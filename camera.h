@@ -167,7 +167,7 @@
 #define IMG_IRQ_PORT	PORTB
 #define IMG_IRQ_PTx		PTB
 #define IMG_IRQ_Pinx	GPIO_Pin16
-#define CAMERAPT_PTx	PTC                        
+#define CAMERAPT_PTx	PTC
 #define CAMERAPT_Pinx	GPIO_Pin0_7
 #define CAMERA_DMA_REQ	PORTB_DMAREQ
 #define CAMERA_DMA_PTx	PTB
@@ -190,11 +190,12 @@ typedef struct
 	uint8 image[ROW][COLUMN];
 	uint8 image_buf1[ROW + 10][COLUMN / 8];
 	uint8 image_buf2[ROW + 10][COLUMN / 8];
+	uint8 enable;
 }Camera_Class;
 extern Camera_Class camera;	
 
-void Camera_Gpio_Init(void);
 uint8 ubyCamera_Init(void);
+void Camera_Gpio_Init(void);
 void Img_Isr(void);
 void DMA_Complete_Isr(void);
 void Camera_Delay(void);
