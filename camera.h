@@ -190,11 +190,12 @@ typedef struct
 	uint8 image[ROW][COLUMN];
 	uint8 image_buf1[ROW + 10][COLUMN / 8];
 	uint8 image_buf2[ROW + 10][COLUMN / 8];
+	uint8 enable;
 }Camera_Class;
 extern Camera_Class camera;	
 
-void Camera_Gpio_Init(void);
 uint8 ubyCamera_Init(void);
+void Camera_Gpio_Init(void);
 void Img_Isr(void);
 void DMA_Complete_Isr(void);
 void Camera_Delay(void);

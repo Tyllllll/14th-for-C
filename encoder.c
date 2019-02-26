@@ -44,5 +44,16 @@ void Encoder_Init(void)
 void Encoder_Get(void)
 {
 	encoder.left_num = (int16)LPLD_FTM_GetCounter(FTM1);
-	encoder.right_num = (int16)(-LPLD_FTM_GetCounter(FTM2));   //新车需要翻转一下
-} 
+	encoder.right_num = (int16)LPLD_FTM_GetCounter(FTM2);
+}
+
+/***************************************************************
+	*	@brief	清空计数器
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Encoder_FTM_Clear(void)
+{
+	LPLD_FTM_ClearCounter(FTM1);
+	LPLD_FTM_ClearCounter(FTM2);
+}

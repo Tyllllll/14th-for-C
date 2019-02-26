@@ -101,6 +101,56 @@ uint8 ubyCameraEagle_CfgNum = ARR_SIZE(regaCameraEagle);
 Camera_Class camera;
 
 /***************************************************************
+	*	@brief	摄像头初始化
+	*	@param	无
+	*	@note	无
+***************************************************************/
+uint8 ubyCamera_Init(void)
+{
+	camera.contrast = 60;
+	camera.ready_write = 1;
+	camera.which_buffer = 1;
+	camera.enable = 1;
+
+	uint16 i = 0;
+	uint8 ubyDeviceID = 0;
+	LPLD_SCCB_Init();
+	Camera_Gpio_Init();
+	Camera_Delay();
+	/* reset */
+	while(!LPLD_SCCB_WriteReg(OV7725_COM7, 0x80))
+	{
+		i++;
+		if(i == 500)
+		{
+			return 1; // 通信失败
+		}
+	}
+	Camera_Delay();
+	if(!LPLD_SCCB_ReadReg(OV7725_VER, &ubyDeviceID, 1))
+	{
+		return 2; // 摄像头验证失败
+	}
+	Camera_Delay();
+	if(ubyDeviceID == OV7725_ID)
+	{
+		for(i = 0; i < ubyCameraEagle_CfgNum; i++)
+		{
+			if(!LPLD_SCCB_WriteReg(regaCameraEagle[i].addr, regaCameraEagle[i].val))
+			{
+				return 3; // 寄存器初始化失败
+			}
+		}
+		LPLD_SCCB_WriteReg(OV7725_CNST, camera.contrast);
+	}
+	else
+	{
+		return 4; // 摄像头不是7725
+	}
+	return 0;
+}
+
+/***************************************************************
 	*	@brief	摄像头gpio初始化
 	*	@param	无
 	*	@note	无
@@ -145,54 +195,6 @@ static void Camera_Gpio_Init(void)
 	DMA_InitStructure.DMA_Isr = DMA_Complete_Isr;
 	LPLD_DMA_Init(DMA_InitStructure);
 	LPLD_DMA_EnableIrq(DMA_InitStructure);
-}
-
-/***************************************************************
-	*	@brief	摄像头初始化
-	*	@param	无
-	*	@note	无
-***************************************************************/
-uint8 ubyCamera_Init(void)
-{
-	camera.contrast = 90;
-	camera.ready_write = 1;
-
-	uint16 i = 0;
-	uint8 ubyDeviceID = 0;
-	LPLD_SCCB_Init();
-	Camera_Gpio_Init();
-	Camera_Delay();
-	/* reset */
-	while(!LPLD_SCCB_WriteReg(OV7725_COM7, 0x80))
-	{
-		i++;
-		if(i == 500)
-		{
-			return 1; // 通信失败
-		}
-	}
-	Camera_Delay();
-	if(!LPLD_SCCB_ReadReg(OV7725_VER, &ubyDeviceID, 1))
-	{
-		return 2; // 摄像头验证失败
-	}
-	Camera_Delay();
-	if(ubyDeviceID == OV7725_ID)
-	{
-		for(i = 0; i < ubyCameraEagle_CfgNum; i++)
-		{
-			if(!LPLD_SCCB_WriteReg(regaCameraEagle[i].addr, regaCameraEagle[i].val))
-			{
-				return 3; // 寄存器初始化失败
-			}
-		}
-		LPLD_SCCB_WriteReg(OV7725_CNST, camera.contrast);
-	}
-	else
-	{
-		return 4; // 摄像头不是7725
-	}
-	return 0;
 }
 
 /***************************************************************
@@ -257,7 +259,7 @@ void DMA_Complete_Isr(void)
 	camera.ready_write = 1;
 	if(camera.which_buffer == 1)
 	{
-		camera.which_buffer = 0;
+		camera.which_buffer = 2;
 	}
 	else
 	{
