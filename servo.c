@@ -1,252 +1,236 @@
-#include "head_file.h"
+#include "header.h"
 
-PID_InitTypeDef Ser_PID={1,0,5};
-int16 foresight1=46;//调试用
-
-//int16 fore_offset=12;//前瞻弯道随动量
-int16 fore_min=37;//使用中47
-int16 fore_max=42;//使用中63
-int16 foresight=55;//使用中61       U弯最大top58
-
-int16 mid_error[5];
-int16 error[5]={0};
-int16 error_cha[4]={0,0,0,0};
-int16 error_d=0;
-int16 S_d=0;//微分项总和
-int16 S_p=0;//比例项总和
-int16 servo_duty=1452;
-int16 mid=DEG_MID;
-int16 max=DEG_MAX;
-int16 min=DEG_MIN;
-int16 speed_now=0;
-int16 index1=8;
-
-float S_kp=4;//实验室参数
-float S_kp_r=4;
-float S_kd=11.1;//16.9
-
-
-int16 servo_duty_text=1515;
-
-/*10cm-i=95 top=100
-20cm-i=82 top=87
-30cm-i=70 top=75
-40cm-i=61 top=66
-50cm-i=54 top=59
-60cm-i=49 top=54
-70cm-i=45 top=50
-80cm-i=42 top=47
-90cm-i=39 top=44
-100cm-i=37 top=42
-110cm-i=35 top=40
-120cm-i=33 top=38
-130cm-i=32 top=37
-140cm-i=31 top=36
-170cm-i=27 top=32
-toppoint与实际顶点差5行*/
-void Sevor_control(void)
-{/******************动态前瞻******************************/
-  
-  speed_now=(int16)(0.6*MotorPID.Speed_test[0]+0.2*MotorPID.Speed_test[1]+0.2*MotorPID.Speed_test[2]);//编码器的值会有高频抖动
-
-    if(speed_now>400)
-    {
-      foresight=fore_min;
-    }
-    
-    else if(speed_now<250)
-    {
-      foresight=fore_max;
-    }
-    else
-    {
-      //    foresight=(int16)(fore_max+(float)(fore_min-fore_max)*(speed_now-200)/150);
-      //    //一次函数拟合 speed为后面值时前瞻为max 为加上除数时前瞻为min 理论上效果不会好 因为前瞻越长时10cm对应行数变化越小
-      foresight=(int16)(fore_min+(float)(fore_max-fore_min)*(400-speed_now)*(400-speed_now)/(150*150));
-      //二次函数拟合 前瞻集中在fore_min
-      
-    }
-    
-//    if(abs(f1.midline[foresight]-80)>10)
-//    {//前瞻同时随控制偏差变化
-//      foresight=foresight+(int16)(fore_offset*(f1.midline[foresight]-80)*(f1.midline[foresight]-80)/(80*80));
-//    }
-    
-//    foresight=foresight>?65:foresight; 好像没有用 
-
-
-  mid_error[0]=2*(f1.midline[foresight]-80);
-  mid_error[1]=2*(f1.midline[foresight+1]-80);
-  mid_error[2]=(f1.midline[foresight+2]-80);
-  mid_error[3]=(f1.midline[foresight-1]-80);
-  error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);//整数除法和单精度乘法的效率差不多
-  
-  
-  if(error[0]>60)
-  {//error限幅 极限60
-    error[0]=60;
-  }
-  if(error[0]<-60)
-  {
-    error[0]= -60;
-  }
-  if(error[0]-error[1]>15)
-  {//error前后变化限幅限制15以内
-    error[0]=error[1]+15;
-  }
-  if(error[0]-error[1]<-15)
-  {
-    error[0]=error[1]-15;
-  }
-  
-  error_cha[0]=error[0]-error[1]; 
-  if(error_cha[0]-error_cha[1]>13)
-  {//error微分的变化限幅 理论ec0最大40 实际示波器返回不超15
-    error_cha[0]=error_cha[1]+13;
-  }
-  if(error_cha[0]-error_cha[1]<-13)
-  {
-    error_cha[0]=error_cha[1]-13;
-  }
-//  error_d=(int16)(0.6*error_cha[3]+0.2*error_cha[2]+0.1*error_cha[1]+0.1*error_cha[0]);//4帧D
-//  error_d=(int16)(0.8*error_cha[1]+0.2*error_cha[0]);//2帧D
-  
-  error_cha[3]=error_cha[2];
-  error_cha[2]=error_cha[1];
-  error_cha[1]=error_cha[0];
-  int i;
-  for(i=4;i>0;i--)
-  {//为什么把error扩到了30 现在忘了
-   error[i]=error[i-1];
-  }
-  Sevor_pid();
-}
-
-
-void Sevor_pid(void)
-{
-
-/*******************Normal P***********/
-	if(road_type[1] == 1 || road_type[1] == 2)
-	{
-		S_kp = 3.2;
-		S_kp_r = 3.2;
-	}
-	else
-	{
-		S_kp = 4.1;
-		S_kp_r = 4.1;
-	}
-	
- if(error[0]>0)
-  {//右边分离Kp
-	  if(error[0] < 25 )
-	  {
-		  Ser_PID.Kp=S_kp_r*error[0]*error[0]/(25*25);
-	  }else
-	    Ser_PID.Kp=S_kp_r;
-  }
-  else
-  { 
-	  if(error[0] >  -25)
-	  {
-		  Ser_PID.Kp=S_kp*error[0]*error[0]/(25*25);
-	  }else
-	Ser_PID.Kp=S_kp;
-  }
- 
-//   if(error[0]>0)
-//  {//右边分离Kp
-//          if(error[0] < index1)
-//          {
-//                  Ser_PID.Kp=S_kp_r * error[0] * error[0]/(index1*index1);
-//          }
-//	  else if(error[0] < 30)
-//	  {
-//		  Ser_PID.Kp=S_kp_r - (error[0] - 30)*(error[0] - 30)/225;
-//	  }else
-//                  Ser_PID.Kp=S_kp_r;
-//  }
-//  else
-//  { 
-//          if(error[0] > -20)
-//          {
-//                  Ser_PID.Kp=S_kp*error[0]*error[0]/400;
-//          }
-//	  else if(error[0] > -30)
-//	  {
-//		  Ser_PID.Kp=S_kp - (error[0] + 30)*(error[0] + 30)/225;
-//	  }
-//          else
-//            Ser_PID.Kp=S_kp;
-//  }
-
-//  if(error[0]<=8&&error[0]>=-8)   //直接分段赋值S_Kp 效果不如二次拟合
-//    Ser_PID.Kp=S_kp_r*0.2;
-//  else if(error[0]<=20&&error[0]>=-20)
-//    Ser_PID.Kp=S_kp_r*0.7;
-//  else
-//    Ser_PID.Kp=S_kp;
-
-  Ser_PID.Kd=S_kd;
-  
-  
-  /************P项计算计算****************/
-  S_p=(int16)(Ser_PID.Kp*error[0]);
-  /************单帧D计算****************/
-  S_d=(int16)(Ser_PID.Kd*error_cha[0]);
-  /************多帧D计算****************/
-  //  S_d=(int16)(Ser_PID.Kd*error_d);
-  /************************************/  
- // servo_duty=abs(error[0])<Deadzone?(short)0:(short)(-(S_d+S_p)+mid);      //舵机转向与预期相反 将（S_d+S_p）取反 
-//  if(f2.huandaoflag == 3 || f2.huandaoflag == 7)
-//  {
-//	  servo_duty = 1570;
-//  }
-//  else if(f2.huandaoflag == 4 || f2.huandaoflag == 8)
-//  {
-//	  servo_duty = 1330;
-//  }
-//  else
-//  {
-//  	servo_duty = abs(error[0])<index1?(short)mid:(short)(-(S_d+S_p)+mid);
-//  }
-  servo_duty = abs(error[0])<index1?(short)mid:(short)(-(S_d+S_p)+mid);
-  
-  sudu_set();//速度设定 改变MotorPID.SpeedSet
-}
-void Sevor_output(void)
-{//PIT周期调用
-  if(servo_duty>max)
-  {//限幅
-    servo_duty=max;	
-  }
-  if(servo_duty<min)
-  {
-    servo_duty=min;
-  }
-
-  PIT->CHANNEL[3].LDVAL = (servo_duty)*(g_bus_clock / 1000000) - 1;//测试在此 servo_duty_text
-  PTD2_O = 1;
-  PIT->CHANNEL[3].TCTRL |= PIT_TCTRL_TEN_MASK;//开始计时 
-}
-void Servo_PIT_Isr(void)
-{//拉低电平
-  PTD2_O = 0;
-  PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
-}
-
+Servo_Class servo;
 
 /***************************************************************
-	*	@brief	舵机测试
+	*	@brief	舵机初始化
 	*	@param	无
 	*	@note	无
 ***************************************************************/
+void Servo_Gpio_Init(void)
+{
+	servo.duty = DEG_MID;
+	servo.fore_max = 47;
+	servo.fore_min = 42;
+	servo.kp_left = 3.9;
+	servo.kp_right = 3.9;
+	servo.ki = 0;
+	servo.kd = 11.1;
+	servo.dead_zone = 2;
+	servo.dynamic_zone = 30;
+	servo.dif_const_left = 7.4;//7.28;
+	servo.dif_const_right = 5.2;//5.6;
+	servo.enable = 1;
+    servo.sensor = 1;
+	magnetic.servo_kp = 10.0;
+    magnetic.servo_kd = 20.0;
+	static GPIO_InitTypeDef GPIO_InitStructure;
+	//舵机引脚初始化
+	GPIO_InitStructure.GPIO_PTx = SERVO_PTx;
+	GPIO_InitStructure.GPIO_Dir = DIR_OUTPUT;
+	GPIO_InitStructure.GPIO_Output = OUTPUT_L;
+	GPIO_InitStructure.GPIO_Pins = SERVO_Pinx;
+	LPLD_GPIO_Init(GPIO_InitStructure);
+	//PIT3定时中断，负责拉低电平
+	static PIT_InitTypeDef PIT_LOW_InitStructure;
+	PIT_LOW_InitStructure.PIT_Pitx = SERVO_LOW_PITx;
+	PIT_LOW_InitStructure.PIT_PeriodUs = 100000;
+	PIT_LOW_InitStructure.PIT_Isr = Servo_PIT_Isr;
+	LPLD_PIT_Init(PIT_LOW_InitStructure);
+	LPLD_PIT_EnableIrq(PIT_LOW_InitStructure);//使能中断
+	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
+	//PIT0 20ms定时中断，负责拉高电平
+	static PIT_InitTypeDef PIT_HIGH_InitStructure;
+	PIT_HIGH_InitStructure.PIT_Pitx = SERVO_HIGH_PITx;
+	PIT_HIGH_InitStructure.PIT_PeriodMs = 20;
+	PIT_HIGH_InitStructure.PIT_Isr = Servo_Output;
+	LPLD_PIT_Init(PIT_HIGH_InitStructure);
+	LPLD_PIT_EnableIrq(PIT_HIGH_InitStructure);//使能中断
+}
+
+/***************************************************************
+	*	@brief	PIT0定时中断
+	*	@param	无
+	*	@note	周期调用，负责拉高电平
+***************************************************************/
+void Servo_Output(void)
+{
+	if(servo.duty > DEG_MAX)
+	{
+		servo.duty = DEG_MAX;
+	}
+	if(servo.duty < DEG_MIN)
+	{
+		servo.duty = DEG_MIN;
+	}
+	PIT->CHANNEL[3].LDVAL = (servo.duty) * (g_bus_clock / 1000000) - 1;
+	SERVO = 1;
+	PIT->CHANNEL[3].TCTRL |= PIT_TCTRL_TEN_MASK;//开始计时
+}
+
+/***************************************************************
+	*	@brief	PIT3定时中断
+	*	@param	无
+	*	@note	负责拉低电平
+***************************************************************/
+void Servo_PIT_Isr(void)
+{
+	SERVO = 0;
+	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
+}
+
+/***************************************************************
+	*	@brief	舵机控制
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Servo_Control(void)
+{
+//	int16 mid_error[4];
+//	int16 speed = (int16)(0.6 * motor.speed_current[0] + 0.2 * motor.speed_current[1] + 0.2 * motor.speed_current[2]);//编码器的值会有高频抖动
+	if(motor.speed_ave > 400)
+	{
+		servo.foresight = servo.fore_min;
+	}
+	else if(motor.speed_ave < 400)
+	{
+		servo.foresight = servo.fore_max;
+	}
+	else
+	{
+		servo.foresight = (uint8)(servo.fore_min + (float)(servo.fore_max - servo.fore_min) * (400 - motor.speed_ave) * (400 - motor.speed_ave) / (150 * 150));
+	}
+	servo.foresight = servo.fore_max;
+	if(servo.foresight < feature.top_point)
+	{
+		servo.foresight = feature.top_point - 2;
+	}
+//	mid_error[0]=2*(line.midline[servo.foresight]-80);
+//	mid_error[1]=2*(line.midline[servo.foresight+1]-80);
+//	mid_error[2]=(line.midline[servo.foresight+2]-80);
+//	mid_error[3]=(line.midline[servo.foresight-1]-80);
+//	servo.error[0]=(int16)((mid_error[0]+mid_error[1]+mid_error[2]+mid_error[3])/6);
+	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0)
+		+ (int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+	if(servo.error[0] > 60)
+	{
+		servo.error[0] = 60;
+	}
+	if(servo.error[0] < -60)
+	{
+		servo.error[0] = -60;
+	}
+	if(servo.error[0] - servo.error[1] > 15)
+	{
+		servo.error[0] = servo.error[1] + 15;
+	}
+	if(servo.error[0] - servo.error[1] < -15)
+	{
+		servo.error[0] = servo.error[1] - 15;
+	}
+	servo.error_differ[0] = servo.error[0] - servo.error[1];
+	if(servo.error_differ[0] - servo.error_differ[1] > 13)
+	{
+		servo.error_differ[0] = servo.error_differ[1] + 13;
+	}
+	if(servo.error_differ[0] - servo.error_differ[1] < -13)
+	{
+		servo.error_differ[0] = servo.error_differ[1] - 13;
+	}
+	for(uint8 i = 4; i > 0; i--)
+	{
+		servo.error[i] = servo.error[i - 1];
+	}
+	for(uint8 i = 3; i > 0; i--)
+	{
+		servo.error_differ[i] = servo.error_differ[i - 1];
+	}
+	Servo_PID();
+}
+
+/***************************************************************
+	*	@brief	舵机pid计算
+	*	@param	无
+	*	@note	Servo_Control调用
+***************************************************************/
+void Servo_PID(void)
+{
+    if(servo.sensor == 1)
+    {
+        int16 p_value;
+        int16 d_value;
+        //左
+        if(servo.error[0] <= 0)
+        {
+            if(servo.error[0] > -servo.dynamic_zone)
+            {
+                servo.kp = servo.kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+            }
+            else
+            {
+                servo.kp = servo.kp_left;
+            }
+        }
+        //右
+        else
+        {
+            if(servo.error[0] < servo.dynamic_zone)
+            {
+                servo.kp = servo.kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+            }
+            else
+            {
+                servo.kp = servo.kp_right;
+            }
+        }
+        p_value = (int16)(servo.kp * servo.error[0]);
+        d_value = (int16)(servo.kd * servo.error_differ[0]);
+        servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);        
+    }
+    else if(servo.sensor == 2)
+    {
+        int16 p_valu;
+        int16 d_valu;
+        magnetic.error = magnetic.right2_mag - magnetic.left2_mag;
+        magnetic.diff_error = magnetic.error - magnetic.error_pre1;
+        magnetic.error_pre1 = magnetic.error;
+        p_valu = (int16)(magnetic.servo_kp * magnetic.error);
+        d_valu = (int16)(magnetic.servo_kd * magnetic.diff_error);
+        servo.duty = (int16)(DEG_MID + p_valu + d_valu);   
+    }
+
+	Speed_Set();
+}
+
+
+
+/**********************a little funcitons**********************/
+/***************************************************************
+	*	@brief	舵机调试
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void servo_up1(void)
+{
+	servo.duty += 130;
+}
+void servo_up5(void)
+{
+	servo.duty += 5;
+}
 void servo_up10(void)
 {
-	servo_duty += 10;
+	servo.duty += 10;
+}
+void servo_down1(void)
+{
+	servo.duty -= 130;
+}
+void servo_down5(void)
+{
+	servo.duty -= 5;
 }
 void servo_down10(void)
 {
-	servo_duty -= 10;
+	servo.duty -= 10;
 }
