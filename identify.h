@@ -8,6 +8,7 @@ typedef struct
 	int16 right_line[120];
 	uint8 right_line_flag[120];
 	int16 midline[120];
+	int16 half_width_test[120];
 }Line_Class;
 extern Line_Class line;
 
@@ -41,9 +42,9 @@ typedef struct
 	//直道标志
 	uint8 straight_state;
 	//左右转标志
+	uint8 pre_turn_state;
 	uint8 turn_state;
 	uint8 turn_row;
-	uint8 deep_turn_state;
 	//十字标志
 	uint8 cross_state[2];
 	//环岛标志
@@ -52,6 +53,7 @@ typedef struct
 	float32 roundabouts_size;
 	//断路标志
 	uint8 breakage_state;
+	int16 breakage_radius_curvature;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -74,5 +76,6 @@ uint8 is_Right_Point_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_All_Line(uint8 row);
 uint8 is_Right_Point_Lose_All_Line(uint8 row);
 float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int16 point_By, int16 point_Cx, int16 point_Cy);
+void Check_Half_Width(void);
 
 #endif

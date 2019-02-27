@@ -412,13 +412,14 @@ void OLED_ShowImage(void)
 	}
 	OLED_Put6x8Str(80, 0, "top");
 	OLED_PrintUintValue(100, 0, feature.top_point);
-	OLED_Put6x8Str(80, 1, "wa");
-	OLED_PrintUintValue(100, 1, feature.deep_turn_state);
-	OLED_Put6x8Str(80, 2, "hu");
-	OLED_PrintUintValue(100, 2, feature.roundabouts_state);
+	OLED_Put6x8Str(80, 1, "zh");
+	OLED_PrintUintValue(100, 1, feature.straight_state);
+	OLED_Put6x8Str(80, 2, "wa");
+	OLED_PrintUintValue(100, 2, feature.turn_state);
 	OLED_Put6x8Str(80, 3, "du");
 	OLED_PrintUintValue(100, 3, feature.breakage_state);
-	OLED_PrintIntValue(80, 4, feature.breakage_state);
+	OLED_Put6x8Str(80, 4, "rc");
+	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature);
 //	OLED_Put6x8Str(80, 4, "rt");
 //	OLED_PrintUintValue(100, 4, feature.road_type[0]);
 //	OLED_PrintUintValue(80, 4, feature.left_flection_row);

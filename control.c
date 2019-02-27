@@ -1,18 +1,20 @@
 #include "header.h"
 
-uint8 half_width[120] = {14, 17, 19, 20, 22, 23, 24, 24, 25, 25,//0
-						27, 28, 29, 30, 31, 32, 33, 35, 36, 36,//1
-						37, 39, 40, 41, 42, 43, 44, 45, 46, 47,//2
-						48, 49, 50, 51, 52, 53, 53, 54, 55, 56,//3
-						57, 58, 59, 60, 61, 62, 63, 64, 65, 65,//4
-						66, 67, 68, 69, 70, 71, 72, 72, 73, 74,//5
-						75, 76, 76, 76, 77, 77, 77, 78, 78, 79,//6
-						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//7
+uint8 half_width[120] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//0
+						0, 19, 20, 21, 22, 24, 25, 26, 27, 28,//1
+						29, 30, 31, 32, 33, 34, 35, 37, 38, 39,//2
+						39, 40, 42, 43, 44, 44, 45, 46, 47, 48,//3
+						49, 50, 51, 52, 53, 54, 55, 56, 57, 58,//4
+						58, 59, 60, 61, 62, 63, 63, 64, 66, 67,//5
+						68, 69, 70, 71, 72, 73, 73, 74, 75, 76,//6
+						77, 78, 79, 79, 79, 79, 79, 79, 79, 79,//7
 						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//8
 						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//9
 						79, 79, 79, 79, 79, 79, 79, 79, 79, 79,//10
-						79, 79, 79, 79, 79, 79, 79, 79, 79, 79//11
+						79, 79, 79, 79, 79, 79, 79, 79, 79, 0,//11
 };
+
+
 Speed_Class speed;
 Setting_Class setting;
 
@@ -56,11 +58,12 @@ void Speed_Init(void)
 ***************************************************************/
 void All_Fill(void)
 {
+	Roundabouts_Fill();
+	Breakage_Fill();
 	if(feature.roundabouts_state != 1 && feature.roundabouts_state != 2)
 	{
 		Cross_Fill();
 	}
-	Roundabouts_Fill();
 //	Curve_Fill();
 }
 
@@ -73,7 +76,7 @@ void Curve_Fill(void)
 {
 	uint8 i = 0;
 	//左小弯
-//	if(feature.deep_turn_state == 1)
+//	if(feature.turn_state == 1)
 //	{
 //		for(i = 60; i > feature.top_point; i--)
 //		{
@@ -96,7 +99,7 @@ void Curve_Fill(void)
 //		}
 //	}
 //	//右小弯
-//	else if(feature.deep_turn_state == 2)
+//	else if(feature.turn_state == 2)
 //	{
 //		for(i = 60; i > feature.top_point; i--)
 //		{
@@ -119,7 +122,7 @@ void Curve_Fill(void)
 //		}
 //	}
 	//左深弯
-	if(feature.deep_turn_state == 3)
+	if(feature.turn_state == 3)
 	{
 		for(i = 118; i > feature.top_point; i--)
 		{
@@ -141,7 +144,7 @@ void Curve_Fill(void)
 		}
 	}
 	//右深弯
-	else if(feature.deep_turn_state == 4)
+	else if(feature.turn_state == 4)
 	{
 		for(i = 118; i > feature.top_point; i--)
 		{
@@ -162,14 +165,14 @@ void Curve_Fill(void)
 			}
 		}
 	}
-	else if(feature.deep_turn_state == 5)
+	else if(feature.turn_state == 5)
 	{
 		for(i = 118; i > 35; i--)
 		{
 			line.midline[i] = 0;
 		}
 	}
-	else if(feature.deep_turn_state == 6)
+	else if(feature.turn_state == 6)
 	{
 		for(i = 118; i > 35; i--)
 		{
@@ -761,6 +764,53 @@ void Roundabouts_Fill(void)
 }
 
 /***************************************************************
+	*	@brief	断路处理
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Breakage_Fill(void)
+{
+	uint8 i = 0;
+	if(feature.breakage_state == 1)
+	{
+//		BUZZER_ON;
+	}
+	else if(feature.breakage_state == 2)
+	{
+//		BUZZER_ON;
+		//左补线
+		for(i = 117; i > feature.top_point; i--)
+		{
+			line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
+		}
+	}
+	else if(feature.breakage_state == 3)
+	{
+//		BUZZER_ON;
+		//右补线
+		for(i = 117; i > feature.top_point; i--)
+		{
+			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
+		}
+	}
+	else if(feature.breakage_state == 4)
+	{
+		//切电磁
+	}
+	else if(feature.breakage_state == 5)
+	{
+		for(i = 80; i > 30; i--)
+		{
+			if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1
+			   && line.left_line_flag[i + 1] == 1 && line.right_line_flag[i] == 1)
+			{
+				servo.fore_max = i;
+			}
+		}
+	}
+}
+
+/***************************************************************
 	*	@brief	速度设定
 	*	@param	无
 	*	@note	无
@@ -1020,6 +1070,8 @@ void Parameter_Setting_Init(void)
 	setting.data[2][5] = (float32)servo.dif_const_left;
 	sprintf(setting.string[2][6], "dif_c_r");
 	setting.data[2][6] = (float32)servo.dif_const_right;
+	sprintf(setting.string[2][7], "enable");
+	setting.data[2][7] = (float32)servo.enable;
         
 	sprintf(setting.string[3][0], "MOTOR");
 	sprintf(setting.string[3][1], "kp");
@@ -1031,11 +1083,17 @@ void Parameter_Setting_Init(void)
 	sprintf(setting.string[3][4], "openloop");
 	setting.data[3][4] = (float32)motor.is_open_loop;
 	
-	sprintf(setting.string[4][0], "MOTOR_DIF");
-	sprintf(setting.string[4][1], "const");
-	setting.data[4][1] = (float32)motor.dif_const;
-	sprintf(setting.string[4][2], "fore");
-	setting.data[4][2] = (float32)motor.dif_fore;
+	sprintf(setting.string[4][0], "MAGNETIC_DIF");
+	sprintf(setting.string[4][1], "k");
+	setting.data[4][1] = (float32)magnetic.k;
+	sprintf(setting.string[4][2], "b");
+	setting.data[4][2] = (float32)magnetic.b;
+	
+//	sprintf(setting.string[4][0], "MOTOR_DIF");
+//	sprintf(setting.string[4][1], "const");
+//	setting.data[4][1] = (float32)motor.dif_const;
+//	sprintf(setting.string[4][2], "fore");
+//	setting.data[4][2] = (float32)motor.dif_fore;
 }
 
 /***************************************************************
@@ -1206,12 +1264,15 @@ void Save_Data(void)
 	servo.kd = setting.data[2][4];
 	servo.dif_const_left = setting.data[2][5];
 	servo.dif_const_right = setting.data[2][6];
+	servo.enable = (uint8)setting.data[2][7];
 	motor.kp = setting.data[3][1];
 	motor.ki = setting.data[3][2];
 	motor.kd = setting.data[3][3];
 	motor.is_open_loop = (int8)setting.data[3][4];
-	motor.dif_const = setting.data[4][1];
-	motor.dif_fore = setting.data[4][2];
+	magnetic.k = setting.data[4][1];
+	magnetic.b = setting.data[4][2];
+//	motor.dif_const = setting.data[4][1];
+//	motor.dif_fore = setting.data[4][2];
 }
 
 
@@ -1221,11 +1282,11 @@ void Save_Data(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-uint8 is_Lose_All(void)
+uint8 is_Lose_All(uint8 row)
 {
 	uint8 i = 0, j = 0;
 	int16 black_count = 0;
-	for(i = 98; i > 95; i--)
+	for(i = row; i > row - 3; i--)
 	{
 		for(j = 130; j >= 30; j--)
 		{

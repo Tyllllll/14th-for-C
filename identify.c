@@ -12,7 +12,7 @@ void Find_Line(void)
 {
 	uint8 i = 0, j = 0;
 	int16 column_start = 80;//基础寻线每行起始搜索列
-	for(i = 118; i >5; i--)
+	for(i = 118; i > 10; i--)
 	{
 		line.left_line[i] = 0;
 		line.left_line_flag[i] = 0;
@@ -69,7 +69,7 @@ void Find_Line(void)
 				line.midline[i] = line.midline[i + 1];
 				if(line.midline[i] > 40 && line.midline[i] < 120)
 				{
-					if(camera.image[i - 5][line.midline[i]] != 0 && (camera.image[i - 6][line.midline[i]] == 0 || camera.image[i - 8][line.midline[i]] == 0 || camera.image[i - 10][line.midline[i]] == 0))
+					if(camera.image[i - 1][line.midline[i]] != 0 && camera.image[i - 2][line.midline[i]] == 0 && camera.image[i - 4][line.midline[i]] == 0 && camera.image[i - 6][line.midline[i]] == 0)
 					{
 						if(camera.image[i - 5][line.midline[i] + 20] != 0)
 						{
@@ -127,9 +127,9 @@ void Find_Top_Point(void)
 {
 	uint8 i = 0;
 	feature.top_point = 0;
-	for(i = 100; i > 5; i--)
+	for(i = 100; i > 10; i--)
 	{
-		if(camera.image[i][line.midline[i]] != 0 && (camera.image[i - 1][line.midline[i]] == 0 || camera.image[i - 3][line.midline[i]] == 0 || camera.image[i - 5][line.midline[i]] == 0))
+		if(camera.image[i][line.midline[i]] != 0 && camera.image[i - 1][line.midline[i]] == 0 && camera.image[i - 3][line.midline[i]] == 0 && camera.image[i - 5][line.midline[i]] == 0)
 		{
 			feature.top_point = i;
 			break;
@@ -244,7 +244,7 @@ void Find_Inflection2(void)
 							{
 								feature.left_flection2_row = i;
 								feature.left_flection2_flag = 1;
-								if(line.left_line[i - 4] - line.left_line[i - 1] >= 10 && line.left_line[feature.left_flection2_row] > 10)
+								if(line.left_line[i - 4] - line.left_line[i - 1] >= 10 && line.left_line[feature.left_flection2_row] > 10 && feature.left_flection2_row > 35)
 								{
 									//反拐点标记
 									feature.left_flection2_antiflag = 1;
@@ -275,7 +275,7 @@ void Find_Inflection2(void)
 							{
 								feature.right_flection2_row = i;
 								feature.right_flection2_flag = 1;
-								if(line.right_line[i - 4] - line.right_line[i - 1] <= -10 && line.right_line[feature.right_flection2_row] < 150)
+								if(line.right_line[i - 4] - line.right_line[i - 1] <= -10 && line.right_line[feature.right_flection2_row] < 150 && feature.right_flection2_row > 35)
 								{
 									//反拐点标记
 									feature.right_flection2_antiflag = 1;
@@ -370,7 +370,7 @@ void Judge_Curve(void)
 	uint8 cnt_left = 0;
 	uint8 cnt_right = 0;
 	//判远小弯
-	if(feature.deep_turn_state == 0)
+	if(feature.turn_state == 0)
 	{	
 		for(i = 100; i > 30; i--)
 		{
@@ -378,7 +378,7 @@ void Judge_Curve(void)
 			{
 				if(line.right_line_flag[i - 4] == 1 && i > 20)
 				{
-					feature.turn_state = 1;
+					feature.pre_turn_state = 1;
 					break;
 				}
 			}
@@ -389,15 +389,15 @@ void Judge_Curve(void)
 			{
 				if(line.left_line_flag[i - 4] == 1 && i > 20)
 				{
-					feature.turn_state = 2;
+					feature.pre_turn_state = 2;
 					break;
 				}
 			}
 		}
 	}
-	if(feature.deep_turn_state != 0)
+	if(feature.turn_state != 0)
 	{
-		feature.turn_state = 0;
+		feature.pre_turn_state = 0;
 	}
 	//救火
 	if(feature.top_point > 70)
@@ -415,19 +415,19 @@ void Judge_Curve(void)
 		}
 		if(cnt_left < 2 && cnt_right > 118 - feature.top_point - 2)
 		{
-			feature.deep_turn_state = 5;
+			feature.turn_state = 5;
 		}
 		else if(cnt_left > 118 - feature.top_point - 2 && cnt_right < 2)
 		{
-			feature.deep_turn_state = 6;
+			feature.turn_state = 6;
 		}
 	}
 	else
 	{
-		feature.deep_turn_state = 0;
+		feature.turn_state = 0;
 	}
 	//判深弯
-	if(feature.deep_turn_state != 5 && feature.deep_turn_state != 6)
+	if(feature.turn_state != 5 && feature.turn_state != 6)
 	{
 		cnt_left = 0;
 		cnt_right = 0;
@@ -466,19 +466,19 @@ void Judge_Curve(void)
 			}
 			if(is_left_turn == 1 && is_right_turn == 0)
 			{
-				feature.deep_turn_state = 3;
+				feature.turn_state = 3;
 			}
 			else if(is_left_turn == 0 && is_right_turn == 1)
 			{
-				feature.deep_turn_state = 4;
+				feature.turn_state = 4;
 			}
 			else
 			{
-				feature.deep_turn_state = 0;
+				feature.turn_state = 0;
 			}
 		}
 	}
-	if(feature.deep_turn_state != 3 && feature.deep_turn_state != 4 && feature.deep_turn_state != 5 && feature.deep_turn_state != 6)
+	if(feature.turn_state != 3 && feature.turn_state != 4 && feature.turn_state != 5 && feature.turn_state != 6)
 	{
 		if(feature.top_point < 70)
 		{
@@ -516,15 +516,15 @@ void Judge_Curve(void)
 			}
 			if(is_left_turn == 1 && is_right_turn == 0)
 			{
-				feature.deep_turn_state = 1;
+				feature.turn_state = 1;
 			}
 			else if(is_left_turn == 0 && is_right_turn == 1)
 			{
-				feature.deep_turn_state = 2;
+				feature.turn_state = 2;
 			}
 			else
 			{
-				feature.deep_turn_state = 0;
+				feature.turn_state = 0;
 			}
 		}
 	}
@@ -610,9 +610,9 @@ void Judge_Cross(void)
 				feature.cross_state[0] = 0;
 			}
 			//拐点存在，销去转弯标志位
-			if(feature.turn_state != 0)
+			if(feature.pre_turn_state != 0)
 			{
-				feature.turn_state = 0;
+				feature.pre_turn_state = 0;
 			}
 		}
 		else
@@ -649,7 +649,7 @@ void Judge_Roundabouts(void)
 	if(cnt == 0)
 	{
 //		Magnetic_Get_Result();
-		if(magnetic.left1_mag > 50 || magnetic.right1_mag > 50 && feature.roundabouts_state == 0)
+		if(magnetic.middle_left_mag > 50 || magnetic.middle_right_mag > 50 && feature.roundabouts_state == 0)
 		{
 			if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 			{
@@ -687,7 +687,7 @@ void Judge_Roundabouts(void)
 	if(feature.roundabouts_state == 5)
 	{
 		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 0 && line.right_line_flag[feature.top_point] == 1
-		|| feature.deep_turn_state == 1)
+		|| feature.turn_state == 1)
 		{
 			servo.enable = 1;
 			feature.roundabouts_state = 0;
@@ -713,7 +713,7 @@ void Judge_Roundabouts(void)
 	if(feature.roundabouts_state == 6)
 	{
 		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 1 && line.right_line_flag[feature.top_point] == 0
-		|| feature.deep_turn_state == 2)
+		|| feature.turn_state == 2)
 		{
 			servo.enable = 1;
 			feature.roundabouts_state = 0;
@@ -729,40 +729,90 @@ void Judge_Roundabouts(void)
 void Judge_Breakage(void)
 {
 	uint8 i;
+	uint8 top_row;
 	uint8 bottom_row;
-	if(feature.top_point > 40)
-	{	
-		//直入
-		if(line.midline[feature.top_point + 3] > 80 && line.midline[feature.top_point + 3] < 100)
+	feature.breakage_radius_curvature = 0;
+	//判断路
+	if(feature.breakage_state == 0)
+	{
+		if(feature.top_point > 50)
 		{
-			feature.breakage_state = 1;
-		}
-		else
-		{
-			for(i = 110; i > feature.top_point; i--)
+			for(i = 100; i > feature.top_point; i--)
 			{
-				if(line.right_line_flag[i] == 1)
+				if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1)
 				{
-					bottom_row = i;
+					top_row = i;
 					break;
 				}
 			}
-			//左入
-			if(line.midline[feature.top_point + 3] < 80)
+			//直入
+			if(line.midline[top_row] >= 75 && line.midline[top_row] <= 85)
 			{
-				if(Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row) > 1700)
+				feature.breakage_state = 1;
+			}
+			else
+			{
+				//左断
+				if(line.midline[top_row] < 75)
 				{
-					feature.breakage_state = 2;
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.left_line_flag[i] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
+					if(feature.breakage_radius_curvature > 1700)
+					{
+						feature.breakage_state = 2;
+					}
+				}
+				//右断
+				else if(line.midline[top_row] > 85)
+				{
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.right_line_flag[i] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
+					if(feature.breakage_radius_curvature > 1700)
+					{
+						feature.breakage_state = 3;
+					}
 				}
 			}
-			//右入
-			else if(line.midline[feature.top_point + 3] > 80)
-			{
-				if(Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row) > 1700)
-				{
-					feature.breakage_state = 3;
-				}
-			}
+		}
+	}
+	//进断路
+	else if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
+	{
+		if(is_Lose_All(100) == 1)
+		{
+			servo.which = 1;
+			feature.breakage_state = 4;
+		}
+	}
+	//切回摄像头
+	else if(feature.breakage_state == 4)
+	{
+		if(is_Lose_All(35) == 0)
+		{
+			servo.which = 0;
+			feature.breakage_state = 5;
+		}
+	}
+	//出断路
+	else if(feature.breakage_state == 5)
+	{
+		if(is_Lose_All(105) == 0)
+		{
+			feature.breakage_state = 0;
 		}
 	}
 }
@@ -771,7 +821,7 @@ void Judge_Breakage(void)
 
 /**********************a little funcitons**********************/
 /***************************************************************
-	*	@brief	求60-30行范围内中线标准差
+	*	@brief	求范围内中线标准差
 	*	@param	row_max：行数最大值，row_min：行数最小值
 	*	@note	无
 ***************************************************************/
@@ -958,4 +1008,17 @@ float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int
 		curvature = 9999;
 	}
 	return curvature;
+}
+
+/***************************************************************
+	*	@brief	测赛道半宽
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Check_Half_Width(void)
+{
+	for(uint8 i = 118; i > 10; i --)
+	{
+		line.half_width_test[i] = (line.right_line[i] - line.left_line[i]) / 2;
+	}
 }

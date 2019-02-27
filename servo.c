@@ -10,8 +10,7 @@ Servo_Class servo;
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
-	servo.fore_max = 42;
-	servo.fore_min = 37;
+	servo.fore_max = 58;
 	servo.kp_left = 3.9;
 	servo.kp_right = 3.9;
 	servo.ki = 0;
@@ -84,13 +83,18 @@ void Servo_PIT_Isr(void)
 ***************************************************************/
 void Servo_Control(void)
 {
+	uint8 i = 0;
+	int16 sum = 0;
 	servo.foresight = servo.fore_max;
 	if(servo.foresight < feature.top_point)
 	{
-		servo.foresight = feature.top_point - 2;
+		servo.foresight = feature.top_point - 6;
 	}
-	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0)
-		+ (int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+	for(i = 0; i < 10; i++)
+	{
+		sum += line.midline[servo.foresight - i + 5] - 80;
+	}
+	servo.error[0] = sum / 10;
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;

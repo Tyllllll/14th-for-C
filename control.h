@@ -29,6 +29,7 @@ void All_Fill(void);
 void Curve_Fill(void);
 void Cross_Fill(void);
 void Roundabouts_Fill(void);
+void Breakage_Fill(void);
 void Speed_Set(void);
 void Parameter_Setting(void);
 void Parameter_Setting_Init(void);
@@ -36,7 +37,7 @@ void Setting_Paint(void);
 int8 Setting_Key_Scan(void);
 void Save_Data(void);
 
-uint8 is_Lose_All(void);
+uint8 is_Lose_All(uint8 row);
 int16 Get_Median(int16* arr, uint8 length);
 
 #endif
