@@ -23,7 +23,7 @@ typedef struct
 	int8 course;
 }Setting_Class;
 extern Setting_Class setting;
-
+extern uint8 half_width[120];
 void Speed_Init(void);
 void All_Fill(void);
 void Curve_Fill(void);

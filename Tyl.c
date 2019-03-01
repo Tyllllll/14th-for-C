@@ -34,7 +34,12 @@ void main(void)
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
 	 		feature.breakage_state = 0;
+            feature.ramp_state[1] = 0;
 		}
+        if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 1)
+        {
+            Magnetic_findMax();
+        }
 		if(SWITCH4 == 1)
 		{
 			Send_Data_to_FreeCars();
@@ -71,7 +76,9 @@ void main(void)
 				feature.cross_state[1] = 0;
 				feature.roundabouts_state = 0;
 				feature.breakage_state = 0;
-				servo.enable = 1;
+                feature.ramp_state[1] = 0;
+                feature.ramp_state[0] = 0;
+				BUZZER_OFF;
 			}
 		}
 		if(camera.ready_read == 1)
@@ -86,30 +93,37 @@ void main(void)
 			{
 				Servo_Control();
 			}
+			Magnetic_Solution();
+			Magnetic_Error_Mapping();
 			Speed_Set();
 			if(motor.start != 0)
 			{
 				if(is_Lose_All(105) == 1)
 				{
-					servo.stop++;
-					if(servo.stop == 5)
+					servo.counter++;
+					if(servo.counter == 5)
 					{
 						motor.stop = 5;
-						servo.stop = 0;
+						servo.counter = 0;
 					}
 				}
 				else
 				{
-					servo.stop = 0;
+					servo.counter = 0;
 				}
 			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
+//				Magnetic_Solution();
+//				OLED_PrintIntValue(40, 3, servo.error[0]);
+//				OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
+//				OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
+//				OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
 				OLED_ShowImage();
 			}
 		}
 //		{
-//			Magnetic_Get_Result();
+//			Magnetic_Solution();
 //			servo.error[0] = (int16)(0.689 * (magnetic.right_outside_mag - magnetic.left_outside_mag) - 1.269);
 //			Servo_PID();
 //			Speed_Set();
@@ -117,16 +131,16 @@ void main(void)
 //			{
 //				if(is_Lose_All() == 1)
 //				{
-//					servo.stop++;
-//					if(servo.stop == 5)
+//					servo.counter++;
+//					if(servo.counter == 5)
 //					{
 //						motor.stop = 5;
-//						servo.stop = 0;
+//						servo.counter = 0;
 //					}
 //				}
 //				else
 //				{
-//					servo.stop = 0;
+//					servo.counter = 0;
 //				}
 //			}
 //			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
@@ -134,10 +148,16 @@ void main(void)
 //				OLED_ShowImage();
 //			}
 //		}
-//		Magnetic_Get_Result();
-//		OLED_PrintIntValue(40, 2, servo.error[0]);
-//		OLED_PrintIntValue(40, 5, magnetic.left_outside_mag);
-//		OLED_PrintIntValue(40, 7, magnetic.right_outside_mag);
+//		Magnetic_Solution();
+//		OLED_PrintIntValue(10, 1, magnetic.middle_left_mag);
+//		OLED_PrintIntValue(70, 1, magnetic.middle_right_mag);
+//		OLED_PrintIntValue(10, 2, magnetic.left_horizontal_mag);
+//		OLED_PrintIntValue(70, 2, magnetic.right_horizontal_mag);
+//		OLED_PrintIntValue(10, 3, magnetic.left_vertical_mag);
+//		OLED_PrintIntValue(70, 3, magnetic.right_vertical_mag);
+//		OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
+//		OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
+//		OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
 //		LPLD_LPTMR_DelayMs(100);
 //		if(KEY1 == 0)
 //		{

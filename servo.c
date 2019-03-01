@@ -10,7 +10,7 @@ Servo_Class servo;
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
-	servo.fore_max = 53;
+	servo.fore_max = 58;
 	servo.kp_left = 3.9;
 	servo.kp_right = 3.9;
 	servo.ki = 0;
@@ -75,7 +75,6 @@ void Servo_PIT_Isr(void)
 	SERVO = 0;
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 }
-
 /***************************************************************
 	*	@brief	舵机控制
 	*	@param	无
@@ -83,13 +82,28 @@ void Servo_PIT_Isr(void)
 ***************************************************************/
 void Servo_Control(void)
 {
-	servo.foresight = servo.fore_max;
-	if(servo.foresight < feature.top_point)
+	if(servo.which == 0)
 	{
-		servo.foresight = feature.top_point - 2;
+		servo.foresight = servo.fore_max;
+		if(servo.foresight < feature.top_point)
+		{
+			servo.foresight = feature.top_point - 6;
+		}
+		servo.error[0] = Get_Mid_Average(servo.foresight);
 	}
-	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0)
-		+ (int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+    
+    else if(servo.which == 1)
+	{
+		float32 result = (magnetic.right_equivalent - magnetic.left_equivalent) / (magnetic.right_equivalent + magnetic.left_equivalent);
+		if(result > -0.12)
+		{
+			servo.error[0] = magnetic.a * (result - 0.12) * (result - 0.12);
+		}
+		else
+		{
+			servo.error[0] = -magnetic.a * (result - 0.12) * (result - 0.12);
+		}
+	}
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;
@@ -164,7 +178,12 @@ void Servo_PID(void)
 	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
 }
 
-
+int16 Get_Mid_Average(uint8 foresight)
+{
+    int16 outvalu = 0;
+    outvalu = line.midline[foresight] - 80;
+    return outvalu;
+}
 
 /**********************a little funcitons**********************/
 /***************************************************************
