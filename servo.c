@@ -10,7 +10,7 @@ Servo_Class servo;
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
-	servo.fore_max = 53;
+	servo.fore_max = 58;
 	servo.kp_left = 3.9;
 	servo.kp_right = 3.9;
 	servo.ki = 0;
@@ -19,6 +19,8 @@ void Servo_Gpio_Init(void)
 	servo.dynamic_zone = 30;
 	servo.dif_const_left = 7.4;//7.28;
 	servo.dif_const_right = 5.2;//5.6;
+    magnetic.s_kp = 10;
+    magnetic.s_kd = 20;
 	servo.enable = 1;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
@@ -75,7 +77,6 @@ void Servo_PIT_Isr(void)
 	SERVO = 0;
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//Í£Ö¹¼ÆÊ±
 }
-
 /***************************************************************
 	*	@brief	¶æ»ú¿ØÖÆ
 	*	@param	ÎÞ
@@ -83,13 +84,28 @@ void Servo_PIT_Isr(void)
 ***************************************************************/
 void Servo_Control(void)
 {
-	servo.foresight = servo.fore_max;
-	if(servo.foresight < feature.top_point)
+	if(servo.which == 0)
 	{
-		servo.foresight = feature.top_point - 2;
+		servo.foresight = servo.fore_max;
+		if(servo.foresight < feature.top_point)
+		{
+			servo.foresight = feature.top_point - 6;
+		}
+		servo.error[0] = Get_Mid_Average(servo.foresight);
 	}
-	servo.error[0] = (int8)((line.midline[servo.foresight] - 80) / 3.0) + (int8)((line.midline[servo.foresight + 1] - 80) / 3.0)
-		+ (int8)((line.midline[servo.foresight + 2] - 80) / 6.0) + (int8)((line.midline[servo.foresight - 1] - 80) / 6.0);
+    
+    else if(servo.which == 1)
+	{
+//		float32 result = (magnetic.right_equivalent - magnetic.left_equivalent) / (magnetic.right_equivalent + magnetic.left_equivalent);
+//		if(result > -0.12)
+//		{
+//			servo.error[0] = magnetic.a * (result - 0.12) * (result - 0.12);
+//		}
+//		else
+//		{
+//			servo.error[0] = -magnetic.a * (result - 0.12) * (result - 0.12);
+//		}
+	}
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;
@@ -133,38 +149,81 @@ void Servo_Control(void)
 ***************************************************************/
 void Servo_PID(void)
 {
-	int16 p_value;
-	int16 d_value;
-	//×ó
-	if(servo.error[0] <= 0)
+    if(servo.which ==0 )
 	{
-		if(servo.error[0] > -servo.dynamic_zone)
-		{
-			servo.kp = servo.kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
-		}
-		else
-		{
-			servo.kp = servo.kp_left;
-		}
-	}
-	//ÓÒ
-	else
-	{
-		if(servo.error[0] < servo.dynamic_zone)
-		{
-			servo.kp = servo.kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
-		}
-		else
-		{
-			servo.kp = servo.kp_right;
-		}
-	}
-	p_value = (int16)(servo.kp * servo.error[0]);
-	d_value = (int16)(servo.kd * servo.error_differ[0]);
-	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
+        int16 p_value;
+        int16 d_value;
+        //×ó
+        if(servo.error[0] <= 0)
+        {
+            if(servo.error[0] > -servo.dynamic_zone)
+            {
+                servo.kp = servo.kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+            }
+            else
+            {
+                servo.kp = servo.kp_left;
+            }
+        }
+        //ÓÒ
+        else
+        {
+            if(servo.error[0] < servo.dynamic_zone)
+            {
+                servo.kp = servo.kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
+            }
+            else
+            {
+                servo.kp = servo.kp_right;
+            }
+        }
+        p_value = (int16)(servo.kp * servo.error[0]);
+        d_value = (int16)(servo.kd * servo.error_differ[0]);
+        servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
+        if(servo.duty>DEG_MAX)
+        {
+            servo.duty = DEG_MAX;
+        }
+        else if(servo.duty<DEG_MIN)
+        {
+            servo.duty = DEG_MIN;
+        }
+    }
+    else if(servo.which == 1)
+    {
+        int16 p_valu;
+        int16 d_valu;
+        magnetic.error = (float32)(magnetic.onceUni[MIDRIGHT] - magnetic.onceUni[MIDLEFT])/(magnetic.onceUni[MIDRIGHT] + magnetic.onceUni[MIDLEFT]);
+        magnetic.diff_error = magnetic.error - magnetic.error_pre1;
+        magnetic.error_pre1 = magnetic.error;
+        p_valu = (int16)(magnetic.s_kp * magnetic.error);
+        d_valu = (int16)(magnetic.s_kd * magnetic.diff_error);
+        servo.duty = (int16)(DEG_MID - p_valu - d_valu); 
+        if(servo.duty>DEG_MAX)
+        {
+            servo.duty = DEG_MAX;
+        }
+        else if(servo.duty<DEG_MIN)
+        {
+            servo.duty = DEG_MIN;
+        }
+    }
 }
 
-
+int16 Get_Mid_Average(uint8 foresight)
+{
+    int16 outvalu = 0;
+    for(int8 i= -4; i <= 0; i++)
+    {
+        outvalu += 2 * (line.midline[foresight+i] - 80);   
+    }
+    for(int8 i = 1; i <= 5; i++)
+    {
+        outvalu += line.midline[foresight+i] - 80; 
+    }
+    outvalu = (int16)(outvalu / 15);
+    return outvalu;
+}
 
 /**********************a little funcitons**********************/
 /***************************************************************

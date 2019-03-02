@@ -53,10 +53,12 @@ typedef struct
 	float32 roundabouts_size;
 	//¶ÏÂ·±êÖ¾
 	uint8 breakage_state;
+    uint8 ramp_state[2];
+    uint8 breramp;
 	int16 breakage_radius_curvature;
 }Feature_Class;
 extern Feature_Class feature;
-
+extern uint8 TOP_POINT[5];
 void Find_Line(void);
 void Judge_Feature(void);
 void Find_Top_Point(void);
@@ -66,8 +68,9 @@ void Judge_Straight(void);
 void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
-void Judge_Breakage(void);
-
+//void Judge_Breakage(void);
+//void Judge_ramp(void);
+void Judge_breramp(void);
 float Midline_Std_Deviation(uint8 row_max, uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);

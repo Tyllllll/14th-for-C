@@ -1,7 +1,7 @@
 #include "header.h"
 
 Motor_Class motor;
-
+int16 P_valu, I_valu, D_valu;
 /***************************************************************
 	*	@brief	电机初始化
 	*	@param	无
@@ -13,7 +13,7 @@ void Motor_Pwm_Init(void)
 	motor.ki = 20;
 	motor.kd = 0;
 	motor.is_open_loop = 0;
-	motor.dif_const = 1;
+	motor.dif_const = 1.04;
 	motor.dif_fore = 1;
 	
     static FTM_InitTypeDef FTM_InitStructure;
@@ -74,7 +74,8 @@ void Motor_PIT(void)
 		motor.speed_current_right[0] = 0;
 	}
 	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
-	Motor_Control();
+    motor.alldist += ((50*((float)encoder.left_num)/((float)ENCODER_NUM_PER_METER_LEFT))+(50*((float)encoder.right_num)/((float)ENCODER_NUM_PER_METER_RIGHT)));//10ms前进的距离 单位m
+    Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
 	{
 		motor.speed_current[i] = motor.speed_current[i - 1];
@@ -100,7 +101,7 @@ void Motor_Control(void)
 			{
 				motor.output_value_left = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
+			else if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
 			{
 				motor.output_value_left = -MOTOR_MAX_OUTPUT;
 			}
@@ -108,7 +109,7 @@ void Motor_Control(void)
 			{
 				motor.output_value_right = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
+			else if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
 			{
 				motor.output_value_right = -MOTOR_MAX_OUTPUT;
 			}
@@ -367,6 +368,22 @@ void Motor_PID(void)
 		motor.output_value = (int16)(motor.kp * motor.error + motor.error_integral);
 		motor.output_value_left = (int16)(motor.kp * motor.error_left + motor.error_integral_left);
 		motor.output_value_right = (int16)(motor.kp * motor.error_right + motor.error_integral_right);
+        if(motor.output_value_left > MOTOR_MAX_OUTPUT)
+        {
+            motor.output_value_left = MOTOR_MAX_OUTPUT;
+        }
+        else if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
+        {
+            motor.output_value_left = -MOTOR_MAX_OUTPUT;
+        }
+        if(motor.output_value_right > MOTOR_MAX_OUTPUT)
+        {
+            motor.output_value_right = MOTOR_MAX_OUTPUT;
+        }
+        else if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
+        {
+            motor.output_value_right = -MOTOR_MAX_OUTPUT;
+        }
 	}
 	//转向差速控制
 //	if(servo.error[0] < -servo.dead_zone)

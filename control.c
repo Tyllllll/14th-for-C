@@ -773,20 +773,22 @@ void Breakage_Fill(void)
 	uint8 i = 0;
 	if(feature.breakage_state == 1)
 	{
-		
+//		BUZZER_ON;
 	}
 	else if(feature.breakage_state == 2)
 	{
+//		BUZZER_ON;
 		//×ó²¹Ïß
-		for(i = 118; i > feature.top_point; i--)
+		for(i = 117; i > feature.top_point; i--)
 		{
 			line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
 		}
 	}
 	else if(feature.breakage_state == 3)
 	{
+//		BUZZER_ON;
 		//ÓÒ²¹Ïß
-		for(i = 118; i > feature.top_point; i--)
+		for(i = 117; i > feature.top_point; i--)
 		{
 			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
 		}
@@ -852,6 +854,18 @@ void Speed_Set(void)
 		}
 		feature.road_type[0] = 4;
 	}
+    else if(feature.ramp_state[1] == 1)
+    {
+        feature.road_type[0] = 6;
+        if(motor.speed_ave > speed.curve_high)
+        {
+            motor.speed_set = speed.curve_high;
+        }
+        else
+        {
+            motor.speed_set = speed.curve_high + (motor.speed_ave - speed.curve_high);
+        }
+    }
 	else if(feature.cross_state[1] == 1)
 	{
 		feature.road_type[0] = 5;
