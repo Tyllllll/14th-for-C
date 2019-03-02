@@ -2,7 +2,9 @@
 #define _CONTROL_H_
 
 #define SPEED_MAX 500
-#define SPEED_MIN 0
+#define SPEED_MIN 50
+
+extern uint8 half_width[120];
 
 typedef struct
 {

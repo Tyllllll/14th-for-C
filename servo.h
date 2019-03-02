@@ -10,7 +10,7 @@
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
 #define DEG_MAX  1620
 #define DEG_MID  1450
-#define DEG_MIN  1280
+#define DEG_MIN  1260
 
 typedef struct
 {

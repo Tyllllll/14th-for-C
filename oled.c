@@ -418,8 +418,11 @@ void OLED_ShowImage(void)
 	OLED_PrintUintValue(100, 2, feature.turn_state);
 	OLED_Put6x8Str(80, 3, "du");
 	OLED_PrintUintValue(100, 3, feature.breakage_state);
-	OLED_Put6x8Str(80, 4, "rc");
+	OLED_Put6x8Str(80, 4, "po");
+	OLED_PrintUintValue(100, 4, feature.ramp_state);
 	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature);
+//	OLED_PrintFloatValue(80, 6, magnetic.angle * 57.3);
+//	OLED_PrintIntValue(80, 7, is_Lose_All(90));
 //	OLED_Put6x8Str(80, 4, "rt");
 //	OLED_PrintUintValue(100, 4, feature.road_type[0]);
 //	OLED_PrintUintValue(80, 4, feature.left_flection_row);

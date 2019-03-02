@@ -3,6 +3,7 @@
 		000		参数设置
 		100+K1	发车
 		110		OLED显图
+		111		显示感应电动势（归一化）
 	S4：
 		1		发数据给FreeCars
 		0		不发数据
@@ -63,4 +64,7 @@ ADC:
 	ADC1	电感	DM1		AD20
 
 UART:
-	UART0
+	UART0	FreeCars
+
+I2C:
+	I2C1

@@ -54,6 +54,9 @@ typedef struct
 	//断路标志
 	uint8 breakage_state;
 	int16 breakage_radius_curvature;
+	//坡道标志
+	uint8 ramp_state;
+	int16 ramp_radius_curvature;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -67,6 +70,7 @@ void Judge_Curve(void);
 void Judge_Cross(void);
 void Judge_Roundabouts(void);
 void Judge_Breakage(void);
+void Judge_Ramp(void);
 
 float Midline_Std_Deviation(uint8 row_max, uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
@@ -76,6 +80,7 @@ uint8 is_Right_Point_Lose_Line(uint8 row);
 uint8 is_Left_Point_Lose_All_Line(uint8 row);
 uint8 is_Right_Point_Lose_All_Line(uint8 row);
 float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int16 point_By, int16 point_Cx, int16 point_Cy);
+int16 Get_Mid_Average(uint8 row);
 void Check_Half_Width(void);
 
 #endif

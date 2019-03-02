@@ -9,8 +9,8 @@ Magnetic_Class magnetic;
 ***************************************************************/
 void Magnetic_Adc_Init(void)
 {
-	magnetic.k = 0.8876;
-	magnetic.b = 10.89;
+//	magnetic.k = 0.05;
+	magnetic.a = 55;
 	static ADC_InitTypeDef ADC_InitStructure;
 	ADC_InitStructure.ADC_Adcx = MAGNETIC_ADCx;
 	ADC_InitStructure.ADC_DiffMode = ADC_SE;
@@ -100,11 +100,10 @@ void Magnetic_Get_Result(void)
 ***************************************************************/
 float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
 {
-	uint8 n = 5;
 	uint8 i, j;
 	float32 window[3], temp;
 	float32 sum = 0;
-	for(i = 0; i < n; i++)
+	for(i = 0; i < MAGNETIC_SAMPLING_POINTS; i++)
 	{
 		for(j = 0; j < 3; j++)
 		{
@@ -131,7 +130,7 @@ float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
 		}
 		sum += temp;
 	}
-	return sum / n;
+	return sum / MAGNETIC_SAMPLING_POINTS;
 }
 
 /***************************************************************

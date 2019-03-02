@@ -11,6 +11,8 @@
 #define MAGNETIC_CH3x AD20	//DM1
 #define MAGNETIC_CH4x AD19	//DM0
 
+#define MAGNETIC_SAMPLING_POINTS 5
+
 typedef struct
 {
 //	int16 middle_left_mag;
@@ -44,8 +46,7 @@ typedef struct
 	float32 right_equivalent;
 	float32 angle;
 	float32 mapping_error[120];
-	float32 k;
-	float32 b;
+	float32 a;
 }Magnetic_Class;
 extern Magnetic_Class magnetic;
 

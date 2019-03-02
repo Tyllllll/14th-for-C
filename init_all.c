@@ -17,6 +17,7 @@ void Init_All(void)
 	Switch_Gpio_Init();
 	Buzzer_Gpio_Init();
 	Magnetic_Adc_Init();
+	IIC_Init();
 	Motor_Pit1_Init();
 	Motor_Pwm_Init();
 	Servo_Gpio_Init();

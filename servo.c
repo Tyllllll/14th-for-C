@@ -10,7 +10,7 @@ Servo_Class servo;
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
-	servo.fore_max = 58;
+	servo.fore_max = 55;
 	servo.kp_left = 3.9;
 	servo.kp_right = 3.9;
 	servo.ki = 0;
@@ -83,18 +83,27 @@ void Servo_PIT_Isr(void)
 ***************************************************************/
 void Servo_Control(void)
 {
-	uint8 i = 0;
-	int16 sum = 0;
-	servo.foresight = servo.fore_max;
-	if(servo.foresight < feature.top_point)
+	if(servo.which == 0)
 	{
-		servo.foresight = feature.top_point - 6;
+		servo.foresight = servo.fore_max;
+		if(servo.foresight < feature.top_point)
+		{
+			servo.foresight = feature.top_point - 6;
+		}
+		servo.error[0] = Get_Mid_Average(servo.foresight);
 	}
-	for(i = 0; i < 10; i++)
+	else if(servo.which == 1)
 	{
-		sum += line.midline[servo.foresight - i + 5] - 80;
+		float32 result = (magnetic.right_equivalent - magnetic.left_equivalent) / (magnetic.right_equivalent + magnetic.left_equivalent);
+		if(result > -0.12)
+		{
+			servo.error[0] = magnetic.a * (result - 0.12) * (result - 0.12);
+		}
+		else
+		{
+			servo.error[0] = -magnetic.a * (result - 0.12) * (result - 0.12);
+		}
 	}
-	servo.error[0] = sum / 10;
 	if(servo.error[0] > 60)
 	{
 		servo.error[0] = 60;
@@ -167,6 +176,14 @@ void Servo_PID(void)
 	p_value = (int16)(servo.kp * servo.error[0]);
 	d_value = (int16)(servo.kd * servo.error_differ[0]);
 	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
+	if(servo.duty > DEG_MAX)
+	{
+		servo.duty = DEG_MAX;
+	}
+	if(servo.duty < DEG_MIN)
+	{
+		servo.duty = DEG_MIN;
+	}
 }
 
 

@@ -18,10 +18,6 @@ uint8 half_width[120] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//0
 Speed_Class speed;
 Setting_Class setting;
 
-//int16 error_ave=0;
-//int16 error_last=0;
-//int16 error_pre=0;
-
 /***************************************************************
 	*	@brief	速度数据初始化
 	*	@param	无
@@ -29,12 +25,19 @@ Setting_Class setting;
 ***************************************************************/
 void Speed_Init(void)
 {
-	speed.straight = 220;
-	speed.long_straight = 250;
-	speed.curve_high = 200;
-	speed.curve_low = 170;
-	speed.cross = 220;
-	speed.roundabouts = 190;
+	speed.straight = 100;
+	speed.long_straight = 100;
+	speed.curve_high = 100;
+	speed.curve_low = 100;
+	speed.cross = 100;
+	speed.roundabouts = 100;
+	
+//	speed.straight = 220;
+//	speed.long_straight = 250;
+//	speed.curve_high = 200;
+//	speed.curve_low = 170;
+//	speed.cross = 220;
+//	speed.roundabouts = 190;
 	
 //	speed.straight = 260;
 //	speed.long_straight = 300;
@@ -189,41 +192,7 @@ void Curve_Fill(void)
 void Cross_Fill(void)
 {
 	uint8 i = 0;
-	uint8 j = 0;
-//	if(feature.left_flection_flag == 1 && feature.left_flection2_flag == 1)
-//	{
-//		feature.k_left_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.left_line[feature.left_flection_row]) / (feature.left_flection_row - feature.left_flection2_row);
-//		feature.k_left = 0.6 * feature.k_left_record[0] + 0.2 * feature.k_left_record[1] + 0.2 * feature.k_left_record[2];
-//		for(i = feature.left_flection2_row; i < feature.left_flection_row; i++)
-//		{
-//			line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] + feature.k_left * (feature.left_flection2_row - i));
-//			if(line.left_line[i] < 0)
-//			{
-//				line.left_line[i] = 0;
-//			}
-//			else if(line.left_line[i] > 159)
-//			{
-//				line.left_line[i] = 159;
-//			}
-//		}
-//	}
-//	else if(feature.right_flection_flag == 1 && feature.right_flection2_flag == 1)
-//	{
-//		feature.k_right_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.right_line[feature.right_flection_row]) / (feature.right_flection_row - feature.right_flection2_row);
-//		feature.k_right = 0.6 * feature.k_right_record[0] + 0.2 * feature.k_right_record[1] + 0.2 * feature.k_right_record[2];
-//		for(i = feature.right_flection2_row; i < feature.right_flection_row; i++)
-//		{
-//			line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] + feature.k_right * (feature.right_flection2_row - i));
-//			if(line.right_line[i] < 0)
-//			{
-//				line.right_line[i] = 0;
-//			}
-//			else if(line.right_line[i] > 159)
-//			{
-//				line.right_line[i] = 159;
-//			}
-//		}
-//	}
+//	uint8 j = 0;
 	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row + 8] > 0
 			|| feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row + 8] < 159)
 	{
@@ -280,120 +249,105 @@ void Cross_Fill(void)
 			}
 		}
 	}
-	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
-			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row - 1] < 140)
-	{
-		if(feature.left_flection2_flag == 1)
-		{
-			if(feature.left_flection2_row - 9 > 6)
-			{
-				feature.k_left_record2[0] = (line.left_line[feature.left_flection2_row - 9] - line.left_line[feature.left_flection2_row - 1]) / 8.0;
-			}
-			else
-			{
-				feature.k_left_record2[0] = (line.left_line[6] - line.left_line[feature.left_flection2_row - 1]) / (feature.left_flection2_row - 7);
-			}
-			feature.k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
-			if(feature.left_flection2_antiflag == 0)
-			{
-				for(i = 110; i > feature.left_flection2_row; i--)
-				{
-					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] + feature.k_left2 * (feature.left_flection2_row - 2 - i));
-					if(line.left_line[i] < 0)
-					{
-						line.left_line[i] = 0;
-					}
-					else if(line.left_line[i] > 159)
-					{
-						line.left_line[i] = 159;
-					}
-				}
-			}
-			else
-			{
-				for(i = 110; i > 30; i--)
-				{
-					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - feature.k_left2 * (feature.left_flection2_row - 2 - i));
-					if(line.left_line[i] < 0)
-					{
-						line.left_line[i] = 0;
-					}
-					else if(line.left_line[i] > 159)
-					{
-						line.left_line[i] = 159;
-					}
-				}
-			}
-		}
-		if(feature.right_flection2_flag == 1)
-		{
-			if(feature.right_flection2_row - 9 > 6)
-			{
-				feature.k_right_record2[0] = (line.right_line[feature.right_flection2_row - 9] - line.right_line[feature.right_flection2_row - 1]) / 8.0;
-			}
-			else
-			{
-				feature.k_right_record2[0] = (line.right_line[6] - line.right_line[feature.right_flection2_row - 1]) / (feature.right_flection2_row - 7);
-			}
-			feature.k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
-			if(feature.right_flection2_antiflag == 0)
-			{
-				for(i = 110; i > feature.right_flection2_row; i--)
-				{
-					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + feature.k_right2 * (feature.right_flection2_row - 2 - i));
-					if(line.right_line[i] < 0)
-					{
-						line.right_line[i] = 0;
-					}
-					else if(line.right_line[i] > 159)
-					{
-						line.right_line[i] = 159;
-					}
-				}
-			}
-			else
-			{
-				for(i = 110; i > 30; i--)
-				{
-					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] - feature.k_right2 * (feature.right_flection2_row - 2 - i));
-					if(line.right_line[i] < 0)
-					{
-						line.right_line[i] = 0;
-					}
-					else if(line.right_line[i] > 159)
-					{
-						line.right_line[i] = 159;
-					}
-				}
-			}
-		}
-	}
+//	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
+//			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row - 1] < 140)
+//	{
+//		if(feature.left_flection2_flag == 1)
+//		{
+//			if(feature.left_flection2_row - 9 > 6)
+//			{
+//				feature.k_left_record2[0] = (line.left_line[feature.left_flection2_row - 9] - line.left_line[feature.left_flection2_row - 1]) / 8.0;
+//			}
+//			else
+//			{
+//				feature.k_left_record2[0] = (line.left_line[6] - line.left_line[feature.left_flection2_row - 1]) / (feature.left_flection2_row - 7);
+//			}
+//			feature.k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
+//			if(feature.left_flection2_antiflag == 0)
+//			{
+//				for(i = 110; i > feature.left_flection2_row; i--)
+//				{
+//					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] + feature.k_left2 * (feature.left_flection2_row - 2 - i));
+//					if(line.left_line[i] < 0)
+//					{
+//						line.left_line[i] = 0;
+//					}
+//					else if(line.left_line[i] > 159)
+//					{
+//						line.left_line[i] = 159;
+//					}
+//				}
+//			}
+//			else
+//			{
+//				for(i = 110; i > 30; i--)
+//				{
+//					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - feature.k_left2 * (feature.left_flection2_row - 2 - i));
+//					if(line.left_line[i] < 0)
+//					{
+//						line.left_line[i] = 0;
+//					}
+//					else if(line.left_line[i] > 159)
+//					{
+//						line.left_line[i] = 159;
+//					}
+//				}
+//			}
+//		}
+//		if(feature.right_flection2_flag == 1)
+//		{
+//			if(feature.right_flection2_row - 9 > 6)
+//			{
+//				feature.k_right_record2[0] = (line.right_line[feature.right_flection2_row - 9] - line.right_line[feature.right_flection2_row - 1]) / 8.0;
+//			}
+//			else
+//			{
+//				feature.k_right_record2[0] = (line.right_line[6] - line.right_line[feature.right_flection2_row - 1]) / (feature.right_flection2_row - 7);
+//			}
+//			feature.k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
+//			if(feature.right_flection2_antiflag == 0)
+//			{
+//				for(i = 110; i > feature.right_flection2_row; i--)
+//				{
+//					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + feature.k_right2 * (feature.right_flection2_row - 2 - i));
+//					if(line.right_line[i] < 0)
+//					{
+//						line.right_line[i] = 0;
+//					}
+//					else if(line.right_line[i] > 159)
+//					{
+//						line.right_line[i] = 159;
+//					}
+//				}
+//			}
+//			else
+//			{
+//				for(i = 110; i > 30; i--)
+//				{
+//					line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] - feature.k_right2 * (feature.right_flection2_row - 2 - i));
+//					if(line.right_line[i] < 0)
+//					{
+//						line.right_line[i] = 0;
+//					}
+//					else if(line.right_line[i] > 159)
+//					{
+//						line.right_line[i] = 159;
+//					}
+//				}
+//			}
+//		}
+//	}
 	feature.k_left_record[2] = feature.k_left_record[1];
 	feature.k_left_record[1] = feature.k_left_record[0];
 	feature.k_right_record[2] = feature.k_right_record[1];
 	feature.k_right_record[1] = feature.k_right_record[0];
-	feature.k_left_record2[2] = feature.k_left_record2[1];
-	feature.k_left_record2[1] = feature.k_left_record2[0];
-	feature.k_right_record2[2] = feature.k_right_record2[1];
-	feature.k_right_record2[1] = feature.k_right_record2[0];
+//	feature.k_left_record2[2] = feature.k_left_record2[1];
+//	feature.k_left_record2[1] = feature.k_left_record2[0];
+//	feature.k_right_record2[2] = feature.k_right_record2[1];
+//	feature.k_right_record2[1] = feature.k_right_record2[0];
 	//算中线
-//	if(feature.left_flection_flag == 1 && feature.left_flection2_flag == 1)
-//	{
-//		for(i = feature.left_flection2_row; i < feature.left_flection_row; i++)
-//		{
-//			line.midline[i] = line.left_line[i] + half_width[i];
-//			if(line.midline[i] < 0)
-//			{
-//				line.midline[i] = 0;
-//			}
-//			else if(line.midline[i] > 159)
-//			{
-//				line.midline[i] = 159;
-//			}
-//		}
-//	}
-	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row] > 20 
-	   || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row] < 140)
+	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row + 8] > 0
+	   || feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row + 8] < 159)
 	{
 		if(feature.left_flection_flag == 1 && feature.right_flection_row == 1)
 		{
@@ -412,9 +366,17 @@ void Cross_Fill(void)
 		}
 		else if(feature.left_flection_flag == 1 && feature.right_flection_flag == 0)
 		{
-			for(i = feature.left_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
+//			for(i = feature.left_flection_row; i > feature.left_flection2_row; i--)
+			for(i = feature.left_flection_row; i > (feature.top_point > 20 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				line.midline[i] = line.left_line[i] + half_width[i];
+				if(i == feature.left_flection_row)
+				{
+					line.midline[i] = line.left_line[i] + half_width[i];
+				}
+				else
+				{
+					line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
+				}
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -427,123 +389,131 @@ void Cross_Fill(void)
 		}
 		else if(feature.left_flection_flag == 0 && feature.right_flection_flag == 1)
 		{
-			for(i = feature.right_flection_row; i > (feature.top_point > 10 ? feature.top_point - 5 : feature.top_point); i--)
+//			for(i = feature.right_flection_row; i > feature.right_flection2_row; i--)
+			for(i = feature.right_flection_row; i > (feature.top_point > 20 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				line.midline[i] = line.right_line[i] - half_width[i];
-				if(line.midline[i] < 0)
-				{
-					line.midline[i] = 0;
-				}
-				else if(line.midline[i] > 159)
-				{
-					line.midline[i] = 159;
-				}
-			}
-		}
-	}
-	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
-			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row  - 1] < 140)
-	{
-		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 1)
-		{
-			for(i = 110; i > (uint8)fmin(feature.left_flection2_row, feature.right_flection2_row); i--)
-			{
-				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-				if(line.midline[i] < 0)
-				{
-					line.midline[i] = 0;
-				}
-				else if(line.midline[i] > 159)
-				{
-					line.midline[i] = 159;
-				}
-			}
-		}
-		else if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
-		{
-			for(i = 110; i > feature.left_flection2_row; i--)
-			{
-				if(feature.left_flection2_antiflag == 0)
-				{
-					line.midline[i] = line.left_line[i] + half_width[i];
-					if(line.midline[i] < 0)
-					{
-						line.midline[i] = 0;
-					}
-					else if(line.midline[i] > 159)
-					{
-						line.midline[i] = 159;
-						for(j = i; j > 5; j--)
-						{
-							line.midline[j] = 159;
-						}
-						break;
-					}
-				}
-				else
-				{
-					line.midline[i] = line.left_line[i] - half_width[i];
-					if(line.midline[i] < 0)
-					{
-						line.midline[i] = 0;
-					}
-					else if(line.midline[i] > 159)
-					{
-						line.midline[i] = 159;
-					}
-				}
-			}
-			if(feature.left_flection2_antiflag == 1)
-			{
-				for(i = feature.left_flection2_row; i > 5; i--)
-				{
-					line.midline[i] = 0;
-				}
-			}
-		}
-		else if(feature.left_flection2_flag == 0 && feature.right_flection2_flag == 1)
-		{
-			for(i = 110; i > feature.right_flection2_row; i--)
-			{
-				if(feature.right_flection2_antiflag == 0)
+				if(i == feature.right_flection_row)
 				{
 					line.midline[i] = line.right_line[i] - half_width[i];
-					if(line.midline[i] < 0)
-					{
-						line.midline[i] = 0;
-						for(j = i; j > 5; j--)
-						{
-							line.midline[i] = 0;
-						}
-						break;
-					}
-					else if(line.midline[i] > 159)
-					{
-						line.midline[i] = 159;
-					}
 				}
 				else
 				{
-					line.midline[i] = line.right_line[i] + half_width[i];
-					if(line.midline[i] < 0)
-					{
-						line.midline[i] = 0;
-					}
-					else if(line.midline[i] > 159)
-					{
-						line.midline[i] = 159;
-					}
+					line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
 				}
-			}
-			if(feature.right_flection2_antiflag == 1)
-			{
-				for(i = feature.right_flection2_row; i > 5; i--)
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
 				{
 					line.midline[i] = 159;
 				}
 			}
 		}
 	}
+//	else if(feature.left_flection2_flag == 1 && feature.left_flection2_row > 20 && line.left_line[feature.left_flection2_row - 1] > 20
+//			|| feature.right_flection2_flag == 1 && feature.right_flection2_row > 20 && line.right_line[feature.right_flection2_row  - 1] < 140)
+//	{
+//		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 1)
+//		{
+//			for(i = 110; i > (uint8)fmin(feature.left_flection2_row, feature.right_flection2_row); i--)
+//			{
+//				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
+//				if(line.midline[i] < 0)
+//				{
+//					line.midline[i] = 0;
+//				}
+//				else if(line.midline[i] > 159)
+//				{
+//					line.midline[i] = 159;
+//				}
+//			}
+//		}
+//		else if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
+//		{
+//			for(i = 110; i > feature.left_flection2_row; i--)
+//			{
+//				if(feature.left_flection2_antiflag == 0)
+//				{
+//					line.midline[i] = line.left_line[i] + half_width[i];
+//					if(line.midline[i] < 0)
+//					{
+//						line.midline[i] = 0;
+//					}
+//					else if(line.midline[i] > 159)
+//					{
+//						line.midline[i] = 159;
+//						for(j = i; j > 5; j--)
+//						{
+//							line.midline[j] = 159;
+//						}
+//						break;
+//					}
+//				}
+//				else
+//				{
+//					line.midline[i] = line.left_line[i] - half_width[i];
+//					if(line.midline[i] < 0)
+//					{
+//						line.midline[i] = 0;
+//					}
+//					else if(line.midline[i] > 159)
+//					{
+//						line.midline[i] = 159;
+//					}
+//				}
+//			}
+//			if(feature.left_flection2_antiflag == 1)
+//			{
+//				for(i = feature.left_flection2_row; i > 5; i--)
+//				{
+//					line.midline[i] = 0;
+//				}
+//			}
+//		}
+//		else if(feature.left_flection2_flag == 0 && feature.right_flection2_flag == 1)
+//		{
+//			for(i = 110; i > feature.right_flection2_row; i--)
+//			{
+//				if(feature.right_flection2_antiflag == 0)
+//				{
+//					line.midline[i] = line.right_line[i] - half_width[i];
+//					if(line.midline[i] < 0)
+//					{
+//						line.midline[i] = 0;
+//						for(j = i; j > 5; j--)
+//						{
+//							line.midline[i] = 0;
+//						}
+//						break;
+//					}
+//					else if(line.midline[i] > 159)
+//					{
+//						line.midline[i] = 159;
+//					}
+//				}
+//				else
+//				{
+//					line.midline[i] = line.right_line[i] + half_width[i];
+//					if(line.midline[i] < 0)
+//					{
+//						line.midline[i] = 0;
+//					}
+//					else if(line.midline[i] > 159)
+//					{
+//						line.midline[i] = 159;
+//					}
+//				}
+//			}
+//			if(feature.right_flection2_antiflag == 1)
+//			{
+//				for(i = feature.right_flection2_row; i > 5; i--)
+//				{
+//					line.midline[i] = 159;
+//				}
+//			}
+//		}
+//	}
 	//补完十字后重新定义一个新的顶点
 	Find_Top_Point();
 }
@@ -799,14 +769,7 @@ void Breakage_Fill(void)
 	}
 	else if(feature.breakage_state == 5)
 	{
-		for(i = 80; i > 30; i--)
-		{
-			if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1
-			   && line.left_line_flag[i + 1] == 1 && line.right_line_flag[i] == 1)
-			{
-				servo.fore_max = i;
-			}
-		}
+		
 	}
 }
 
@@ -886,11 +849,7 @@ void Speed_Set(void)
 	else
 	{
 		feature.road_type[0] = 3;
-		if(feature.turn_state == 5 || feature.turn_state == 6)
-		{
-			motor.speed_set = 50;
-		}
-		else if(feature.turn_state == 3 || feature.turn_state == 4)
+		if(feature.turn_state == 3 || feature.turn_state == 4)
 		{
 			motor.speed_set = speed.curve_low;
 		}
@@ -986,7 +945,7 @@ void Parameter_Setting(void)
 					setting.data[setting.page_num][setting.course] += 1;
 					break;
 				case 4:
-					setting.data[setting.page_num][setting.course] += 0.01;
+					setting.data[setting.page_num][setting.course] += 1;
 					break;
 				}
 				Save_Data();
@@ -1010,7 +969,7 @@ void Parameter_Setting(void)
 					setting.data[setting.page_num][setting.course] -= 1;
 					break;
 				case 4:
-					setting.data[setting.page_num][setting.course] -= 0.01;
+					setting.data[setting.page_num][setting.course] -= 1;
 					break;
 				}
 				Save_Data();
@@ -1083,11 +1042,9 @@ void Parameter_Setting_Init(void)
 	sprintf(setting.string[3][4], "openloop");
 	setting.data[3][4] = (float32)motor.is_open_loop;
 	
-	sprintf(setting.string[4][0], "MAGNETIC_DIF");
-	sprintf(setting.string[4][1], "k");
-	setting.data[4][1] = (float32)magnetic.k;
-	sprintf(setting.string[4][2], "b");
-	setting.data[4][2] = (float32)magnetic.b;
+	sprintf(setting.string[4][0], "MAGNETIC");
+	sprintf(setting.string[4][1], "a");
+	setting.data[4][1] = (float32)magnetic.a;
 	
 //	sprintf(setting.string[4][0], "MOTOR_DIF");
 //	sprintf(setting.string[4][1], "const");
@@ -1269,8 +1226,7 @@ void Save_Data(void)
 	motor.ki = setting.data[3][2];
 	motor.kd = setting.data[3][3];
 	motor.is_open_loop = (int8)setting.data[3][4];
-	magnetic.k = setting.data[4][1];
-	magnetic.b = setting.data[4][2];
+	magnetic.a = setting.data[4][1];
 //	motor.dif_const = setting.data[4][1];
 //	motor.dif_fore = setting.data[4][2];
 }

@@ -66,22 +66,37 @@ void Find_Line(void)
 			}
 			else
 			{
-				line.midline[i] = line.midline[i + 1];
-				if(line.midline[i] > 40 && line.midline[i] < 120)
+				if(line.midline[i + 1] == 80)
 				{
-					if(camera.image[i - 1][line.midline[i]] != 0 && camera.image[i - 2][line.midline[i]] == 0 && camera.image[i - 4][line.midline[i]] == 0 && camera.image[i - 6][line.midline[i]] == 0)
-					{
-						if(camera.image[i - 5][line.midline[i] + 20] != 0)
-						{
-							line.midline[i] += 20;
-						}
-						else if(camera.image[i - 5][line.midline[i] - 20] != 0)
-						{
-							line.midline[i] -= 20;
-						}
-					}
+					line.midline[i] = line.midline[i + 1];
 				}
+				else
+				{
+					line.midline[i] = (line.midline[i + 1] + line.midline[i + 2] + line.midline[i + 3] + line.midline[i + 4] + line.midline[i + 5]) / 5;
+				}
+//				if(line.midline[i] > 40 && line.midline[i] < 120)
+//				{
+//					if(camera.image[i - 1][line.midline[i]] != 0 && camera.image[i - 2][line.midline[i]] == 0 && camera.image[i - 4][line.midline[i]] == 0 && camera.image[i - 6][line.midline[i]] == 0)
+//					{
+//						if(camera.image[i - 5][line.midline[i] + 20] != 0)
+//						{
+//							line.midline[i] += 20;
+//						}
+//						else if(camera.image[i - 5][line.midline[i] - 20] != 0)
+//						{
+//							line.midline[i] -= 20;
+//						}
+//					}
+//				}
 			}
+		}
+		if(line.midline[i] - line.midline[i + 1] > 10)
+		{
+			line.midline[i] = line.midline[i + 1] + 10;
+		}
+		else if(line.midline[i] - line.midline[i + 1] < -10)
+		{
+			line.midline[i] = line.midline[i + 1] - 10;
 		}
 		column_start = line.midline[i];
 	}
@@ -115,6 +130,8 @@ void Judge_Feature(void)
 	Judge_Straight();
 	Judge_Curve();
 	Judge_Breakage();
+	Judge_Ramp();
+	
 //	Judge_Cross();
 }
 
@@ -724,13 +741,15 @@ void Judge_Roundabouts(void)
 /***************************************************************
 	*	@brief	判断路
 	*	@param	无
-	*	@note	无
+	*	@note	顶点大于50判断
 ***************************************************************/
 void Judge_Breakage(void)
 {
-	uint8 i;
-	uint8 top_row;
-	uint8 bottom_row;
+	uint8 i, j;
+	uint8 top_row = 0;
+	uint8 bottom_row = 0;
+	uint16 black_count = 0;
+	uint16 white_count = 0;
 	feature.breakage_radius_curvature = 0;
 	//判断路
 	if(feature.breakage_state == 0)
@@ -757,16 +776,19 @@ void Judge_Breakage(void)
 				{
 					for(i = 110; i > feature.top_point; i--)
 					{
-						if(line.left_line_flag[i] == 1)
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1)
 						{
 							bottom_row = i;
 							break;
 						}
 					}
-					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
-					if(feature.breakage_radius_curvature > 1700)
+					if(bottom_row != 0)
 					{
-						feature.breakage_state = 2;
+						feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
+						if(feature.breakage_radius_curvature > 1700)
+						{
+							feature.breakage_state = 2;
+						}
 					}
 				}
 				//右断
@@ -774,16 +796,19 @@ void Judge_Breakage(void)
 				{
 					for(i = 110; i > feature.top_point; i--)
 					{
-						if(line.right_line_flag[i] == 1)
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1)
 						{
 							bottom_row = i;
 							break;
 						}
 					}
-					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
-					if(feature.breakage_radius_curvature > 1700)
+					if(bottom_row != 0)
 					{
-						feature.breakage_state = 3;
+						feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
+						if(feature.breakage_radius_curvature > 1700)
+						{
+							feature.breakage_state = 3;
+						}
 					}
 				}
 			}
@@ -792,7 +817,7 @@ void Judge_Breakage(void)
 	//进断路
 	else if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
 	{
-		if(is_Lose_All(100) == 1)
+		if(is_Lose_All(95) == 1)
 		{
 			servo.which = 1;
 			feature.breakage_state = 4;
@@ -801,10 +826,33 @@ void Judge_Breakage(void)
 	//切回摄像头
 	else if(feature.breakage_state == 4)
 	{
-		if(is_Lose_All(35) == 0)
+		for(i = servo.fore_max + 5; i > servo.fore_max; i--)
 		{
-			servo.which = 0;
-			feature.breakage_state = 5;
+			for(j = 60; j < 100; j++)
+			{
+				if(camera.image[i][j] == 0)
+				{
+					black_count++;
+				}
+			}
+		}
+		if(black_count > 150)
+		{
+			for(i = servo.fore_max; i > servo.fore_max - 5; i--)
+			{
+				for(j = 60; j < 100; j++)
+				{
+					if(camera.image[i][j] == 253)
+					{
+						white_count++;
+					}
+				}
+			}
+			if(white_count > 150)
+			{
+				servo.which = 0;
+				feature.breakage_state = 5;
+			}
 		}
 	}
 	//出断路
@@ -813,6 +861,70 @@ void Judge_Breakage(void)
 		if(is_Lose_All(105) == 0)
 		{
 			feature.breakage_state = 0;
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	判坡道
+	*	@param	无
+	*	@note	顶点大于40判断
+***************************************************************/
+void Judge_Ramp(void)
+{
+	uint8 i;
+	uint8 bottom_row = 0;
+	if(feature.top_point > 30)
+	{
+		if(line.right_line[feature.top_point + 10] - line.left_line[feature.top_point + 10] > 2.2 * half_width[feature.top_point + 10])
+		{
+			if(line.midline[feature.top_point + 5] >= 75 && line.midline[feature.top_point + 5] <= 85)
+			{
+				feature.ramp_state = 1;
+			}
+			else
+			{
+				if(line.midline[feature.top_point + 5] < 75)
+				{
+					//左坡
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					if(bottom_row != 0)
+					{
+						feature.ramp_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 5], feature.top_point + 5, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
+						if(feature.ramp_radius_curvature > 1000)
+						{
+							feature.ramp_state = 2;
+						}
+					}
+				}
+				else if(line.midline[feature.top_point + 5] > 85)
+				{
+					//右坡
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					if(bottom_row != 0)
+					{
+						feature.ramp_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 10], feature.top_point + 10, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
+						if(feature.ramp_radius_curvature > 1000)
+						{
+							feature.ramp_state = 3;
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -1008,6 +1120,22 @@ float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int
 		curvature = 9999;
 	}
 	return curvature;
+}
+
+/***************************************************************
+	*	@brief	算前后5行中线偏差平均值
+	*	@param	row：行数
+	*	@note	无
+***************************************************************/
+int16 Get_Mid_Average(uint8 row)
+{
+	uint8 i;
+	int16 sum = 0;
+	for(i = row - 5; i < row + 5; i++)
+	{
+		sum += line.midline[i] - 80;
+	}
+	return sum / 10;
 }
 
 /***************************************************************
