@@ -107,7 +107,7 @@ Camera_Class camera;
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 90;
+	camera.contrast = 70;
 	camera.ready_write = 1;
 	camera.which_buffer = 1;
 

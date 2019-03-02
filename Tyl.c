@@ -35,10 +35,14 @@ void main(void)
 			feature.roundabouts_state = 0;
 	 		feature.breakage_state = 0;
             feature.ramp_state[1] = 0;
+            servo.which = 0;
+            servo.enable = 1;
 		}
+        //电感找最大值 跑前必须测试
         if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 1)
         {
             Magnetic_findMax();
+            servo.enable = 0;
         }
 		if(SWITCH4 == 1)
 		{
@@ -75,9 +79,8 @@ void main(void)
 				feature.cross_state[0] = 0;
 				feature.cross_state[1] = 0;
 				feature.roundabouts_state = 0;
-				feature.breakage_state = 0;
-                feature.ramp_state[1] = 0;
-                feature.ramp_state[0] = 0;
+                feature.breramp = 0;
+                servo.which = 0;
 				BUZZER_OFF;
 			}
 		}
@@ -86,7 +89,7 @@ void main(void)
 		{
 			Img_Extract();
 			Find_Line();
-//			Check_Half_Width();
+			Check_Half_Width();
 			Judge_Feature();
 			All_Fill();
 			if(servo.enable == 1)
@@ -98,7 +101,7 @@ void main(void)
 			Speed_Set();
 			if(motor.start != 0)
 			{
-				if(is_Lose_All(105) == 1)
+				if(is_Lose_All(105) == 1 && feature.breramp!=2 && feature.breramp!=3)
 				{
 					servo.counter++;
 					if(servo.counter == 5)

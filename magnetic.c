@@ -32,12 +32,6 @@ void Magnetic_Adc_Init(void)
 	
 	Magnetic_findOffset();
     magnetic.a = 55;
-    magnetic.valu_max[1] = 1.96728881E+3;
-    magnetic.valu_max[2] = 1.58515564E+3;
-    magnetic.valu_max[3] = 1.57288891E+3;
-    magnetic.valu_max[4] = 2.2612224122E+3;
-    magnetic.valu_max[5] = 1.99268908E+3;
-    magnetic.valu_max[6] = 1.45088891E+3;
 }
 
 /***************************************************************
@@ -80,7 +74,7 @@ void Magnetic_findOffset(void)
 	*	@note	Œ¥πÈ“ªªØ
    5                  6      
    |                  |                  
-1---------2-3-----------4          
+5---------2-3-----------1          
 ***************************************************************/
 void Magnetic_GetAllAdc(void)
 {

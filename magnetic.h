@@ -18,42 +18,22 @@
 #define VRIGHT      6
 typedef struct
 {
-//	int16 middle_left_mag;
-//	int16 middle_right_mag;
-//	int16 left_horizontal_mag;
-//	int16 right_horizontal_mag;
-//	int16 left_vertical_mag;
-//	int16 right_vertical_mag;
-//	int16 middle_left_mag_zero_drift;
-//	int16 middle_right_mag_zero_drift;
-//	int16 left_horizontal_mag_zero_drift;
-//	int16 right_horizontal_mag_zero_drift;
-//	int16 left_vertical_mag_zero_drift;
-//	int16 right_vertical_mag_zero_drift;
-//	int16 left_equivalent;
-//	int16 right_equivalent;
     int16   a;
     float32 valu_temp[7];
 	float32 valu_avr[7];    
     float32 valu_max[7];    //电感最大值
     float32 onceUni[7];     //一次归一化
     float32 valu_offset[7]; //电感零漂
-	float32 middle_left_mag;
-	float32 middle_right_mag;
-	float32 left_horizontal_mag;
-	float32 right_horizontal_mag;
-	float32 left_vertical_mag;
-	float32 right_vertical_mag;
-	float32 middle_left_mag_zero_drift;
-	float32 middle_right_mag_zero_drift;
-	float32 left_horizontal_mag_zero_drift;
-	float32 right_horizontal_mag_zero_drift;
-	float32 left_vertical_mag_zero_drift;
-	float32 right_vertical_mag_zero_drift;
 	int16 left_equivalent;
 	int16 right_equivalent;
 	float32 angle;
 	float32 mapping_error[120];
+    
+    float32 error;
+    float32 diff_error;
+    float32 s_kp;
+    float32 s_kd;
+    float32 error_pre1;
 }Magnetic_Class;
 extern Magnetic_Class magnetic;
 

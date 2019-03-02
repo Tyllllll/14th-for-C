@@ -8,12 +8,12 @@
 #define SERVO_HIGH_PITx PIT0
 
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
-//#define DEG_MAX  1587   //1632            
-//#define DEG_MID  1427  //1462
-//#define DEG_MIN  1257   //1292
-#define DEG_MAX  1632            
-#define DEG_MID  1462
-#define DEG_MIN  1292
+#define DEG_MAX  1587   //1632            
+#define DEG_MID  1427  //1462
+#define DEG_MIN  1257   //1292
+//#define DEG_MAX  1632            
+//#define DEG_MID  1462
+//#define DEG_MIN  1292
 typedef struct
 {
 	int16 duty;
