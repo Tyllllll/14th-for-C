@@ -181,6 +181,7 @@ typedef struct{
 	uint8 addr;	/*¼Ä´æÆ÷µØÖ·*/
 	uint8 val;	/*¼Ä´æÆ÷Öµ*/
 }reg_s;
+
 typedef struct
 {
 	uint8 contrast;
@@ -194,7 +195,7 @@ typedef struct
 extern Camera_Class camera;	
 
 uint8 ubyCamera_Init(void);
-void Camera_Gpio_Init(void);
+uint8 Camera_Gpio_Init(void);
 void Img_Isr(void);
 void DMA_Complete_Isr(void);
 void Camera_Delay(void);

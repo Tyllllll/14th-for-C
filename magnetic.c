@@ -7,9 +7,9 @@ Magnetic_Class magnetic;
 	*	@param	нч
 	*	@note	нч
 ***************************************************************/
-void Magnetic_Adc_Init(void)
+uint8 Magnetic_Adc_Init(void)
 {
-	magnetic.kp_default = 230;
+	magnetic.kp_default = 200;
 	magnetic.kd = 0;
 	static ADC_InitTypeDef ADC_InitStructure;
 	ADC_InitStructure.ADC_Adcx = MAGNETIC_ADCx;
@@ -18,16 +18,25 @@ void Magnetic_Adc_Init(void)
 	ADC_InitStructure.ADC_SampleTimeCfg = SAMTIME_SHORT;
 	ADC_InitStructure.ADC_HwAvgSel = HW_4AVG;
 	ADC_InitStructure.ADC_CalEnable = TRUE;
-	LPLD_ADC_Init(ADC_InitStructure);
-	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH1x);
-	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH2x);
-	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH3x);
-	LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH4x);
+	if(!LPLD_ADC_Init(ADC_InitStructure))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH1x))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH2x))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH3x))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_ADCx, MAGNETIC_CH4x))
+		return STATUS_FAILED;
 	
 	ADC_InitStructure.ADC_Adcx = MAGNETIC_MID_ADCx;
-	LPLD_ADC_Init(ADC_InitStructure);
-	LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
-	LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
+	if(!LPLD_ADC_Init(ADC_InitStructure))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x))
+		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x))
+		return STATUS_FAILED;
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -202,7 +211,7 @@ void Magnetic_Solution(void)
 	magnetic.value[EQUIVALENT_R] = magnetic.value[HORIZONTAL_R] / sin(magnetic.angle);
 	if(feature.straight_state == 1)
 	{
-		magnetic.correction = magnetic.value[EQUIVALENT_R] - magnetic.value[EQUIVALENT_R];
+		magnetic.correction = magnetic.value[EQUIVALENT_R] - magnetic.value[EQUIVALENT_L];
 	}
 }
 

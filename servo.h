@@ -31,11 +31,12 @@ typedef struct
 }Servo_Class;
 extern Servo_Class servo;
 
-void Servo_Gpio_Init(void);
+uint8 Servo_Init(void);
 void Servo_PIT_Isr(void);
 void Servo_Output(void);
 void Servo_Control(void);
 void Servo_Foresight_Change(void);
+void Servo_Fuzzy(void);
 
 void servo_up1(void);
 void servo_up5(void);

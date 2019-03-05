@@ -12,7 +12,7 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-	push(0, (uint16)servo.duty);
+	push(0, (uint16)servo.kp);
 	push(1, (uint16)motor.speed_ave);
 	push(2, (uint16)motor.speed_set);
 	push(3, (uint16)magnetic.hongwaiceju);
@@ -86,7 +86,7 @@ void UartCmd(uint8 CmdNum,uint8 Data)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Uart_Init(void)
+uint8 Uart_Init(void)
 {
 	static UART_InitTypeDef UART_InitStructure;
 	UART_InitStructure.UART_Uartx = UART0;
@@ -97,6 +97,7 @@ void Uart_Init(void)
 	UART_InitStructure.UART_RxIsr = Uart0_Isr;//接收中断回调函数
 	LPLD_UART_Init(UART_InitStructure);//初始化UART
 	LPLD_UART_EnableIrq(UART_InitStructure);//使能串口数据接收中断
+	return STATUS_OK;
 }
 
 /***************************************************************

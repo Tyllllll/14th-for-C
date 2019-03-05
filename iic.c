@@ -1,5 +1,7 @@
 #include "header.h"
 
+static I2C_InitTypeDef I2C_InitStructure;
+Gyro_Class gyro;
 VL53L0X_Class vl53l0x;
 
 /***************************************************************
@@ -7,16 +9,17 @@ VL53L0X_Class vl53l0x;
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void IIC_Init(void)
+uint8 IIC_Init(void)
 {
-	static I2C_InitTypeDef I2C_InitStructure;
 	I2C_InitStructure.I2C_I2Cx = IIC_I2Cx;
 	I2C_InitStructure.I2C_ICR = IIC_SCL_400KHZ;
 	I2C_InitStructure.I2C_SclPin = IIC_SCLPIN;
 	I2C_InitStructure.I2C_SdaPin = IIC_SDAPIN;
 	I2C_InitStructure.I2C_IntEnable = FALSE;
 	I2C_InitStructure.I2C_Isr = NULL;
-	LPLD_I2C_Init(I2C_InitStructure);
+	if(!LPLD_I2C_Init(I2C_InitStructure))
+		return STATUS_FAILED;
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -59,9 +62,10 @@ uint8 IIC_Read_Byte(uint8 addr, uint8 reg)
 	*	@param	addr：外设地址，reg：寄存器地址，high_first：第一个字节是否为高8位
 	*	@note	未测试
 ***************************************************************/
-int16 IIC_Read_Word(uint8 addr, uint8 reg, uint8 high_first)
+int16 IIC_Read_Word(uint8 addr, uint8 reg)
 {
-	uint8 result_L, result_H;
+	int16 result_H;
+	uint8 result_L;
 	//发送从机地址
 	LPLD_I2C_StartTrans(IIC_I2Cx, addr, I2C_MWSR);
 	LPLD_I2C_WaitAck(IIC_I2Cx, I2C_ACK_ON);
@@ -97,17 +101,15 @@ int16 IIC_Read_Word(uint8 addr, uint8 reg, uint8 high_first)
 		t++;
 		if (t > 10)
 		{
-			IIC_Init();
+			LPLD_I2C_Deinit(I2C_InitStructure);
+			LPLD_I2C_Init(I2C_InitStructure);
 			if (t > 13)
 			{
 				break;
 			}
 		}
 	}
-	if(high_first == 1)
-		result_H = result_L << 8 | result_H;
-	else
-		result_H = result_H << 8 | result_L;
+	result_H = result_H << 8 | result_L;
 	return result_H;
 }
 
@@ -139,10 +141,58 @@ void IIC_Write_Byte(uint8 addr, uint8 reg, uint8 data)
 void IIC_Delay(void)
 {
 	int16 i;
-	for(i = 0; i < 200; i++)
+	for(i = 0; i < 10000; i++)
 	{
 		asm("nop");
 	}
+}
+
+/***************************************************************
+	*	@brief	MPU6050初始化
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void MPU6050_Init(void)
+{
+	//配置电源和时钟源。这里是解除休眠状态
+	IIC_Write_Byte(MPU6050_DEV_ADDR, PWR_MGMT_1, 0x00);
+	IIC_Delay();
+	//SMPLRT_DIV指定陀螺仪采样率，0x00(对应1KHz)
+	IIC_Write_Byte(MPU6050_DEV_ADDR, SMPLRT_DIV, 0x00);
+	IIC_Delay();
+	//CONFIG用于配置数字低通滤波器，配置加速度计和陀螺仪的低通带宽和延时
+	IIC_Write_Byte(MPU6050_DEV_ADDR, CONFIG, 0x03);
+	IIC_Delay();
+	//GYRO_CONFIG配置陀螺仪满量程范围，0x08,对应正负500度每秒
+	IIC_Write_Byte(MPU6050_DEV_ADDR, GYRO_CONFIG, 0x00);
+	IIC_Delay();
+	//ACCEL_CONFIG配置加速度计的输出量程，0x00对应正负2g
+	IIC_Write_Byte(MPU6050_DEV_ADDR, ACCEL_CONFIG, 0x00);
+	IIC_Delay();
+}
+
+/***************************************************************
+	*	@brief	获取角速度
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Get_Angular_Velocity(void)
+{
+	gyro.angx = IIC_Read_Word(MPU6050_DEV_ADDR, GYRO_XOUT_H) / 131;
+	gyro.angy = IIC_Read_Word(MPU6050_DEV_ADDR, GYRO_YOUT_H) / 131;
+	gyro.angz = IIC_Read_Word(MPU6050_DEV_ADDR, GYRO_ZOUT_H) / 131;
+}
+
+/***************************************************************
+	*	@brief	获取加速度
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Get_Acceleration(void)
+{
+	gyro.accx = IIC_Read_Word(MPU6050_DEV_ADDR, ACCEL_XOUT_H) / 131;
+	gyro.accy = IIC_Read_Word(MPU6050_DEV_ADDR, ACCEL_YOUT_H) / 131;
+	gyro.accz = IIC_Read_Word(MPU6050_DEV_ADDR, ACCEL_ZOUT_H) / 131;
 }
 
 /***************************************************************

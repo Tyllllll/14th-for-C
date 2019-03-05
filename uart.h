@@ -20,7 +20,7 @@ typedef struct
 
 void Send_Data_to_FreeCars(void);
 void UartDebug(void);
-void Uart_Init(void);
+uint8 Uart_Init(void);
 void Uart0_Isr(void);
 void UartCmd(uint8 CmdNum,uint8 Data);
 void Send_Data_To_Scope(void);

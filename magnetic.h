@@ -40,7 +40,7 @@ typedef struct
 }Magnetic_Class;
 extern Magnetic_Class magnetic;
 
-void Magnetic_Adc_Init(void);
+uint8 Magnetic_Adc_Init(void);
 void Magnetic_Find_Zero_Drift(void);
 void Magnetic_Find_Max_Value(void);
 void Magnetic_Get_Result(void);

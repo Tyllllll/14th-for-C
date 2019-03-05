@@ -22,7 +22,19 @@
 //{
 //	Uart_Init();
 //	IIC_Init();
-//	static int16 temp;
+//	MPU6050_Init();
+//	while(1)
+//	{
+//		Get_Angular_Velocity();
+//		Get_Acceleration();
+//		push(0, (uint16)gyro.angx);
+//		push(1, (uint16)gyro.angy);
+//		push(2, (uint16)gyro.angz);
+//		push(3, (uint16)gyro.accx);
+//		push(4, (uint16)gyro.accy);
+//		push(5, (uint16)gyro.accz);
+//		Send_Data_To_Scope();
+//	}
 ////	uint8 i = 0;
 ////	uint8 count = 0;
 ////	for(i = 0; i < 255; i++)
@@ -41,19 +53,6 @@
 ////	{
 ////		OLED_Put6x8Str(100, 7, "fuck");
 ////	}
-//	while(1)
-//	{
-//		VL53L0X_test();
-//		IIC_Write_Byte(VL53L0X_DEV_ADDR, vl53l0x.temp_addr, 1);
-//		Key_Delay();
-//		Key_Delay();
-//		temp = (int16)vl53l0x.value[0x1e] << 8 | (int16)vl53l0x.value[0x1f];
-//		if(temp != 20)
-//		{
-//			push(0, (uint16)temp);
-//		}
-//		Send_Data_To_Scope();
-//	}
 //}
 
 void main(void)
@@ -148,23 +147,24 @@ void main(void)
 				Servo_Control();
 			}
 			Speed_Set();
-//			if(motor.start != 0)
-//			{
+			if(motor.start != 0)
+			{
 //				if(Magnetic_Lose_Line() == 1)
-//				{
-//					motor.stop = 1;
-//				}
-//			}
-//			if(motor.start == 0)
-//			{
-//				if(Magnetic_Lose_Line() == 0)
-//				{
-//					motor.start = 20;
-//					motor.error_integral = 0;
-//					motor.error_integral_left = 0;
-//					motor.error_integral_right = 0;
-//				}
-//			}
+				if(is_Lose_All(105))
+				{
+					motor.stop = 1;
+				}
+			}
+			if(motor.start == 0)
+			{
+				if(Magnetic_Lose_Line() == 0)
+				{
+					motor.start = 20;
+					motor.error_integral = 0;
+					motor.error_integral_left = 0;
+					motor.error_integral_right = 0;
+				}
+			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
 				OLED_ShowImage();

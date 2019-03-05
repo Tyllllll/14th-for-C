@@ -14,6 +14,6 @@
 #define LED2_Toggle()	LED2 = !LED2
 #define LED3_Toggle()	LED3 = !LED3
 
-void Led_Gpio_Init(void);
+uint8 Led_Gpio_Init(void);
 
 #endif

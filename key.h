@@ -21,7 +21,7 @@
 #define KEY5	PTA12_I
 #define KEY6	PTA11_I
 
-void Key_Gpio_Init(void);
+uint8 Key_Gpio_Init(void);
 void Key_Delay(void);
 
 #endif

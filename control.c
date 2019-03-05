@@ -14,7 +14,6 @@ uint8 half_width[120] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//0
 						79, 79, 79, 79, 79, 79, 79, 79, 79, 0,//11
 };
 
-
 Speed_Class speed;
 Setting_Class setting;
 
@@ -31,25 +30,128 @@ void Speed_Init(void)
 //	speed.curve_low = 120;
 //	speed.roundabouts = 120;
 	
-	speed.straight = 220;
-	speed.long_straight = 250;
-	speed.curve_high = 200;
-	speed.curve_low = 170;
-	speed.roundabouts = 190;
-	speed.breakage = 180;
-	speed.ramp = 170;
+//	speed.straight = 220;
+//	speed.long_straight = 250;
+//	speed.curve_high = 200;
+//	speed.curve_low = 170;
+//	speed.roundabouts = 190;
+//	speed.breakage = 180;
+//	speed.ramp = 150;
 	
-//	speed.straight = 260;
-//	speed.long_straight = 300;
-//	speed.curve_high = 240;
-//	speed.curve_low = 220;
-//	speed.roundabouts = 220;
+	speed.straight = 260;
+	speed.long_straight = 300;
+	speed.curve_high = 240;
+	speed.curve_low = 220;
+	speed.roundabouts = 220;
+	speed.breakage = 150;
+	speed.ramp = 200;
 	
 //	speed.straight = 290;
 //	speed.long_straight = 330;
 //	speed.curve_high = 260;
 //	speed.curve_low = 230;
 //	speed.roundabouts = 240;
+}
+
+/***************************************************************
+	*	@brief	速度设定
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Speed_Set(void)
+{
+	int16 error_ave;
+	if(feature.breakage_state != 0)
+	{
+		if(feature.breakage_state == 2 || feature.breakage_state == 3)
+		{
+			motor.speed_set = speed.breakage - 20;
+		}
+		else if(feature.breakage_state == 5)
+		{
+			motor.speed_set = speed.breakage;
+		}
+		else
+		{
+			motor.speed_set = speed.breakage;
+		}
+		feature.road_type[0] = 8;
+	}
+	else if(feature.ramp_state != 0)
+	{
+		if(feature.ramp_state == 1)
+		{
+			motor.speed_set = speed.ramp - 100;
+		}
+		else
+		{
+			motor.speed_set = speed.ramp + 60;
+		}
+		feature.road_type[0] = 6;
+	}
+	else if(feature.roundabouts_state != 0)
+	{
+		if(feature.roundabouts_state == 1 || feature.roundabouts_state == 2)
+		{
+			motor.speed_set = speed.roundabouts;
+		}
+		else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
+		{
+			error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
+			motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
+			if(motor.speed_set > speed.curve_high)
+			{
+				motor.speed_set = speed.curve_high;
+			}
+			else if(motor.speed_set < speed.curve_low)
+			{
+				motor.speed_set = speed.curve_low;
+			}
+		}
+		else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)
+		{
+			motor.speed_set = speed.straight + 50;
+		}
+		feature.road_type[0] = 4;
+	}
+	else if(feature.straight_state == 1)
+	{
+		feature.road_type[0] = 1;
+		if(feature.turn_state == 0)
+		{
+			motor.speed_set = speed.long_straight;
+		}
+		else
+		{
+			motor.speed_set = speed.long_straight - 50;
+		}
+	}
+	else if(feature.straight_state == 2)
+	{
+		feature.road_type[0] = 2;
+		if(feature.turn_state == 0)
+		{
+			motor.speed_set = speed.straight;
+		}
+		else
+		{
+			motor.speed_set = speed.straight - 20;
+		}
+	}
+	else
+	{
+		feature.road_type[0] = 3;
+		error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
+		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
+		if(motor.speed_set > speed.curve_high)
+		{
+			motor.speed_set = speed.curve_high;
+		}
+		else if(motor.speed_set < speed.curve_low)
+		{
+			motor.speed_set = speed.curve_low;
+		}
+	}
 }
 
 /***************************************************************
@@ -543,7 +645,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.right_line[i] - half_width[i];
+				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -553,7 +655,7 @@ void Roundabouts_Fill(void)
 					line.midline[i] = 159;
 				}
 			}
-			for(i = feature.left_flection2_row; i > 5; i--)
+			for(i = feature.left_flection2_row; i > 10; i--)
 			{
 				line.midline[i] = 0;
 			}
@@ -573,7 +675,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.right_line[i] - half_width[i];
+				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -583,11 +685,14 @@ void Roundabouts_Fill(void)
 					line.midline[i] = 159;
 				}
 			}
+			for(i = feature.right_flection2_row; i > 10; i--)
+			{
+				line.midline[i] = 0;
+			}
 		}
 		feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
 		feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
 		Find_Top_Point();
-//		servo.enable = 0;
 		if(feature.left_flection2_flag == 1)
 		{
 			if(feature.left_flection2_row > 16 || feature.left_flection2_row == 0)
@@ -640,7 +745,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.left_line[i] + half_width[i];
+				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -650,9 +755,9 @@ void Roundabouts_Fill(void)
 					line.midline[i] = 159;
 				}
 			}
-			for(i = feature.right_flection2_row; i > 5; i--)
+			for(i = feature.right_flection2_row; i > 10; i--)
 			{
-				line.midline[i] = 0;
+				line.midline[i] = 159;
 			}
 		}
 		else if(feature.left_flection2_flag == 1)
@@ -670,7 +775,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.left_line[i] + half_width[i];
+				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -680,7 +785,14 @@ void Roundabouts_Fill(void)
 					line.midline[i] = 159;
 				}
 			}
+			for(i = feature.left_flection2_row; i > 10; i--)
+			{
+				line.midline[i] = 159;
+			}
 		}
+		feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+		feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+		Find_Top_Point();
 		if(feature.right_flection2_flag == 1)
 		{
 			if(feature.right_flection2_row > 16 || feature.right_flection2_row == 0)
@@ -753,107 +865,6 @@ void Breakage_Fill(void)
 		for(i = 117; i > feature.top_point; i--)
 		{
 			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
-		}
-	}
-}
-
-/***************************************************************
-	*	@brief	速度设定
-	*	@param	无
-	*	@note	无
-***************************************************************/
-void Speed_Set(void)
-{
-	int16 error_ave;
-	if(feature.breakage_state != 0)
-	{
-		if(feature.breakage_state == 2 || feature.breakage_state == 3)
-		{
-			motor.speed_set = speed.breakage - 80;
-		}
-		else if(feature.breakage_state == 5)
-		{
-			motor.speed_set = speed.breakage;
-		}
-		else
-		{
-			motor.speed_set = speed.breakage;
-		}
-		feature.road_type[0] = 8;
-	}
-	else if(feature.ramp_state != 0)
-	{
-		if(feature.ramp_state == 1)
-		{
-			motor.speed_set = speed.ramp - 60;
-		}
-		else
-		{
-			motor.speed_set = speed.ramp;
-		}
-		feature.road_type[0] = 6;
-	}
-	else if(feature.roundabouts_state != 0)
-	{
-		if(feature.roundabouts_state == 1 || feature.roundabouts_state == 2)
-		{
-			motor.speed_set = speed.roundabouts;
-		}
-		else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
-		{
-			error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
-			motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
-			if(motor.speed_set > speed.curve_high)
-			{
-				motor.speed_set = speed.curve_high;
-			}
-			else if(motor.speed_set < speed.curve_low)
-			{
-				motor.speed_set = speed.curve_low;
-			}
-		}
-		else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)
-		{
-			motor.speed_set = speed.straight + 50;
-		}
-		feature.road_type[0] = 4;
-	}
-	else if(feature.straight_state == 1)
-	{
-		feature.road_type[0] = 1;
-		if(feature.turn_state == 0)
-		{
-			motor.speed_set = speed.long_straight;
-		}
-		else
-		{
-			motor.speed_set = speed.long_straight - 50;
-		}
-	}
-	else if(feature.straight_state == 2)
-	{
-		feature.road_type[0] = 2;
-		if(feature.turn_state == 0)
-		{
-			motor.speed_set = speed.straight;
-		}
-		else
-		{
-			motor.speed_set = speed.straight - 20;
-		}
-	}
-	else
-	{
-		feature.road_type[0] = 3;
-		error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
-		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
-		if(motor.speed_set > speed.curve_high)
-		{
-			motor.speed_set = speed.curve_high;
-		}
-		else if(motor.speed_set < speed.curve_low)
-		{
-			motor.speed_set = speed.curve_low;
 		}
 	}
 }

@@ -5,9 +5,9 @@ Motor_Class motor;
 /***************************************************************
 	*	@brief	电机初始化
 	*	@param	无
-	*	@note	FTM初始化pwm
+	*	@note	无
 ***************************************************************/
-void Motor_Pwm_Init(void)
+uint8 Motor_Init(void)
 {
 	motor.kp = 65;
 	motor.ki = 8;
@@ -21,30 +21,30 @@ void Motor_Pwm_Init(void)
     FTM_InitStructure.FTM_PwmDeadtimeCfg = MOTOR_PWMCFG
     FTM_InitStructure.FTM_PwmFreq = 10000;		//PWM频率10KHz    
 
-	LPLD_FTM_Init(FTM_InitStructure);
+	if(!LPLD_FTM_Init(FTM_InitStructure))
+		return STATUS_FAILED;
 	//左正转 
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR1_FTM_CH1x, 0, MOTOR1_PORTPin1x, ALIGN_LEFT);
+	if(!LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR1_FTM_CH1x, 0, MOTOR1_PORTPin1x, ALIGN_LEFT))
+		return STATUS_FAILED;
 	//左反转
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR1_FTM_CH2x, 0, MOTOR1_PORTPin2x, ALIGN_LEFT);
+	if(!LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR1_FTM_CH2x, 0, MOTOR1_PORTPin2x, ALIGN_LEFT))
+		return STATUS_FAILED;
 	//右反转
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH1x, 0, MOTOR2_PORTPin1x, ALIGN_LEFT);
+	if(!LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH1x, 0, MOTOR2_PORTPin1x, ALIGN_LEFT))
+		return STATUS_FAILED;
 	//右正转
-	LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH2x, 0, MOTOR2_PORTPin2x, ALIGN_LEFT);
-}
-
-/***************************************************************
-	*	@brief	PIT1初始化
-	*	@param	无
-	*	@note	Motor_PIT为回调函数
-***************************************************************/
-void Motor_Pit1_Init(void)
-{
+	if(!LPLD_FTM_PWM_Enable(MOTOR_FTMx, MOTOR2_FTM_CH2x, 0, MOTOR2_PORTPin2x, ALIGN_LEFT))
+		return STATUS_FAILED;
+	
 	static  PIT_InitTypeDef PIT_InitStructure; 
 	PIT_InitStructure.PIT_Pitx = PIT1;
 	PIT_InitStructure.PIT_PeriodMs = 10;	//定时周期10毫秒
 	PIT_InitStructure.PIT_Isr = Motor_PIT;	//设置中断函数
-	LPLD_PIT_Init(PIT_InitStructure);		//初始化PIT1
+	if(!LPLD_PIT_Init(PIT_InitStructure))	//初始化PIT1
+		return STATUS_FAILED;
 	LPLD_PIT_EnableIrq(PIT_InitStructure);	//使能PIT1
+	
+	return STATUS_OK;
 }
 
 /***************************************************************

@@ -7,15 +7,15 @@ Servo_Class servo;
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Servo_Gpio_Init(void)
+uint8 Servo_Init(void)
 {
 	servo.duty = DEG_MID;
 	servo.fore_default = 48;
-	servo.kp_default = 2.6;//3.9;
-	servo.kd = 0;//11.1;
-	servo.dead_zone = 2;
+	servo.kp_default = 3.9;
+	servo.kd = 2.7;
+	servo.dead_zone = 3;
 	servo.enable = 1;
-	servo.ramp_change = 20;
+	servo.ramp_change = 25;
 //	servo.which = 1;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
@@ -24,13 +24,16 @@ void Servo_Gpio_Init(void)
 	GPIO_InitStructure.GPIO_Dir = DIR_OUTPUT;
 	GPIO_InitStructure.GPIO_Output = OUTPUT_L;
 	GPIO_InitStructure.GPIO_Pins = SERVO_Pinx;
-	LPLD_GPIO_Init(GPIO_InitStructure);
+	if(!LPLD_GPIO_Init(GPIO_InitStructure))
+		return STATUS_FAILED;
+	
 	//PIT3定时中断，负责拉低电平
 	static PIT_InitTypeDef PIT_LOW_InitStructure;
 	PIT_LOW_InitStructure.PIT_Pitx = SERVO_LOW_PITx;
 	PIT_LOW_InitStructure.PIT_PeriodUs = 100000;
 	PIT_LOW_InitStructure.PIT_Isr = Servo_PIT_Isr;
-	LPLD_PIT_Init(PIT_LOW_InitStructure);
+	if(!LPLD_PIT_Init(PIT_LOW_InitStructure))
+		return STATUS_FAILED;
 	LPLD_PIT_EnableIrq(PIT_LOW_InitStructure);//使能中断
 	PIT->CHANNEL[3].TCTRL &= ~PIT_TCTRL_TEN_MASK;//停止计时
 	//PIT0 20ms定时中断，负责拉高电平
@@ -38,8 +41,10 @@ void Servo_Gpio_Init(void)
 	PIT_HIGH_InitStructure.PIT_Pitx = SERVO_HIGH_PITx;
 	PIT_HIGH_InitStructure.PIT_PeriodMs = 20;
 	PIT_HIGH_InitStructure.PIT_Isr = Servo_Output;
-	LPLD_PIT_Init(PIT_HIGH_InitStructure);
+	if(!LPLD_PIT_Init(PIT_HIGH_InitStructure))
+		return STATUS_FAILED;
 	LPLD_PIT_EnableIrq(PIT_HIGH_InitStructure);//使能中断
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -124,7 +129,8 @@ void Servo_Control(void)
 		{
 			servo.error_differ[i] = servo.error_differ[i - 1];
 		}
-		servo.kp = servo.kp_default * servo.error[0] * servo.error[0] / 60 / 60;
+//		servo.kp = servo.kp_default * servo.error[0] * servo.error[0] / 60 / 60;
+		Servo_Fuzzy();
 		p_value = (int16)(servo.kp * servo.error[0]);
 		d_value = (int16)(servo.kd * servo.error_differ[0]);
 		servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
@@ -163,6 +169,148 @@ void Servo_Foresight_Change(void)
 	if(feature.ramp_state == 2)
 	{
 		servo.foresight = servo.fore_default - servo.ramp_change;
+	}
+}
+
+/***************************************************************
+	*	@brief	模糊计算
+	*	@param	无
+	*	@note	无
+***************************************************************/
+static int8 fuzzy0_e[7] = {-45, -30, -15, 0, 15, 30, 45};
+static int8 fuzzy0_ec[5] = {-8, -4, 0, 4, 8};
+static float fuzzy0_rule_kp[7][5] = {
+//	-8, -4, 0, 4, 8 ec	e
+	{4, 4, 3, 2, 1},//	-45
+	{3.7, 3.5, 3, 2, 1},//	-30	
+	{3, 2, 1, 1, 1},//	-15
+	{2, 1, 0, 1, 2},//	0
+	{1, 1, 1, 2, 3},//	15
+	{1, 2, 3, 3.5, 3.7},//	30
+	{1, 2, 3, 4, 4}//	45
+};
+static uint8 fuzzy0_rule_kd[7][5] = {
+//	-8, -4, 0, 4, 8 ec	e
+	{9, 8, 7, 5, 3},//	-45
+	{8, 6, 4, 2, 1},//	-30	
+	{3, 2, 2, 1, 1},//	-15
+	{2, 1, 0, 1, 1},//	0
+	{1, 1, 2, 2, 3},//	15
+	{1, 2, 4, 6, 8},//	30
+	{3, 5, 7, 8, 9}//	45
+};
+//r=50cm kd=8.7
+//大圆kd=2.5
+void Servo_Fuzzy(void)
+{
+	float32 e_probability[2];
+	float32 ec_probability[2];
+	int8 en;
+	int8 ecn;
+	float32 u[4];
+	if(servo.which == 0)
+	{
+		if(servo.error[0] > fuzzy0_e[0] && servo.error[0] < fuzzy0_e[6])
+		{
+			//偏差模糊
+			if(servo.error[0] <= fuzzy0_e[1])
+			{
+				en = 0;
+				e_probability[0] = (float32)(fuzzy0_e[1] - servo.error[0]) / (fuzzy0_e[1] - fuzzy0_e[0]);
+			}
+			else if(servo.error[0] <= fuzzy0_e[2])
+			{
+				en = 1;
+				e_probability[0] = (float32)(fuzzy0_e[2] - servo.error[0]) / (fuzzy0_e[2] - fuzzy0_e[1]);
+			}
+			else if(servo.error[0] <= fuzzy0_e[3])
+			{
+				en = 2;
+				e_probability[0] = (float32)(fuzzy0_e[3] - servo.error[0]) / (fuzzy0_e[3] - fuzzy0_e[2]);
+			}
+			else if(servo.error[0] <= fuzzy0_e[4])
+			{
+				en = 3;
+				e_probability[0] = (float32)(fuzzy0_e[4] - servo.error[0]) / (fuzzy0_e[4] - fuzzy0_e[3]);
+			}
+			else if(servo.error[0] <= fuzzy0_e[5])
+			{
+				en = 4;
+				e_probability[0] = (float32)(fuzzy0_e[5] - servo.error[0]) / (fuzzy0_e[5] - fuzzy0_e[4]);
+			}
+			else if(servo.error[0] <= fuzzy0_e[6])
+			{
+				en = 5;
+				e_probability[0] = (float32)(fuzzy0_e[6] - servo.error[0]) / (fuzzy0_e[6] - fuzzy0_e[5]);
+			}
+		}
+		else if(servo.error[0] <= fuzzy0_e[0])
+		{
+			en = 0;
+			e_probability[0] = 1;
+		}
+		else if(servo.error[0] >= fuzzy0_e[6])
+		{
+			en = 5;
+			e_probability[0] = 0;
+		}
+		e_probability[1] = 1 - e_probability[0];
+		//偏差变化率模糊
+		if(servo.error_differ[0] > fuzzy0_ec[0] && servo.error_differ[0] < fuzzy0_ec[4])
+		{
+			if(servo.error_differ[0] <= fuzzy0_ec[1])
+			{
+				ecn = 0;
+				ec_probability[0] = (float32)(fuzzy0_ec[1] - servo.error_differ[0]) / (fuzzy0_ec[1] - fuzzy0_ec[0]);
+			}
+			else if(servo.error_differ[0] <= fuzzy0_ec[2])
+			{
+				ecn = 1;
+				ec_probability[0] = (float32)(fuzzy0_ec[2] - servo.error_differ[0]) / (fuzzy0_ec[2] - fuzzy0_ec[1]);
+			}
+			else if(servo.error_differ[0] <= fuzzy0_ec[3])
+			{
+				ecn = 2;
+				ec_probability[0] = (float32)(fuzzy0_ec[3] - servo.error_differ[0]) / (fuzzy0_ec[3] - fuzzy0_ec[2]);
+			}
+			else if(servo.error_differ[0] <= fuzzy0_ec[4])
+			{
+				ecn = 3;
+				ec_probability[0] = (float32)(fuzzy0_ec[4] - servo.error_differ[0]) / (fuzzy0_ec[4] - fuzzy0_ec[3]);
+			}
+		}
+		else if(servo.error_differ[0] <= fuzzy0_ec[0])
+		{
+			ecn = 0;
+			ec_probability[0] = 1;
+		}
+		else if(servo.error_differ[0] >= fuzzy0_ec[4])
+		{
+			ecn = 3;
+			ec_probability[0] = 0;
+		}
+		ec_probability[1] = 1 - ec_probability[0];
+		//解模糊
+		u[0] = fuzzy0_rule_kp[en][ecn];
+		u[1] = fuzzy0_rule_kp[en][ecn  + 1];
+		u[2] = fuzzy0_rule_kp[en + 1][ecn];
+		u[3] = fuzzy0_rule_kp[en + 1][ecn + 1];
+		servo.kp = u[0] * e_probability[0] * ec_probability[0]
+			+ u[1] * e_probability[0] * ec_probability[1]
+				+ u[2] * e_probability[1] * ec_probability[0]
+					+ u[3] * e_probability[1] * ec_probability[1];
+		u[0] = fuzzy0_rule_kd[en][ecn];
+		u[1] = fuzzy0_rule_kd[en][ecn  + 1];
+		u[2] = fuzzy0_rule_kd[en + 1][ecn];
+		u[3] = fuzzy0_rule_kd[en + 1][ecn + 1];
+		servo.kd = u[0] * e_probability[0] * ec_probability[0]
+			+ u[1] * e_probability[0] * ec_probability[1]
+				+ u[2] * e_probability[1] * ec_probability[0]
+					+ u[3] * e_probability[1] * ec_probability[1];
+	}
+	else if(servo.which == 1)
+	{
+		
 	}
 }
 

@@ -47,8 +47,7 @@ typedef struct
 }Motor_Class;
 extern Motor_Class motor;
 
-void Motor_Pwm_Init(void);
-void Motor_Pit1_Init(void);
+uint8 Motor_Init(void);
 void Motor_PIT(void);
 void Motor_Control(void);
 void Motor_PID(void);
