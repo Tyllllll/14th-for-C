@@ -19,7 +19,6 @@ typedef struct
 {
 	float32 kp;
 	float32 ki;
-	float32 kd;
 	int8 start;
 	int8 stop;
 	uint8 stall_cnt;

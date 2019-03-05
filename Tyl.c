@@ -20,9 +20,7 @@
 
 //void main(void)
 //{
-//	Oled_Gpio_Init();
-//	Key_Gpio_Init();
-//	Buzzer_Gpio_Init();
+//	Uart_Init();
 //	IIC_Init();
 //	static int16 temp;
 ////	uint8 i = 0;
@@ -46,18 +44,15 @@
 //	while(1)
 //	{
 //		VL53L0X_test();
-//		if(KEY1 == 0)
+//		IIC_Write_Byte(VL53L0X_DEV_ADDR, vl53l0x.temp_addr, 1);
+//		Key_Delay();
+//		Key_Delay();
+//		temp = (int16)vl53l0x.value[0x1e] << 8 | (int16)vl53l0x.value[0x1f];
+//		if(temp != 20)
 //		{
-//			Key_Delay();
-//			if(KEY1 == 0)
-//			{
-//				BUZZER_ON;
-//				IIC_Write_Byte(VL53L0X_DEV_ADDR, vl53l0x.temp_addr, vl53l0x.temp_value);
-//				Key_Delay();Key_Delay();
-//			}
-//			temp= (int16)vl53l0x.value[0x1e] << 8 | (int16)vl53l0x.value[0x1f];
+//			push(0, (uint16)temp);
 //		}
-//		BUZZER_OFF;
+//		Send_Data_To_Scope();
 //	}
 //}
 
@@ -66,6 +61,7 @@ void main(void)
     Init_All();
     while(1)
     {
+		magnetic.hongwaiceju = Magnetic_GetAdc(MAGNETIC_MID_ADCx, HONGWAICEJU_CHx);
 		//²ÎÊýÉèÖÃ
 		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
@@ -79,6 +75,7 @@ void main(void)
 	 		feature.breakage_state = 0;
 			feature.ramp_state = 0;
 			servo.enable = 1;
+			servo.which = 0;
 		}
 		if(SWITCH4 == 1)
 		{
@@ -108,7 +105,7 @@ void main(void)
 			Key_Delay();
 			if(KEY2 == 0)
 			{
-				motor.stop = 5;
+				motor.stop = 1;
 				feature.straight_state = 0;
 				feature.pre_turn_state = 0;
 				feature.turn_state = 0;
@@ -118,11 +115,20 @@ void main(void)
 				feature.breakage_state = 0;
 				feature.ramp_state = 0;
 				servo.enable = 1;
+				servo.which = 0;
 				BUZZER_OFF;
 			}
 		}
 		if(camera.ready_read == 1)
 		{
+			if(servo.counter != 0)
+			{
+				servo.counter--;
+			}
+			else
+			{
+				BUZZER_OFF;
+			}
 			Img_Extract();
 			Find_Line();
 			Judge_Feature();
@@ -141,25 +147,24 @@ void main(void)
 			{
 				Servo_Control();
 			}
-	//		Magnetic_Solution();
-	//		Magnetic_Error_Mapping();
 			Speed_Set();
-			if(motor.start != 0)
-			{
-				if(is_Lose_All(105) == 1 && feature.breakage_state == 0)
-				{
-					servo.counter++;
-					if(servo.counter == 5)
-					{
-						motor.stop = 5;
-						servo.counter = 0;
-					}
-				}
-				else
-				{
-					servo.counter = 0;
-				}
-			}
+//			if(motor.start != 0)
+//			{
+//				if(Magnetic_Lose_Line() == 1)
+//				{
+//					motor.stop = 1;
+//				}
+//			}
+//			if(motor.start == 0)
+//			{
+//				if(Magnetic_Lose_Line() == 0)
+//				{
+//					motor.start = 20;
+//					motor.error_integral = 0;
+//					motor.error_integral_left = 0;
+//					motor.error_integral_right = 0;
+//				}
+//			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
 				OLED_ShowImage();
@@ -167,15 +172,15 @@ void main(void)
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 1)
 			{
 				Magnetic_Solution();
-				OLED_PrintIntValue(10, 1, magnetic.middle_left_mag);
-				OLED_PrintIntValue(70, 1, magnetic.middle_right_mag);
-				OLED_PrintIntValue(10, 2, magnetic.left_horizontal_mag);
-				OLED_PrintIntValue(70, 2, magnetic.right_horizontal_mag);
-				OLED_PrintIntValue(10, 3, magnetic.left_vertical_mag);
-				OLED_PrintIntValue(70, 3, magnetic.right_vertical_mag);
-				OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
-				OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
-				OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
+				OLED_PrintIntValue(10, 1, (int32)magnetic.value[MID_L]);
+				OLED_PrintIntValue(70, 1, (int32)magnetic.value[MID_R]);
+				OLED_PrintIntValue(10, 2, (int32)magnetic.value[HORIZONTAL_L]);
+				OLED_PrintIntValue(70, 2, (int32)magnetic.value[HORIZONTAL_R]);
+				OLED_PrintIntValue(10, 3, (int32)magnetic.value[VERTICAL_L]);
+				OLED_PrintIntValue(70, 3, (int32)magnetic.value[VERTICAL_R]);
+				OLED_PrintIntValue(10, 4, (int32)magnetic.value[EQUIVALENT_L]);
+				OLED_PrintIntValue(70, 4, (int32)magnetic.value[EQUIVALENT_R]);
+				OLED_PrintFloatValue(60, 5, (int32)magnetic.angle * 57.3);
 			}
 		}
 //		if(KEY1 == 0)

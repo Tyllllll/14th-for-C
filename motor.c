@@ -10,10 +10,9 @@ Motor_Class motor;
 void Motor_Pwm_Init(void)
 {
 	motor.kp = 65;
-	motor.ki = 20;
-	motor.kd = 0;
+	motor.ki = 8;
 	motor.is_open_loop = 0;
-	motor.dif_const = 1;
+	motor.dif_const = 1.1;
 	motor.dif_fore = 1;
 	
     static FTM_InitTypeDef FTM_InitStructure;
@@ -159,7 +158,6 @@ void Motor_Control(void)
 		//stop*10ms后关电机
 		if(motor.start == 1 && motor.stop >= 1)
 		{
-			motor.stop--;
 			//停车成功
 			if(motor.stop == 1)
 			{

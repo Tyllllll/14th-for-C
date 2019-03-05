@@ -14,3 +14,14 @@ void Buzzer_Gpio_Init(void)
 	GPIO_InitStructure.GPIO_Output = OUTPUT_L;
 	LPLD_GPIO_Init(GPIO_InitStructure);
 }
+
+/***************************************************************
+	*	@brief	Bee£¡
+	*	@param	ÎÞ
+	*	@note	ÎÞ
+***************************************************************/
+void Bee(void)
+{
+	BUZZER_ON;
+	servo.counter = 10;
+}

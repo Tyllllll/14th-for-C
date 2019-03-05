@@ -12,7 +12,10 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-	push(0, (uint16)feature.breakage_state);
+	push(0, (uint16)servo.duty);
+	push(1, (uint16)motor.speed_ave);
+	push(2, (uint16)motor.speed_set);
+	push(3, (uint16)magnetic.hongwaiceju);
 	Send_Data_To_Scope();
 }
 
@@ -23,10 +26,29 @@ void Send_Data_to_FreeCars(void)
 ***************************************************************/
 void UartDebug(void)
 {
-	push(0, (int16)UartData[0]);//将数据发送回去观察
 	if(UartData[0] != 0)
 	{
-		motor.kp = (int16)UartData[0];
+		servo.kp_default = (int16)UartData[0];
+	}
+	if(UartData[1] != 0)
+	{
+		servo.kd = (int16)UartData[1];
+	}
+	if(UartData[2] != 0)
+	{
+		motor.kp = (int16)UartData[2];
+	}
+	if(UartData[3] != 0)
+	{
+		motor.ki = (int16)UartData[3];
+	}
+	if(UartData[7] != 0)
+	{
+		motor.start = (int16)UartData[7];
+	}
+	if(UartData[8] != 0)
+	{
+		motor.stop = (int16)UartData[8];
 	}
 	BUZZER_ON;
 	LPLD_LPTMR_DelayMs(100);

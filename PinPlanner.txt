@@ -58,6 +58,8 @@ DMA:
 	DMA		摄像头			CH0
 
 ADC:
+	ADC0	电感	DM1		AD20
+	ADC0	电感	DP1		DAD1
 	ADC1	电感	DM0		AD19
 	ADC1	电感	DP0		DAD0
 	ADC1	电感	DP1		DAD1

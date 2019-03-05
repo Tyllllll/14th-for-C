@@ -154,7 +154,7 @@ void
 VL53L0X_test(void)
 {
 	int i = 0;
-	for(i = 0; i < 0xff; i++)
+	for(i = 10; i < 40; i++)
 	{
 		vl53l0x.value[i] = IIC_Read_Byte(VL53L0X_DEV_ADDR, i);
 	}

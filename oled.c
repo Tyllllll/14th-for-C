@@ -421,6 +421,8 @@ void OLED_ShowImage(void)
 	OLED_Put6x8Str(80, 4, "po");
 	OLED_PrintUintValue(100, 4, feature.ramp_state);
 	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature);
+	OLED_Put6x8Str(80, 6, "which");
+	OLED_PrintUintValue(100, 6, servo.which);
 //	OLED_PrintFloatValue(80, 6, magnetic.angle * 57.3);
 //	OLED_PrintIntValue(80, 7, is_Lose_All(90));
 //	OLED_Put6x8Str(80, 4, "rt");
@@ -435,8 +437,8 @@ void OLED_ShowImage(void)
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
 //	OLED_PrintUintValue(80, 6, motor.speed_set_left);
 //	OLED_PrintUintValue(100, 6, motor.speed_set_right);
-//	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
-//	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
+	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
+	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);
 }
 

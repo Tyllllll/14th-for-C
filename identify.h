@@ -56,7 +56,6 @@ typedef struct
 	int16 breakage_radius_curvature;
 	//ÆÂµÀ±êÖ¾
 	uint8 ramp_state;
-	int16 ramp_radius_curvature;
 }Feature_Class;
 extern Feature_Class feature;
 

@@ -10,16 +10,13 @@ Servo_Class servo;
 void Servo_Gpio_Init(void)
 {
 	servo.duty = DEG_MID;
-	servo.fore_max = 55;
-	servo.kp_left = 3.9;
-	servo.kp_right = 3.9;
-	servo.ki = 0;
-	servo.kd = 11.1;
+	servo.fore_default = 48;
+	servo.kp_default = 2.6;//3.9;
+	servo.kd = 0;//11.1;
 	servo.dead_zone = 2;
-	servo.dynamic_zone = 30;
-	servo.dif_const_left = 7.4;//7.28;
-	servo.dif_const_right = 5.2;//5.6;
 	servo.enable = 1;
+	servo.ramp_change = 20;
+//	servo.which = 1;
 	
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	//舵机引脚初始化
@@ -77,105 +74,71 @@ void Servo_PIT_Isr(void)
 }
 
 /***************************************************************
-	*	@brief	舵机控制
+	*	@brief	舵机控制PID
 	*	@param	无
 	*	@note	无
 ***************************************************************/
 void Servo_Control(void)
 {
+	int16 p_value;
+	int16 d_value;
 	if(servo.which == 0)
 	{
-		servo.foresight = servo.fore_max;
-		if(servo.foresight < feature.top_point)
+		servo.foresight = servo.fore_default;
+		Servo_Foresight_Change();
+		if(servo.foresight < feature.top_point + 5)
 		{
-			servo.foresight = feature.top_point - 6;
+			servo.foresight = feature.top_point + 5;
 		}
 		servo.error[0] = Get_Mid_Average(servo.foresight);
+		if(servo.error[0] > 60)
+		{
+			servo.error[0] = 60;
+		}
+		if(servo.error[0] < -60)
+		{
+			servo.error[0] = -60;
+		}
+		if(servo.error[0] - servo.error[1] > 15)
+		{
+			servo.error[0] = servo.error[1] + 15;
+		}
+		if(servo.error[0] - servo.error[1] < -15)
+		{
+			servo.error[0] = servo.error[1] - 15;
+		}
+		servo.error_differ[0] = servo.error[0] - servo.error[1];
+		if(servo.error_differ[0] - servo.error_differ[1] > 13)
+		{
+			servo.error_differ[0] = servo.error_differ[1] + 13;
+		}
+		if(servo.error_differ[0] - servo.error_differ[1] < -13)
+		{
+			servo.error_differ[0] = servo.error_differ[1] - 13;
+		}
+		for(uint8 i = 4; i > 0; i--)
+		{
+			servo.error[i] = servo.error[i - 1];
+		}
+		for(uint8 i = 3; i > 0; i--)
+		{
+			servo.error_differ[i] = servo.error_differ[i - 1];
+		}
+		servo.kp = servo.kp_default * servo.error[0] * servo.error[0] / 60 / 60;
+		p_value = (int16)(servo.kp * servo.error[0]);
+		d_value = (int16)(servo.kd * servo.error_differ[0]);
+		servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
 	}
 	else if(servo.which == 1)
 	{
-		float32 result = (magnetic.right_equivalent - magnetic.left_equivalent) / (magnetic.right_equivalent + magnetic.left_equivalent);
-		if(result > -0.12)
-		{
-			servo.error[0] = magnetic.a * (result - 0.12) * (result - 0.12);
-		}
-		else
-		{
-			servo.error[0] = -magnetic.a * (result - 0.12) * (result - 0.12);
-		}
+		magnetic.error[0] = (magnetic.value[EQUIVALENT_R] - magnetic.value[EQUIVALENT_L] - magnetic.correction) / (magnetic.value[EQUIVALENT_R] + magnetic.value[EQUIVALENT_L]);
+		magnetic.error_differ = magnetic.error[0] - magnetic.error[1];
+		magnetic.kp = (int16)(magnetic.kp_default * magnetic.error[0] * magnetic.error[0]);
+		p_value = (int16)(magnetic.kp * magnetic.error[0]);
+		d_value = (int16)(magnetic.kd * magnetic.error_differ);
+		magnetic.error[1] = magnetic.error[0];
+		servo.duty = (int16)(DEG_MID - p_value - d_value);
 	}
-	if(servo.error[0] > 60)
-	{
-		servo.error[0] = 60;
-	}
-	if(servo.error[0] < -60)
-	{
-		servo.error[0] = -60;
-	}
-	if(servo.error[0] - servo.error[1] > 15)
-	{
-		servo.error[0] = servo.error[1] + 15;
-	}
-	if(servo.error[0] - servo.error[1] < -15)
-	{
-		servo.error[0] = servo.error[1] - 15;
-	}
-	servo.error_differ[0] = servo.error[0] - servo.error[1];
-	if(servo.error_differ[0] - servo.error_differ[1] > 13)
-	{
-		servo.error_differ[0] = servo.error_differ[1] + 13;
-	}
-	if(servo.error_differ[0] - servo.error_differ[1] < -13)
-	{
-		servo.error_differ[0] = servo.error_differ[1] - 13;
-	}
-	for(uint8 i = 4; i > 0; i--)
-	{
-		servo.error[i] = servo.error[i - 1];
-	}
-	for(uint8 i = 3; i > 0; i--)
-	{
-		servo.error_differ[i] = servo.error_differ[i - 1];
-	}
-	Servo_PID();
-}
-
-/***************************************************************
-	*	@brief	舵机pid计算
-	*	@param	无
-	*	@note	Servo_Control调用
-***************************************************************/
-void Servo_PID(void)
-{
-	int16 p_value;
-	int16 d_value;
-	//左
-	if(servo.error[0] <= 0)
-	{
-		if(servo.error[0] > -servo.dynamic_zone)
-		{
-			servo.kp = servo.kp_left * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
-		}
-		else
-		{
-			servo.kp = servo.kp_left;
-		}
-	}
-	//右
-	else
-	{
-		if(servo.error[0] < servo.dynamic_zone)
-		{
-			servo.kp = servo.kp_right * servo.error[0] * servo.error[0] / servo.dynamic_zone / servo.dynamic_zone;
-		}
-		else
-		{
-			servo.kp = servo.kp_right;
-		}
-	}
-	p_value = (int16)(servo.kp * servo.error[0]);
-	d_value = (int16)(servo.kd * servo.error_differ[0]);
-	servo.duty = fabs(servo.error[0]) < servo.dead_zone ? (int16)DEG_MID : (int16)(DEG_MID - p_value - d_value);
 	if(servo.duty > DEG_MAX)
 	{
 		servo.duty = DEG_MAX;
@@ -186,6 +149,22 @@ void Servo_PID(void)
 	}
 }
 
+/***************************************************************
+	*	@brief	改变前瞻
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Servo_Foresight_Change(void)
+{
+	if(feature.ramp_state == 1)
+	{
+		servo.foresight = servo.fore_default + servo.ramp_change;
+	}
+	if(feature.ramp_state == 2)
+	{
+		servo.foresight = servo.fore_default - servo.ramp_change;
+	}
+}
 
 
 /**********************a little funcitons**********************/

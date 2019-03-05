@@ -17,11 +17,17 @@ void Init_All(void)
 	Switch_Gpio_Init();
 	Buzzer_Gpio_Init();
 	Magnetic_Adc_Init();
+	OLED_Fill(0x00);
+	OLED_Put6x8Str(20, 2, "initializing");
+	OLED_Put6x8Str(10, 3, "magnetic zero drift");
+	Magnetic_Find_Zero_Drift();
 	IIC_Init();
 	Motor_Pit1_Init();
 	Motor_Pwm_Init();
 	Servo_Gpio_Init();
 	Encoder_Init();
+	Magnetic_Find_Max_Value();
+	OLED_Fill(0x00);
 	Speed_Init();
 	switch(ubyCamera_Init())
 	{
@@ -44,6 +50,7 @@ void Init_All(void)
 		OLED_Put6x8Str(20, 2, "Error: Unkonwn.");
 		while(1);
 	}
+	LPLD_LPTMR_DelayMs(1000);
 	OLED_Fill(0x00);
 	EnableInterrupts;
 }

@@ -9,8 +9,8 @@ Magnetic_Class magnetic;
 ***************************************************************/
 void Magnetic_Adc_Init(void)
 {
-//	magnetic.k = 0.05;
-	magnetic.a = 55;
+	magnetic.kp_default = 230;
+	magnetic.kd = 0;
 	static ADC_InitTypeDef ADC_InitStructure;
 	ADC_InitStructure.ADC_Adcx = MAGNETIC_ADCx;
 	ADC_InitStructure.ADC_DiffMode = ADC_SE;
@@ -28,8 +28,6 @@ void Magnetic_Adc_Init(void)
 	LPLD_ADC_Init(ADC_InitStructure);
 	LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
 	LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
-	
-	Magnetic_Find_Zero_Drift();
 }
 
 /***************************************************************
@@ -39,13 +37,69 @@ void Magnetic_Adc_Init(void)
 ***************************************************************/
 void Magnetic_Find_Zero_Drift(void)
 {
-//	magnetic.angle_zero_drift = magnetic.angle;
-	magnetic.middle_left_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) * 0.95;
-	magnetic.middle_right_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) * 0.95;
-	magnetic.left_horizontal_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) * 0.95;
-	magnetic.right_horizontal_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) * 0.95;
-	magnetic.left_vertical_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) * 0.95;
-	magnetic.right_vertical_mag_zero_drift = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) * 0.95;
+	magnetic.value_zero_drift[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
+	magnetic.value_zero_drift[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
+	magnetic.value_zero_drift[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x);
+	magnetic.value_zero_drift[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x);
+	magnetic.value_zero_drift[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x);
+	magnetic.value_zero_drift[VERTICAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x);
+}
+
+/***************************************************************
+	*	@brief	测最大值
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Magnetic_Find_Max_Value(void)
+{
+	float32 temp[6];
+	OLED_Fill(0x00);
+	OLED_Put6x8Str(20, 1, "checking");
+	OLED_Put6x8Str(20, 2, "magnetic");
+	OLED_Put6x8Str(20, 3, "max value");
+	OLED_Put6x8Str(20, 5, "press KEY6");
+	OLED_Put6x8Str(20, 6, "to continue.");
+	while(1)
+	{
+		temp[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
+		temp[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
+		temp[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
+		temp[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
+		temp[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
+		temp[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
+		if(magnetic.max_value[MID_L] < temp[MID_L])
+		{
+			magnetic.max_value[MID_L] = temp[MID_L];
+		}
+		if(magnetic.max_value[MID_R] < temp[MID_R])
+		{
+			magnetic.max_value[MID_R] = temp[MID_R];
+		}
+		if(magnetic.max_value[HORIZONTAL_L] < temp[HORIZONTAL_L])
+		{
+			magnetic.max_value[HORIZONTAL_L] = temp[HORIZONTAL_L];
+		}
+		if(magnetic.max_value[HORIZONTAL_R] < temp[HORIZONTAL_R])
+		{
+			magnetic.max_value[HORIZONTAL_R] = temp[HORIZONTAL_R];
+		}
+		if(magnetic.max_value[VERTICAL_L] < temp[VERTICAL_L])
+		{
+			magnetic.max_value[VERTICAL_L] = temp[VERTICAL_L];
+		}
+		if(magnetic.max_value[VERTICAL_R] < temp[VERTICAL_R])
+		{
+			magnetic.max_value[VERTICAL_R] = temp[VERTICAL_R];
+		}
+		if(KEY6 == 0)
+		{
+			Key_Delay();
+			if(KEY6 == 0)
+			{
+				break;
+			}
+		}
+	}
 }
 
 /***************************************************************
@@ -55,41 +109,43 @@ void Magnetic_Find_Zero_Drift(void)
 ***************************************************************/
 void Magnetic_Get_Result(void)
 {
-//	magnetic.middle_left_mag = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) * 100 / 4095;
-//	magnetic.middle_right_mag = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) * 100 / 4095;
-//	magnetic.left_horizontal_mag = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) * 100 / 4095;
-//	magnetic.right_horizontal_mag = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) * 100 / 4095;
-//	magnetic.left_vertical_mag = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) * 100 / 4095;
-//	magnetic.right_vertical_mag = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) * 100 / 4095;
-	magnetic.middle_left_mag = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) - magnetic.middle_left_mag_zero_drift) * 100 / 4095;
-	if(magnetic.middle_left_mag < 0)
+	//调电位器用
+//	magnetic.value[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) * 100 / 4095;
+//	magnetic.value[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) * 100 / 4095;
+//	magnetic.value[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) * 100 / 4095;
+//	magnetic.value[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) * 100 / 4095;
+//	magnetic.value[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) * 100 / 4095;
+//	magnetic.value[VERTICAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) * 100 / 4095;
+	
+	magnetic.value[MID_L] = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) - magnetic.value_zero_drift[MID_L]) * 100 / magnetic.max_value[MID_L];
+	if(magnetic.value[MID_L] < 0)
 	{
-		magnetic.middle_left_mag = 0;
+		magnetic.value[MID_L] = 0;
 	}
-	magnetic.middle_right_mag = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) - magnetic.middle_right_mag_zero_drift) * 100 / 4095;
-	if(magnetic.middle_right_mag < 0)
+	magnetic.value[MID_R] = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) - magnetic.value_zero_drift[MID_R]) * 100 / magnetic.max_value[MID_R];
+	if(magnetic.value[MID_R] < 0)
 	{
-		magnetic.middle_right_mag = 0;
+		magnetic.value[MID_R] = 0;
 	}
-	magnetic.left_horizontal_mag = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) - magnetic.left_horizontal_mag_zero_drift) * 100 / 4095;
-	if(magnetic.left_horizontal_mag < 0)
+	magnetic.value[HORIZONTAL_L] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) - magnetic.value_zero_drift[HORIZONTAL_L]) * 100 / magnetic.max_value[HORIZONTAL_L];
+	if(magnetic.value[HORIZONTAL_L] < 0)
 	{
-		magnetic.left_horizontal_mag = 0;
+		magnetic.value[HORIZONTAL_L] = 0;
 	}
-	magnetic.right_horizontal_mag = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) - magnetic.right_horizontal_mag_zero_drift) * 100 / 4095;
-	if(magnetic.right_horizontal_mag < 0)
+	magnetic.value[HORIZONTAL_R] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) - magnetic.value_zero_drift[HORIZONTAL_R]) * 100 / magnetic.max_value[HORIZONTAL_R];
+	if(magnetic.value[HORIZONTAL_R] < 0)
 	{
-		magnetic.right_horizontal_mag = 0;
+		magnetic.value[HORIZONTAL_R] = 0;
 	}
-	magnetic.left_vertical_mag = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) - magnetic.left_vertical_mag_zero_drift) * 100 / 4095;
-	if(magnetic.left_vertical_mag < 0)
+	magnetic.value[VERTICAL_L] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) - magnetic.value_zero_drift[VERTICAL_L]) * 100 / magnetic.max_value[VERTICAL_L];
+	if(magnetic.value[VERTICAL_L] < 0)
 	{
-		magnetic.left_vertical_mag = 0;
+		magnetic.value[VERTICAL_L] = 0;
 	}
-	magnetic.right_vertical_mag = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) - magnetic.right_vertical_mag_zero_drift) * 100 / 4095;
-	if(magnetic.right_vertical_mag < 0)
+	magnetic.value[VERTICAL_R] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) - magnetic.value_zero_drift[VERTICAL_R]) * 100 / magnetic.max_value[VERTICAL_R];
+	if(magnetic.value[VERTICAL_R] < 0)
 	{
-		magnetic.right_vertical_mag = 0;
+		magnetic.value[VERTICAL_R] = 0;
 	}
 }
 
@@ -141,18 +197,28 @@ float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
 void Magnetic_Solution(void)
 {
 	Magnetic_Get_Result();
-	magnetic.angle = (atan(magnetic.left_horizontal_mag / magnetic.left_vertical_mag) + atan(magnetic.right_horizontal_mag / magnetic.right_vertical_mag)) / 2;
-	magnetic.left_equivalent = magnetic.left_horizontal_mag / sin(magnetic.angle);
-	magnetic.right_equivalent = magnetic.right_horizontal_mag / sin(magnetic.angle);
-	magnetic.angle = 90 - 57.3 * magnetic.angle;
+	magnetic.angle = (atan(magnetic.value[HORIZONTAL_L] / magnetic.value[VERTICAL_L]) + atan(magnetic.value[HORIZONTAL_R] / magnetic.value[VERTICAL_R])) / 2;
+	magnetic.value[EQUIVALENT_L] = magnetic.value[HORIZONTAL_L] / sin(magnetic.angle);
+	magnetic.value[EQUIVALENT_R] = magnetic.value[HORIZONTAL_R] / sin(magnetic.angle);
+	if(feature.straight_state == 1)
+	{
+		magnetic.correction = magnetic.value[EQUIVALENT_R] - magnetic.value[EQUIVALENT_R];
+	}
 }
 
 /***************************************************************
-	*	@brief	偏差映射
+	*	@brief	电磁丢线
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Magnetic_Error_Mapping(void)
+uint8 Magnetic_Lose_Line(void)
 {
-	magnetic.mapping_error[servo.error[0] + 60] = (magnetic.right_equivalent - magnetic.left_equivalent) / (magnetic.right_equivalent + magnetic.left_equivalent) * 100;
+	if((int16)(magnetic.value[MID_L] + magnetic.value[MID_R] + magnetic.value[HORIZONTAL_L] + magnetic.value[HORIZONTAL_R]) < 8)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
