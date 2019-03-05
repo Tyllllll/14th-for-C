@@ -43,8 +43,8 @@ void Encoder_Init(void)
 ***************************************************************/
 void Encoder_Get(void)
 {
-	encoder.left_num = (int16)(LPLD_FTM_GetCounter(FTM2));
-	encoder.right_num = (int16)(-LPLD_FTM_GetCounter(FTM1));
+	encoder.right_num = (int16)(-LPLD_FTM_GetCounter(FTM2));
+	encoder.left_num = (int16)(LPLD_FTM_GetCounter(FTM1));
 }
 
 /***************************************************************

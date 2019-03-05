@@ -10,7 +10,7 @@
 #define MAGNETIC_CH2x DAD1	//DP1
 #define MAGNETIC_CH3x AD20	//DM1
 #define MAGNETIC_CH4x AD19	//DM0
-#define HLEFT       1
+#define HLEFT       5
 #define MIDLEFT     2
 #define MIDRIGHT    3
 #define HRIGHT      4

@@ -1310,6 +1310,35 @@ uint8 is_Lose_All(uint8 row)
 	}
 }
 
+
+
+/***************************************************************
+	*	@brief	限幅
+	*	@param	float data		当前数据
+                float max_out	最大输出
+                float min_out	最小输出
+	*	@note	无
+***************************************************************/
+float constrain_32(float *data, float max_out,float min_out)
+{
+  *data = (*data)>max_out ? max_out:*data;
+  *data = (*data)<min_out ? min_out:*data;
+  return *data;
+}
+/***************************************************************
+	*	@brief	限幅
+	*	@param	int16 data		当前数据
+                int16 max_out	最大输出
+                int16 min_out	最小输出
+	*	@note	无
+***************************************************************/
+int16 constrain_16(int16 *data, int16 max_out,int16 min_out)
+{
+  *data = (*data)>max_out ? max_out:*data;
+  *data = (*data)<min_out ? min_out:*data;
+  return *data;
+}
+
 /***************************************************************
 	*	@brief	求数组中的中位数
 	*	@param	arr：首地址指针，length：长度

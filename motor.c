@@ -197,16 +197,24 @@ void Motor_PID(void)
 	}
 	if(motor.speed_set != 0)
 	{
+        //°¢Âü¿ËÄ£ÐÍ²îËÙ
 		if(servo.error[0] < - 2 * servo.dead_zone)
 		{
 			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
 			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
+
 		}
 		else if(servo.error[0] > 2 * servo.dead_zone)
 		{
 			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 		}
+//        //±àÂëÆ÷²â²îËÙ²âÊÔ
+//        if(fabs(servo.error[0]) > 2 * servo.dead_zone)
+//        {
+//            motor.speed_set_left = (int16)( ( -0.0020 * ( servo.duty - 1427 ) + 0.9987 ) * motor.speed_set );
+//            motor.speed_set_right = (int16)( ( 0.0020 * ( servo.duty - 1427 ) + 1.0013 ) * motor.speed_set );
+//        }
 		else
 		{
 			motor.speed_set_left = motor.speed_set;

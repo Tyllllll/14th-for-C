@@ -422,7 +422,8 @@ void OLED_ShowImage(void)
     OLED_PrintUintValue(100, 3, feature.breramp);   
     OLED_Put6x8Str(80, 4, "whi");
     OLED_PrintUintValue(100, 4, servo.which);
-    
+    OLED_Put6x8Str(80, 4, "skp");
+    OLED_PrintUintValue(100, 4, (uint16)servo.kp);    
     
     OLED_PrintUintValue(80, 6, motor.speed_set_left);
 	OLED_PrintUintValue(100, 6, motor.speed_set_right);

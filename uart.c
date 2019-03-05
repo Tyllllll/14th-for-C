@@ -19,7 +19,13 @@ void Send_Data_to_FreeCars(void)
     push(3, (uint16)P_valu);
     push(4, (uint16)I_valu);
     push(5, (uint16)D_valu);
+    /*********************  ¶æ»ú  ****************************/ 
+    push(6, (uint16)servo.kp);
+    push(7, (int16)servo.error[0]);
+    push(8, (int16)servo.error_differ[0]);
+    push(9, (uint16)servo.duty);
 	Send_Data_To_Scope();
+    
 }
 
 /***************************************************************
@@ -33,6 +39,7 @@ void UartDebug(void)
 	if(UartData[0] != 0)
 	{
 		motor.kp = (int16)UartData[0];
+        servo.kd = (int16)UartData[1];
 	}
 	BUZZER_ON;
 	LPLD_LPTMR_DelayMs(100);

@@ -1045,7 +1045,7 @@ void Judge_breramp(void)
 	{
         if(motor.alldist < 70)
         {
-            if(is_Lose_All(80) == 1)
+            if(is_Lose_All(100) == 1)
             {
                 feature.breramp = 2;	//半米内有丢线确定为断路 否则为坡道
              				BUZZER_ON;
@@ -1054,7 +1054,7 @@ void Judge_breramp(void)
             }
 
         }
-        else
+        else if(feature.top_point < 40)
         {
             feature.breramp = 4;
             servo.which = 0;
@@ -1102,7 +1102,7 @@ void Judge_breramp(void)
                 {
                     cnt2++;
                 }
-                if(cnt2 >= 20 || feature.turn_state!=0 || feature.straight_state!=0)
+                if(cnt2 >= 20 || feature.straight_state!=0)
                 {
                     feature.breramp = 0;	//驶出坡道
                     servo.which = 0;

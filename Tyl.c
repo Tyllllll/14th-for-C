@@ -85,11 +85,12 @@ void main(void)
 			}
 		}
 		if(camera.ready_read == 1)
-//		if(0)
+	//	if(0)
 		{
 			Img_Extract();
 			Find_Line();
 			Check_Half_Width();
+            
 			Judge_Feature();
 			All_Fill();
 			if(servo.enable == 1)
@@ -175,7 +176,7 @@ void main(void)
 //			Key_Delay();
 //			if(KEY2 == 0)
 //			{
-//				servo_up5();
+//				//servo_up5();
 //			}
 //		}
 //		if(KEY3 == 0)
