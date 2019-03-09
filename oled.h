@@ -13,7 +13,7 @@
 #define OLED_RST(x)  LPLD_GPIO_Output_b(OLED_GPIO_PTx, 11, x)//复位低能电平
 #define OLED_DC(x)   LPLD_GPIO_Output_b(OLED_GPIO_PTx, 10, x)//偏置常低
 
-uint8 Oled_Gpio_Init(void);
+uint8 Oled_Init(void);
 void OLED_WriteData(unsigned char data);
 void OLED_WriteCmd(unsigned char cmd);
 void OLED_SetPosition(unsigned char x, unsigned char y);

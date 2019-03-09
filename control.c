@@ -24,33 +24,32 @@ Setting_Class setting;
 *************************************************************+**/
 void Speed_Init(void)
 {
-//	speed.straight = 120;
-//	speed.long_straight = 120;
-//	speed.curve_high = 120;
-//	speed.curve_low = 120;
-//	speed.roundabouts = 120;
+//	speed.curve_high = 160;
+//	speed.curve_low = 130;
 	
-//	speed.straight = 220;
-//	speed.long_straight = 250;
-//	speed.curve_high = 200;
-//	speed.curve_low = 170;
-//	speed.roundabouts = 190;
-//	speed.breakage = 180;
-//	speed.ramp = 150;
+	speed.straight = 220;
+	speed.long_straight = 250;
+	speed.curve_high = 200;
+	speed.curve_low = 170;
+	speed.roundabouts = 190;
+	speed.breakage = 180;
+	speed.ramp = 150;
 	
-	speed.straight = 260;
-	speed.long_straight = 300;
-	speed.curve_high = 240;
-	speed.curve_low = 220;
-	speed.roundabouts = 220;
-	speed.breakage = 150;
-	speed.ramp = 200;
+//	speed.straight = 260;
+//	speed.long_straight = 300;
+//	speed.curve_high = 270;
+//	speed.curve_low = 240;
+//	speed.roundabouts = 220;
+//	speed.breakage = 150;
+//	speed.ramp = 170;
 	
 //	speed.straight = 290;
 //	speed.long_straight = 330;
-//	speed.curve_high = 260;
+//	speed.curve_high = 280;
 //	speed.curve_low = 230;
-//	speed.roundabouts = 240;
+//	speed.roundabouts = 260;
+//	speed.breakage = 150;
+//	speed.ramp = 200;
 }
 
 /***************************************************************
@@ -61,33 +60,34 @@ void Speed_Init(void)
 void Speed_Set(void)
 {
 	int16 error_ave;
-	if(feature.breakage_state != 0)
+	if(feature.roadblock_state == 1)
 	{
-		if(feature.breakage_state == 2 || feature.breakage_state == 3)
-		{
-			motor.speed_set = speed.breakage - 20;
-		}
-		else if(feature.breakage_state == 5)
-		{
-			motor.speed_set = speed.breakage;
-		}
-		else
-		{
-			motor.speed_set = speed.breakage;
-		}
+		motor.stop = 1;
 		feature.road_type[0] = 8;
 	}
 	else if(feature.ramp_state != 0)
 	{
 		if(feature.ramp_state == 1)
 		{
-			motor.speed_set = speed.ramp - 100;
+			motor.speed_set = speed.ramp - 70;
 		}
 		else
 		{
-			motor.speed_set = speed.ramp + 60;
+			motor.speed_set = speed.ramp;
 		}
 		feature.road_type[0] = 6;
+	}
+	else if(feature.breakage_state != 0)
+	{
+		if(feature.breakage_state == 2 || feature.breakage_state == 3)
+		{
+			motor.speed_set = speed.breakage - 20;
+		}
+		else
+		{
+			motor.speed_set = speed.breakage;
+		}
+		feature.road_type[0] = 5;
 	}
 	else if(feature.roundabouts_state != 0)
 	{
@@ -98,7 +98,7 @@ void Speed_Set(void)
 		else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
 		{
 			error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
-			motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
+			motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 60.0 / 60);
 			if(motor.speed_set > speed.curve_high)
 			{
 				motor.speed_set = speed.curve_high;
@@ -110,7 +110,7 @@ void Speed_Set(void)
 		}
 		else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)
 		{
-			motor.speed_set = speed.straight + 50;
+			motor.speed_set = speed.long_straight;
 		}
 		feature.road_type[0] = 4;
 	}
@@ -123,7 +123,7 @@ void Speed_Set(void)
 		}
 		else
 		{
-			motor.speed_set = speed.long_straight - 50;
+			motor.speed_set = speed.long_straight - 40;
 		}
 	}
 	else if(feature.straight_state == 2)
@@ -135,14 +135,14 @@ void Speed_Set(void)
 		}
 		else
 		{
-			motor.speed_set = speed.straight - 20;
+			motor.speed_set = speed.straight - 10;
 		}
 	}
 	else
 	{
 		feature.road_type[0] = 3;
 		error_ave = (int16)(0.6 * servo.error[0] + 0.2 * servo.error[1] + 0.2 * servo.error[2]);
-		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 40.0 / 40);
+		motor.speed_set = (int16)(speed.curve_high - (speed.curve_high - speed.curve_low) * error_ave * error_ave / 60.0 / 60);
 		if(motor.speed_set > speed.curve_high)
 		{
 			motor.speed_set = speed.curve_high;
@@ -161,13 +161,12 @@ void Speed_Set(void)
 ***************************************************************/
 void All_Fill(void)
 {
-	Roundabouts_Fill();
 	Breakage_Fill();
-	if(feature.roundabouts_state != 1 && feature.roundabouts_state != 2)
+	Roundabouts_Fill();
+	if(feature.roundabouts_state != 1 && feature.roundabouts_state != 2 && feature.breakage_state != 5)
 	{
 		Cross_Fill();
 	}
-//	Curve_Fill();
 }
 
 /***************************************************************
@@ -627,7 +626,7 @@ void Roundabouts_Fill(void)
 {
 	uint8 i = 0;
 	float32 state12_k;
-	uint8 state12_fill_row = 90;
+	uint8 state12_fill_row = 95;
 	if(feature.roundabouts_state == 1)
 	{
 		if(feature.left_flection2_flag == 1)
@@ -645,7 +644,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
+				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -675,7 +674,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
+				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -693,40 +692,6 @@ void Roundabouts_Fill(void)
 		feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
 		feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
 		Find_Top_Point();
-		if(feature.left_flection2_flag == 1)
-		{
-			if(feature.left_flection2_row > 16 || feature.left_flection2_row == 0)
-			{
-				feature.roundabouts_size = 2;
-//				servo.duty = DEG_MID + 60 + 60;
-			}
-			else if(feature.left_flection2_row < 12)
-			{
-				feature.roundabouts_size = -1;
-//				servo.duty = DEG_MID + 60;
-			}
-			else if(feature.roundabouts_size <= 0 || feature.roundabouts_size >= 1)
-			{
-				feature.roundabouts_size = (float32)(feature.left_flection2_row - 12) / 4;
-//				servo.duty = (int16)(DEG_MID + 60 + feature.roundabouts_size * 60);
-			}
-		}
-	}
-	else if(feature.roundabouts_state == 5)
-	{
-		servo.enable = 0;
-		if(feature.roundabouts_size == 2)
-		{
-			servo.duty = DEG_MID + 70 + 80;
-		}
-		else if(feature.roundabouts_size == -1)
-		{
-			servo.duty = DEG_MID + 80;
-		}
-		else
-		{
-			servo.duty = (int16)(DEG_MID + 70 + feature.roundabouts_size * 80);
-		}
 	}
 	else if(feature.roundabouts_state == 2)
 	{
@@ -745,7 +710,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
+				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -775,7 +740,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
+				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -793,79 +758,38 @@ void Roundabouts_Fill(void)
 		feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
 		feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
 		Find_Top_Point();
-		if(feature.right_flection2_flag == 1)
-		{
-			if(feature.right_flection2_row > 16 || feature.right_flection2_row == 0)
-			{
-				feature.roundabouts_size = 2;
-//				servo.duty = DEG_MID - 60 - 60;
-			}
-			else if(feature.right_flection2_row < 12)
-			{
-				feature.roundabouts_size = -1;
-//				servo.duty = DEG_MID - 60;
-			}
-			else if(feature.roundabouts_size <= 0 || feature.roundabouts_size >= 1)
-			{
-				feature.roundabouts_size = (float32)(feature.right_flection2_row - 12) / 4;
-//				servo.duty = (int16)(DEG_MID - 60 - feature.roundabouts_size * 60);
-			}
-		}
 	}
-	else if(feature.roundabouts_state == 6)
-	{
-		servo.enable = 0;
-		if(feature.roundabouts_size == 2)
-		{
-			servo.duty = DEG_MID - 70 - 80;
-		}
-		else if(feature.roundabouts_size == -1)
-		{
-			servo.duty = DEG_MID - 80;
-		}
-		else
-		{
-			servo.duty = (int16)(DEG_MID - 70 - feature.roundabouts_size * 80);
-		}
-	}
-//	else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
-//	{
-//		servo.duty_record[0] = servo.duty;
-//		for(i = 10; i > 0; i--)
-//		{
-//			servo.duty_record[i] = servo.duty_record[i - 1];
-//		}
-//	}
-//	else if(feature.roundabouts_state == 5 || feature.roundabouts_state == 6)
-//	{
-//		servo.enable = 0;
-//		servo.duty = Get_Median(servo.duty_record, 19);
-//	}
 }
 
+
 /***************************************************************
-	*	@brief	断路处理
+	*	@brief	断路补线
 	*	@param	无
 	*	@note	无
 ***************************************************************/
 void Breakage_Fill(void)
 {
-	uint8 i = 0;
-	if(feature.breakage_state == 2)
+	uint8 i;
+	float32 k;
+	if(feature.breakage_state == 5)
 	{
-		//左补线
-		for(i = 117; i > feature.top_point; i--)
+		feature.breakage_k_record[0] = (float32)(line.midline[39] - 80) / (100 - 39);
+		k = 0.6 * feature.breakage_k_record[0] + 0.2 * feature.breakage_k_record[1] + 0.2 * feature.breakage_k_record[2];
+		for(i = 100; i > 39; i--)
 		{
-			line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
+			line.midline[i] = (int16)(line.midline[39] + k * (39 - i));
+			if(line.midline[i] < 0)
+			{
+				line.midline[i] = 0;
+			}
+			else if(line.midline[i] > 159)
+			{
+				line.midline[i] = 159;
+			}
 		}
-	}
-	else if(feature.breakage_state == 3)
-	{
-		//右补线
-		for(i = 117; i > feature.top_point; i--)
-		{
-			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
-		}
+		feature.breakage_k_record[2] = feature.breakage_k_record[1];
+		feature.breakage_k_record[1] = feature.breakage_k_record[0];
+		Find_Top_Point();
 	}
 }
 
@@ -1015,8 +939,8 @@ void Parameter_Setting_Init(void)
 	setting.data[1][2] = (float32)servo.dead_zone;
         
 	sprintf(setting.string[2][0], "SERVO");
-	sprintf(setting.string[2][1], "kp_default");
-	setting.data[2][1] = (float32)servo.kp_default;
+	sprintf(setting.string[2][1], "kp");
+	setting.data[2][1] = (float32)servo.kp;
 	sprintf(setting.string[2][2], "kd");
 	setting.data[2][2] = (float32)servo.kd;
 	sprintf(setting.string[2][3], "enable");
@@ -1033,12 +957,12 @@ void Parameter_Setting_Init(void)
 	setting.data[3][2] = (float32)motor.ki;
 	sprintf(setting.string[3][3], "openloop");
 	setting.data[3][3] = (float32)motor.is_open_loop;
+	sprintf(setting.string[3][4], "dis_set");
+	setting.data[3][4] = (float32)motor.distance_set;
 	
 	sprintf(setting.string[4][0], "MAGNETIC");
-	sprintf(setting.string[4][1], "kp");
-	setting.data[4][1] = (float32)magnetic.kp;
-	sprintf(setting.string[4][2], "kd");
-	setting.data[4][2] = (float32)magnetic.kd;
+	sprintf(setting.string[4][1], "kd");
+	setting.data[4][1] = (float32)magnetic.kd;
 	
 //	sprintf(setting.string[4][0], "MOTOR_DIF");
 //	sprintf(setting.string[4][1], "const");
@@ -1063,7 +987,7 @@ void Save_Data(void)
 	speed.ramp = (int16)setting.data[0][7];
 	servo.fore_default = (uint8)setting.data[1][1];
 	servo.dead_zone = (uint8)setting.data[1][2];
-	servo.kp_default = setting.data[2][1];
+	servo.kp = setting.data[2][1];
 	servo.kd = setting.data[2][2];
 	servo.enable = (uint8)setting.data[2][3];
 	motor.dif_const = setting.data[2][6];
@@ -1071,8 +995,8 @@ void Save_Data(void)
 	motor.kp = setting.data[3][1];
 	motor.ki = setting.data[3][2];
 	motor.is_open_loop = (int8)setting.data[3][3];
-	magnetic.kp = (int16)setting.data[4][1];
-	magnetic.kd = (int16)setting.data[4][2];
+	motor.distance_set = (int8)setting.data[3][4];
+	magnetic.kd = (int16)setting.data[4][1];
 //	motor.dif_const = setting.data[4][1];
 //	motor.dif_fore = setting.data[4][2];
 }

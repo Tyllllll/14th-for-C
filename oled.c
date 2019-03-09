@@ -101,7 +101,7 @@ const unsigned char F6x8[][6] =
 	*	@param	нч
 	*	@note	нч
 ***************************************************************/
-uint8 Oled_Gpio_Init(void)
+uint8 Oled_Init(void)
 {
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_PTx = OLED_SCLK_PTx;
@@ -424,11 +424,10 @@ void OLED_ShowImage(void)
 	OLED_PrintUintValue(100, 3, feature.breakage_state);
 	OLED_Put6x8Str(80, 4, "po");
 	OLED_PrintUintValue(100, 4, feature.ramp_state);
-	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature);
-	OLED_Put6x8Str(80, 6, "whi");
-	OLED_PrintUintValue(100, 6, servo.which);
-	OLED_PrintUintValue(80, 7, servo.error[0]);
-	OLED_PrintUintValue(100, 7, servo.kp);
+	OLED_Put6x8Str(80, 5, "lz");
+	OLED_PrintUintValue(100, 5, feature.roadblock_state);
+	OLED_PrintUintValue(80, 6, servo.error[0]);
+	
 //	OLED_PrintFloatValue(80, 6, magnetic.angle * 57.3);
 //	OLED_PrintIntValue(80, 7, is_Lose_All(90));
 //	OLED_Put6x8Str(80, 4, "rt");

@@ -20,47 +20,34 @@
 
 //void main(void)
 //{
-//	Uart_Init();
-//	IIC_Init();
-//	MPU6050_Init();
+//	Adc_Init();
+//	Oled_Init();
 //	while(1)
 //	{
-//		Get_Angular_Velocity();
-//		Get_Acceleration();
-//		push(0, (uint16)gyro.angx);
-//		push(1, (uint16)gyro.angy);
-//		push(2, (uint16)gyro.angz);
-//		push(3, (uint16)gyro.accx);
-//		push(4, (uint16)gyro.accy);
-//		push(5, (uint16)gyro.accz);
-//		Send_Data_To_Scope();
+//		Adc_Magnetic_Get_Result();
+//		Adc_Measure_Distance();
+//		OLED_PrintIntValue(10, 1, (int32)magnetic.value[MID_L]);
+//		OLED_PrintIntValue(70, 1, (int32)magnetic.value[MID_R]);
+//		OLED_PrintIntValue(10, 2, (int32)magnetic.value[HORIZONTAL_L]);
+//		OLED_PrintIntValue(70, 2, (int32)magnetic.value[HORIZONTAL_R]);
+//		OLED_PrintIntValue(10, 3, (int32)magnetic.value[VERTICAL_L]);
+//		OLED_PrintIntValue(70, 3, (int32)magnetic.value[VERTICAL_R]);
+//		OLED_PrintIntValue(10, 4, (int32)magnetic.value[EQUIVALENT_L]);
+//		OLED_PrintIntValue(70, 4, (int32)magnetic.value[EQUIVALENT_R]);
+//		OLED_PrintIntValue(60, 5, (int32)infrared.distance);
+//		OLED_PrintIntValue(60, 6, (int32)infrared.distance_test);
 //	}
-////	uint8 i = 0;
-////	uint8 count = 0;
-////	for(i = 0; i < 255; i++)
-////	{
-////		if(IIC_Read_Byte(i, 0) != 255)
-////		{
-////			OLED_PrintIntValue(20, count, i);
-////			count++;
-////		}
-////		if(count == 7)
-////		{
-////			break;
-////		}
-////	}
-////	if(i == 255)
-////	{
-////		OLED_Put6x8Str(100, 7, "fuck");
-////	}
 //}
 
 void main(void)
 {
-    Init_All();
+    if(!Init_All())
+	{
+		while(1);
+	}
     while(1)
     {
-		magnetic.hongwaiceju = Magnetic_GetAdc(MAGNETIC_MID_ADCx, HONGWAICEJU_CHx);
+		VL53L0X_Get_Distance();
 		//参数设置
 		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
@@ -73,12 +60,22 @@ void main(void)
 			feature.roundabouts_state = 0;
 	 		feature.breakage_state = 0;
 			feature.ramp_state = 0;
+			feature.roadblock_state = 0;
 			servo.enable = 1;
 			servo.which = 0;
 		}
 		if(SWITCH4 == 1)
 		{
 			Send_Data_to_FreeCars();
+		}
+		//按键重置oled
+		if(KEY5 == 0)
+		{
+			Key_Delay();
+			if(KEY5 == 0)
+			{
+				Oled_Init();
+			}
 		}
 		//按键发车
 		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0)
@@ -92,7 +89,7 @@ void main(void)
 				if(motor.start == 0)
 				{
 					motor.start = 50;
-					motor.error_integral = 0;
+					motor.distance_current = 0;
 					motor.error_integral_left = 0;
 					motor.error_integral_right = 0;
 				}
@@ -113,9 +110,12 @@ void main(void)
 				feature.roundabouts_state = 0;
 				feature.breakage_state = 0;
 				feature.ramp_state = 0;
+				feature.roadblock_state = 0;
 				servo.enable = 1;
 				servo.which = 0;
 				BUZZER_OFF;
+				encoder.left_num_sum = 0;
+				encoder.right_num_sum = 0;
 			}
 		}
 		if(camera.ready_read == 1)
@@ -130,6 +130,8 @@ void main(void)
 			}
 			Img_Extract();
 			Find_Line();
+			Adc_Magnetic_Get_Result();
+			Adc_Measure_Distance();
 			Judge_Feature();
 			if(servo.which == 0)
 			{
@@ -140,7 +142,7 @@ void main(void)
 			else if(servo.which == 1)
 			{
 				//电磁
-				Magnetic_Solution();
+				Adc_Magnetic_Solution();
 			}
 			if(servo.enable == 1)
 			{
@@ -149,18 +151,21 @@ void main(void)
 			Speed_Set();
 			if(motor.start != 0)
 			{
-//				if(Magnetic_Lose_Line() == 1)
-				if(is_Lose_All(105))
+				if(Adc_Magnetic_Lose_Line() == 1)
+				{
+					motor.stop = 1;
+				}
+				if(motor.distance_current > motor.distance_set && motor.distance_set != 0)
 				{
 					motor.stop = 1;
 				}
 			}
 			if(motor.start == 0)
 			{
-				if(Magnetic_Lose_Line() == 0)
+				if(Adc_Magnetic_Lose_Line() == 0)
 				{
-					motor.start = 20;
-					motor.error_integral = 0;
+					motor.start = 1;
+					motor.distance_current = 0;
 					motor.error_integral_left = 0;
 					motor.error_integral_right = 0;
 				}
@@ -171,7 +176,7 @@ void main(void)
 			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 1)
 			{
-				Magnetic_Solution();
+				Adc_Magnetic_Solution();
 				OLED_PrintIntValue(10, 1, (int32)magnetic.value[MID_L]);
 				OLED_PrintIntValue(70, 1, (int32)magnetic.value[MID_R]);
 				OLED_PrintIntValue(10, 2, (int32)magnetic.value[HORIZONTAL_L]);
@@ -180,56 +185,8 @@ void main(void)
 				OLED_PrintIntValue(70, 3, (int32)magnetic.value[VERTICAL_R]);
 				OLED_PrintIntValue(10, 4, (int32)magnetic.value[EQUIVALENT_L]);
 				OLED_PrintIntValue(70, 4, (int32)magnetic.value[EQUIVALENT_R]);
-				OLED_PrintFloatValue(60, 5, (int32)magnetic.angle * 57.3);
+				OLED_PrintIntValue(60, 5, (int32)infrared.distance);
 			}
 		}
-//		if(KEY1 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY1 == 0)
-//			{
-//				servo_up1();
-//			}
-//		}
-//		if(KEY2 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY2 == 0)
-//			{
-//				servo_up5();
-//			}
-//		}
-//		if(KEY3 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY3 == 0)
-//			{
-//				servo_up10();
-//			}
-//		}
-//		if(KEY4 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY4 == 0)
-//			{
-//				servo_down10();
-//			}
-//		}
-//		if(KEY5 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY5 == 0)
-//			{
-//				servo_down5();
-//			}
-//		}
-//		if(KEY6 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY6 == 0)
-//			{
-//				servo_down1();
-//			}
-//		}
     }
 }

@@ -19,7 +19,7 @@
 #include "oled.h"
 #include "camera.h"
 #include "encoder.h"
-#include "magnetic.h"
+#include "adc.h"
 #include "identify.h"
 #include "control.h"
 #include "uart.h"

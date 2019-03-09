@@ -8,13 +8,29 @@
 uint8 Init_All(void)
 {
     DisableInterrupts;
-	if(!Oled_Gpio_Init())
+	if(!Oled_Init())
 		while(1);
 	OLED_Put6x8Str(20, 2, "initializing...");
 	if(!NVIC_Init())
 	{
 		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error NVIC");
+		return STATUS_FAILED;
+	}
+	if(!Adc_Init())
+	{
+		OLED_Fill(0x00);
+		OLED_Put6x8Str(20, 2, "Error ADC");
+		return STATUS_FAILED;
+	}
+	OLED_Fill(0x00);
+	OLED_Put6x8Str(20, 2, "initializing");
+	OLED_Put6x8Str(15, 3, "ADC zero drift");
+	if(!Adc_Find_Zero_Drift())
+	{
+		OLED_Fill(0x00);
+		OLED_Put6x8Str(20, 2, "Error Magnetic");
+		OLED_Put6x8Str(20, 3, "Zero Drift");
 		return STATUS_FAILED;
 	}
 	if(!Uart_Init())
@@ -47,16 +63,6 @@ uint8 Init_All(void)
 		OLED_Put6x8Str(20, 2, "Error BUZZER");
 		return STATUS_FAILED;
 	}
-	if(!Magnetic_Adc_Init())
-	{
-		OLED_Fill(0x00);
-		OLED_Put6x8Str(20, 2, "Error MAGNETIC");
-		return STATUS_FAILED;
-	}
-	OLED_Fill(0x00);
-	OLED_Put6x8Str(20, 2, "initializing");
-	OLED_Put6x8Str(10, 3, "magnetic zero drift");
-	Magnetic_Find_Zero_Drift();
 	if(!IIC_Init())
 	{
 		OLED_Fill(0x00);
@@ -66,47 +72,51 @@ uint8 Init_All(void)
 	if(!Motor_Init())
 	{
 		OLED_Fill(0x00);
-		OLED_Put6x8Str(20, 2, "Error MOTOR");
+		OLED_Put6x8Str(20, 2, "Error Motor");
 		return STATUS_FAILED;
 	}
 	if(!Servo_Init())
 	{
 		OLED_Fill(0x00);
-		OLED_Put6x8Str(20, 2, "Error SERVO");
+		OLED_Put6x8Str(20, 2, "Error Servo");
 		return STATUS_FAILED;
 	}
 	if(!Encoder_Init())
 	{
 		OLED_Fill(0x00);
-		OLED_Put6x8Str(20, 2, "Error ENCODER");
+		OLED_Put6x8Str(20, 2, "Error Encoder");
 		return STATUS_FAILED;
 	}
-	Magnetic_Find_Max_Value();
-	OLED_Fill(0x00);
 	Speed_Init();
 	switch(ubyCamera_Init())
 	{
 	case 0:
-		OLED_Put6x8Str(20, 2, "initialized!!!  ");
 		break;
 	case 1:
+		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error: Camera 1.");
-		while(1);
+		return STATUS_FAILED;
 	case 2:
+		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error: Camera 2.");
-		while(1);
+		return STATUS_FAILED;
 	case 3:
+		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error: Camera 3.");
-		while(1);
+		return STATUS_FAILED;
 	case 4:
+		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error: Camera 4.");
-		while(1);
+		return STATUS_FAILED;
 	default:
+		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error: Unkonwn.");
-		while(1);
+		return STATUS_FAILED;
 	}
-	LPLD_LPTMR_DelayMs(1000);
+	Adc_Find_Max_Value();
 	OLED_Fill(0x00);
+	OLED_Put6x8Str(20, 2, "initialized!!!");
+	LPLD_LPTMR_DelayMs(1000);
 	EnableInterrupts;
 	return STATUS_OK;
 }

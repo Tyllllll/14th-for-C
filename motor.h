@@ -27,12 +27,12 @@ typedef struct
 	int16 speed_current[5];
 	int16 speed_current_left[5];
 	int16 speed_current_right[5];
-	int16 error;
-	int16 error_integral;
 	int16 output_value;
 	int16 output_value_left;
 	int16 output_value_right;
 	int8 is_open_loop;
+	float32 distance_set;
+	float32 distance_current;
 	
 	float32 dif_const;
 	float32 dif_fore;

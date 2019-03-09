@@ -17,15 +17,14 @@ typedef struct
 	int16 duty;
 	uint8 foresight;
 	uint8 fore_default;
-	float32 kp_default;
 	float32 kp;
+	float32 kp_record[3];
 	float32 kd;
 	int16 error[5];
 	int16 error_differ[4];
 	uint8 dead_zone;
 	int8 enable;
 	int8 which;
-	int16 duty_record[20];
 	int8 counter;
 	int8 ramp_change;
 }Servo_Class;

@@ -1,10 +1,12 @@
-#ifndef _MAGNETIC_H_
-#define _MAGNETIC_H_
+#ifndef _ADC_H_
+#define _ADC_H_
+
+#define INFRARED_ADCx	ADC0
+#define INFRARED_CHx		AD19	//DM0
 
 #define MAGNETIC_MID_ADCx	ADC0
 #define MAGNETIC_MID_CH1x	AD20	//DM1
 #define MAGNETIC_MID_CH2x	DAD1	//DP1
-#define HONGWAICEJU_CHx		AD19	//DM0
 
 #define MAGNETIC_ADCx	ADC1
 #define MAGNETIC_CH1x	DAD0	//DP0
@@ -29,23 +31,29 @@ typedef struct
 	float32 value_zero_drift[6];
 	float32 max_value[6];
 	float32 angle;
-	int16 kp_default;
 	int16 kp;
 	int16 kd;
 	float32 error[2];
 	float32 error_differ;
 	float32 mapping_error[120];
 	float32 correction;
-	float32 hongwaiceju;
 }Magnetic_Class;
 extern Magnetic_Class magnetic;
 
-uint8 Magnetic_Adc_Init(void);
-void Magnetic_Find_Zero_Drift(void);
-void Magnetic_Find_Max_Value(void);
-void Magnetic_Get_Result(void);
-float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn);
-void Magnetic_Solution(void);
-uint8 Magnetic_Lose_Line(void);
+typedef struct
+{
+	int16 distance;
+	int16 distance_test;
+}Infrared_Class;
+extern Infrared_Class infrared;
+
+uint8 Adc_Init(void);
+uint8 Adc_Find_Zero_Drift(void);
+void Adc_Find_Max_Value(void);
+void Adc_Magnetic_Get_Result(void);
+float32 Adc_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn);
+void Adc_Magnetic_Solution(void);
+uint8 Adc_Magnetic_Lose_Line(void);
+void Adc_Measure_Distance(void);
 
 #endif

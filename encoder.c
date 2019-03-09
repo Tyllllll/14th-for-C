@@ -59,6 +59,8 @@ void Encoder_Get(void)
 ***************************************************************/
 void Encoder_FTM_Clear(void)
 {
+	encoder.left_num_sum += encoder.left_num;
+	encoder.right_num_sum += encoder.right_num;
 	LPLD_FTM_ClearCounter(FTM1);
 	LPLD_FTM_ClearCounter(FTM2);
 }

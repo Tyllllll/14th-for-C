@@ -1,15 +1,15 @@
 #include "header.h"
 
 Magnetic_Class magnetic;
+Infrared_Class infrared;
 
 /***************************************************************
 	*	@brief	ADC初始化
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-uint8 Magnetic_Adc_Init(void)
+uint8 Adc_Init(void)
 {
-	magnetic.kp_default = 200;
 	magnetic.kd = 0;
 	static ADC_InitTypeDef ADC_InitStructure;
 	ADC_InitStructure.ADC_Adcx = MAGNETIC_ADCx;
@@ -36,6 +36,8 @@ uint8 Magnetic_Adc_Init(void)
 		return STATUS_FAILED;
 	if(!LPLD_ADC_Chn_Enable(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x))
 		return STATUS_FAILED;
+	if(!LPLD_ADC_Chn_Enable(INFRARED_ADCx, INFRARED_CHx))
+		return STATUS_FAILED;
 	return STATUS_OK;
 }
 
@@ -44,14 +46,22 @@ uint8 Magnetic_Adc_Init(void)
 	*	@param	无
 	*	@note	远离电磁线调用
 ***************************************************************/
-void Magnetic_Find_Zero_Drift(void)
+uint8 Adc_Find_Zero_Drift(void)
 {
-	magnetic.value_zero_drift[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
-	magnetic.value_zero_drift[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
-	magnetic.value_zero_drift[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x);
-	magnetic.value_zero_drift[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x);
-	magnetic.value_zero_drift[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x);
-	magnetic.value_zero_drift[VERTICAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x);
+	magnetic.value_zero_drift[MID_L] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
+	magnetic.value_zero_drift[MID_R] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
+	magnetic.value_zero_drift[HORIZONTAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x);
+	magnetic.value_zero_drift[HORIZONTAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x);
+	magnetic.value_zero_drift[VERTICAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x);
+	magnetic.value_zero_drift[VERTICAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x);
+	for(uint8 i = 0; i < 6; i++)
+	{
+		if(magnetic.value_zero_drift[i] > 250)
+		{
+			return STATUS_FAILED;
+		}
+	}
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -59,7 +69,7 @@ void Magnetic_Find_Zero_Drift(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Magnetic_Find_Max_Value(void)
+void Adc_Find_Max_Value(void)
 {
 	float32 temp[6];
 	OLED_Fill(0x00);
@@ -70,12 +80,12 @@ void Magnetic_Find_Max_Value(void)
 	OLED_Put6x8Str(20, 6, "to continue.");
 	while(1)
 	{
-		temp[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
-		temp[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
-		temp[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
-		temp[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
-		temp[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
-		temp[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_MID_CH1x);
+		temp[MID_L] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x);
+		temp[MID_R] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x);
+		temp[HORIZONTAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x);
+		temp[HORIZONTAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x);
+		temp[VERTICAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x);
+		temp[VERTICAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x);
 		if(magnetic.max_value[MID_L] < temp[MID_L])
 		{
 			magnetic.max_value[MID_L] = temp[MID_L];
@@ -116,42 +126,42 @@ void Magnetic_Find_Max_Value(void)
 	*	@param	无
 	*	@note	一次归一化
 ***************************************************************/
-void Magnetic_Get_Result(void)
+void Adc_Magnetic_Get_Result(void)
 {
 	//调电位器用
-//	magnetic.value[MID_L] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) * 100 / 4095;
-//	magnetic.value[MID_R] = Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) * 100 / 4095;
-//	magnetic.value[HORIZONTAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) * 100 / 4095;
-//	magnetic.value[HORIZONTAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) * 100 / 4095;
-//	magnetic.value[VERTICAL_L] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) * 100 / 4095;
-//	magnetic.value[VERTICAL_R] = Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) * 100 / 4095;
+//	magnetic.value[MID_L] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) * 100 / 4095;
+//	magnetic.value[MID_R] = Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) * 100 / 4095;
+//	magnetic.value[HORIZONTAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) * 100 / 4095;
+//	magnetic.value[HORIZONTAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) * 100 / 4095;
+//	magnetic.value[VERTICAL_L] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) * 100 / 4095;
+//	magnetic.value[VERTICAL_R] = Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) * 100 / 4095;
 	
-	magnetic.value[MID_L] = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) - magnetic.value_zero_drift[MID_L]) * 100 / magnetic.max_value[MID_L];
+	magnetic.value[MID_L] = (Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH1x) - magnetic.value_zero_drift[MID_L]) * 100 / magnetic.max_value[MID_L];
 	if(magnetic.value[MID_L] < 0)
 	{
 		magnetic.value[MID_L] = 0;
 	}
-	magnetic.value[MID_R] = (Magnetic_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) - magnetic.value_zero_drift[MID_R]) * 100 / magnetic.max_value[MID_R];
+	magnetic.value[MID_R] = (Adc_GetAdc(MAGNETIC_MID_ADCx, MAGNETIC_MID_CH2x) - magnetic.value_zero_drift[MID_R]) * 100 / magnetic.max_value[MID_R];
 	if(magnetic.value[MID_R] < 0)
 	{
 		magnetic.value[MID_R] = 0;
 	}
-	magnetic.value[HORIZONTAL_L] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) - magnetic.value_zero_drift[HORIZONTAL_L]) * 100 / magnetic.max_value[HORIZONTAL_L];
+	magnetic.value[HORIZONTAL_L] = (Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH1x) - magnetic.value_zero_drift[HORIZONTAL_L]) * 100 / magnetic.max_value[HORIZONTAL_L];
 	if(magnetic.value[HORIZONTAL_L] < 0)
 	{
 		magnetic.value[HORIZONTAL_L] = 0;
 	}
-	magnetic.value[HORIZONTAL_R] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) - magnetic.value_zero_drift[HORIZONTAL_R]) * 100 / magnetic.max_value[HORIZONTAL_R];
+	magnetic.value[HORIZONTAL_R] = (Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH2x) - magnetic.value_zero_drift[HORIZONTAL_R]) * 100 / magnetic.max_value[HORIZONTAL_R];
 	if(magnetic.value[HORIZONTAL_R] < 0)
 	{
 		magnetic.value[HORIZONTAL_R] = 0;
 	}
-	magnetic.value[VERTICAL_L] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) - magnetic.value_zero_drift[VERTICAL_L]) * 100 / magnetic.max_value[VERTICAL_L];
+	magnetic.value[VERTICAL_L] = (Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH3x) - magnetic.value_zero_drift[VERTICAL_L]) * 100 / magnetic.max_value[VERTICAL_L];
 	if(magnetic.value[VERTICAL_L] < 0)
 	{
 		magnetic.value[VERTICAL_L] = 0;
 	}
-	magnetic.value[VERTICAL_R] = (Magnetic_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) - magnetic.value_zero_drift[VERTICAL_R]) * 100 / magnetic.max_value[VERTICAL_R];
+	magnetic.value[VERTICAL_R] = (Adc_GetAdc(MAGNETIC_ADCx, MAGNETIC_CH4x) - magnetic.value_zero_drift[VERTICAL_R]) * 100 / magnetic.max_value[VERTICAL_R];
 	if(magnetic.value[VERTICAL_R] < 0)
 	{
 		magnetic.value[VERTICAL_R] = 0;
@@ -163,7 +173,7 @@ void Magnetic_Get_Result(void)
 	*	@param	adcx：ADC类型，chn：ADC通道
 	*	@note	返回结果未归一化
 ***************************************************************/
-float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
+float32 Adc_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
 {
 	uint8 i, j;
 	float32 window[3], temp;
@@ -203,9 +213,8 @@ float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Magnetic_Solution(void)
+void Adc_Magnetic_Solution(void)
 {
-	Magnetic_Get_Result();
 	magnetic.angle = (atan(magnetic.value[HORIZONTAL_L] / magnetic.value[VERTICAL_L]) + atan(magnetic.value[HORIZONTAL_R] / magnetic.value[VERTICAL_R])) / 2;
 	magnetic.value[EQUIVALENT_L] = magnetic.value[HORIZONTAL_L] / sin(magnetic.angle);
 	magnetic.value[EQUIVALENT_R] = magnetic.value[HORIZONTAL_R] / sin(magnetic.angle);
@@ -220,9 +229,9 @@ void Magnetic_Solution(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-uint8 Magnetic_Lose_Line(void)
+uint8 Adc_Magnetic_Lose_Line(void)
 {
-	if((int16)(magnetic.value[MID_L] + magnetic.value[MID_R] + magnetic.value[HORIZONTAL_L] + magnetic.value[HORIZONTAL_R]) < 8)
+	if((int16)(magnetic.value[MID_L] + magnetic.value[MID_R] + magnetic.value[HORIZONTAL_L] + magnetic.value[HORIZONTAL_R]) < 6)
 	{
 		return 1;
 	}
@@ -230,4 +239,14 @@ uint8 Magnetic_Lose_Line(void)
 	{
 		return 0;
 	}
+}
+
+/***************************************************************
+	*	@brief	测距
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Adc_Measure_Distance(void)
+{
+	infrared.distance = (int16)Adc_GetAdc(INFRARED_ADCx, INFRARED_CHx);
 }

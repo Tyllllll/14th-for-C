@@ -43,9 +43,7 @@
 
 typedef struct
 {
-	uint8 temp_addr;
-	uint8 temp_value;
-	uint8 value[255];
+	int16 distance;
 }VL53L0X_Class;
 extern VL53L0X_Class vl53l0x;
 
@@ -74,6 +72,6 @@ void MPU6050_Init(void);
 void Get_Angular_Velocity(void);
 void Get_Acceleration(void);
 
-void VL53L0X_test(void);
+void VL53L0X_Get_Distance(void);
 
 #endif

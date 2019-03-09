@@ -18,16 +18,16 @@ typedef struct
 	uint8 top_point;
 	//锐角拐点（十字近拐点）
 	uint8 left_flection_row;
-	uint8 left_flection_flag;
+	int8 left_flection_flag;
 	uint8 right_flection_row;
-	uint8 right_flection_flag;
+	int8 right_flection_flag;
 	//钝角拐点（十字远拐点）
 	uint8 left_flection2_row;
-	uint8 left_flection2_flag;
-	uint8 left_flection2_antiflag;
+	int8 left_flection2_flag;
+	int8 left_flection2_antiflag;
 	uint8 right_flection2_row;
-	uint8 right_flection2_flag;
-	uint8 right_flection2_antiflag;
+	int8 right_flection2_flag;
+	int8 right_flection2_antiflag;
 	//斜率
 	float32 k_left;
 	float32 k_left2;
@@ -37,25 +37,27 @@ typedef struct
 	float32 k_right_record[3];
 	float32 k_left_record2[3];
 	float32 k_right_record2[3];
-	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为颠簸，8为障碍
-	uint8 road_type[200];
+	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为断路，6为坡道，7为颠簸，8为障碍
+	int8 road_type[200];
 	//直道标志
-	uint8 straight_state;
+	int8 straight_state;
 	//左右转标志
-	uint8 pre_turn_state;
-	uint8 turn_state;
+	int8 pre_turn_state;
+	int8 turn_state;
 	uint8 turn_row;
 	//十字标志
-	uint8 cross_state[2];
+	int8 cross_state[2];
 	//环岛标志
-	uint8 roundabouts_state;
+	int8 roundabouts_state;
 	float32 roundabouts_k_record[3];
-	float32 roundabouts_size;
 	//断路标志
-	uint8 breakage_state;
+	int8 breakage_state;
 	int16 breakage_radius_curvature;
+	float32 breakage_k_record[3];
 	//坡道标志
-	uint8 ramp_state;
+	int8 ramp_state;
+	//路障标志
+	int8 roadblock_state;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -70,6 +72,7 @@ void Judge_Cross(void);
 void Judge_Roundabouts(void);
 void Judge_Breakage(void);
 void Judge_Ramp(void);
+void Judge_Roadblock(void);
 
 float Midline_Std_Deviation(uint8 row_max, uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
