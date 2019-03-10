@@ -6,9 +6,9 @@ Magnetic_Class magnetic;
 	*	@brief	ADC初始化
 	*	@param	无
 	*	@note	无
-   5                  6      
+   5                  1      
    |                  |                  
-1---------2-3-----------4          
+6---------2--3----------4        
 ***************************************************************/
 void Magnetic_Adc_Init(void)
 {
@@ -220,6 +220,28 @@ void Magnetic_OnceUnion(void)
     for(i = 1; i <= 6; i++)
     {
         magnetic.onceUni[i] = (float32)((magnetic.valu_avr[i] * 100.0f) / magnetic.valu_max[i]);
+        if(magnetic.onceUni[i] <= 1)
+        {
+            magnetic.onceUni[i] = 1;
+        }
     }
     
+    
+}
+
+/***************************************************************
+	*	@brief	电磁丢线
+	*	@param	无
+	*	@note	无
+***************************************************************/
+uint8 Magnetic_Lose_Line(void)
+{
+	if((int16)(magnetic.onceUni[HLEFT] + magnetic.onceUni[MIDLEFT] + magnetic.onceUni[MIDRIGHT] + magnetic.onceUni[HRIGHT]) < 8)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }

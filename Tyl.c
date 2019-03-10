@@ -23,6 +23,7 @@ void main(void)
     Init_All();
     while(1)
     {
+        Magnetic_OnceUnion();
 		//参数设置
 		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
@@ -34,13 +35,16 @@ void main(void)
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
 	 		feature.breakage_state = 0;
-            feature.ramp_state[1] = 0;
+            feature.ramp_state = 0;
             servo.which = 0;
+            servo.enable = 1;
 		}
         //电感找最大值 跑前必须测试
         if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 1)
         {
             Magnetic_findMax();
+            servo.enable = 0;
+            OLED_Put6x8Str(20, 2, "find max mag!  ");
         }
 		if(SWITCH4 == 1)
 		{
@@ -52,9 +56,7 @@ void main(void)
 			Key_Delay();
 			if(KEY1 == 0)
 			{
-				BUZZER_ON;
-				LPLD_LPTMR_DelayMs(200);
-				BUZZER_OFF;
+				Bee();
 				if(motor.start == 0)
 				{
 					motor.start = 50;
@@ -77,17 +79,18 @@ void main(void)
 				feature.cross_state[0] = 0;
 				feature.cross_state[1] = 0;
 				feature.roundabouts_state = 0;
-                feature.breramp = 0;
-                servo.which = 0;
-				BUZZER_OFF;
+                servo.which = 1;
+                motor.alldist = 0;
+                feature.block_state = 0;
+                Bee();
 			}
 		}
 		if(camera.ready_read == 1)
-//		if(0)
+	//	if(0)
 		{
 			Img_Extract();
 			Find_Line();
-			Check_Half_Width();
+//			Check_Half_Width();
 			Judge_Feature();
 			All_Fill();
 			if(servo.enable == 1)
@@ -95,11 +98,11 @@ void main(void)
 				Servo_Control();
 			}
 			Magnetic_Solution();
-			Magnetic_Error_Mapping();
+//			Magnetic_Error_Mapping();
 			Speed_Set();
 			if(motor.start != 0)
 			{
-				if(is_Lose_All(105) == 1)
+				if(Magnetic_Lose_Line()==1)
 				{
 					servo.counter++;
 					if(servo.counter == 5)
@@ -115,51 +118,10 @@ void main(void)
 			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
-//				Magnetic_Solution();
-//				OLED_PrintIntValue(40, 3, servo.error[0]);
-//				OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
-//				OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
-//				OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
 				OLED_ShowImage();
 			}
 		}
-//		{
-//			Magnetic_Solution();
-//			servo.error[0] = (int16)(0.689 * (magnetic.right_outside_mag - magnetic.left_outside_mag) - 1.269);
-//			Servo_PID();
-//			Speed_Set();
-//			if(motor.start != 0)
-//			{
-//				if(is_Lose_All() == 1)
-//				{
-//					servo.counter++;
-//					if(servo.counter == 5)
-//					{
-//						motor.stop = 5;
-//						servo.counter = 0;
-//					}
-//				}
-//				else
-//				{
-//					servo.counter = 0;
-//				}
-//			}
-//			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
-//			{
-//				OLED_ShowImage();
-//			}
-//		}
-//		Magnetic_Solution();
-//		OLED_PrintIntValue(10, 1, magnetic.middle_left_mag);
-//		OLED_PrintIntValue(70, 1, magnetic.middle_right_mag);
-//		OLED_PrintIntValue(10, 2, magnetic.left_horizontal_mag);
-//		OLED_PrintIntValue(70, 2, magnetic.right_horizontal_mag);
-//		OLED_PrintIntValue(10, 3, magnetic.left_vertical_mag);
-//		OLED_PrintIntValue(70, 3, magnetic.right_vertical_mag);
-//		OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
-//		OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
-//		OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
-//		LPLD_LPTMR_DelayMs(100);
+
 //		if(KEY1 == 0)
 //		{
 //			Key_Delay();
@@ -173,7 +135,7 @@ void main(void)
 //			Key_Delay();
 //			if(KEY2 == 0)
 //			{
-//				servo_up5();
+//				//servo_up5();
 //			}
 //		}
 //		if(KEY3 == 0)

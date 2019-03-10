@@ -35,7 +35,10 @@ typedef struct
 	int16 output_value_left;
 	int16 output_value_right;
 	int8 is_open_loop;
-    float32 alldist;	
+    uint8 encntdist;
+    float32 alldist;
+    float32 alldist_L;
+    float32 alldist_R;
 	float32 dif_const;
 	float32 dif_fore;
 	int16 speed_ave_left;

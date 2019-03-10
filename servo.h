@@ -18,6 +18,7 @@ typedef struct
 {
 	int16 duty;
 	uint8 foresight;
+    uint8 fore_default;
 	uint8 fore_min;
 	uint8 fore_max;
 	float32 kp_left;
@@ -25,8 +26,8 @@ typedef struct
 	float32 kp;
 	float32 ki;
 	float32 kd;
-	int16 error[5];
-	int16 error_differ[4];
+	int16 error[10];
+	int16 error_differ[10];
 	uint8 dead_zone;
 	uint8 dynamic_zone;
 	float32 dif_const_left;
@@ -50,5 +51,6 @@ void servo_up10(void);
 void servo_down1(void);
 void servo_down5(void);
 void servo_down10(void);
-
+//int  Fuzzy(int P, int D);
+void Servo_Fuzzy(void);
 #endif

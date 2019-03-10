@@ -74,7 +74,19 @@ void Motor_PIT(void)
 		motor.speed_current_right[0] = 0;
 	}
 	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
-    motor.alldist += ((50*((float)encoder.left_num)/((float)ENCODER_NUM_PER_METER_LEFT))+(50*((float)encoder.right_num)/((float)ENCODER_NUM_PER_METER_RIGHT)));//10ms前进的距离 单位m
+    //计数总距离
+//    if(motor.encntdist == 1)
+//    {
+        motor.alldist += ((50*((float)encoder.left_num)/((float)ENCODER_NUM_PER_METER_LEFT))+(50*((float)encoder.right_num)/((float)ENCODER_NUM_PER_METER_RIGHT)));//10ms前进的距离 单位m
+        motor.alldist_L += (100*((float)encoder.left_num)/((float)ENCODER_NUM_PER_METER_LEFT));
+        motor.alldist_R += (100*((float)encoder.right_num)/((float)ENCODER_NUM_PER_METER_RIGHT));
+//    }
+//    else
+//    {
+//        motor.alldist = 0;
+//        motor.alldist_L = 0;
+//        motor.alldist_R = 0;
+//    }
     Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
 	{
@@ -197,16 +209,24 @@ void Motor_PID(void)
 	}
 	if(motor.speed_set != 0)
 	{
+        //阿曼克模型差速
 		if(servo.error[0] < - 2 * servo.dead_zone)
 		{
 			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
 			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
+
 		}
 		else if(servo.error[0] > 2 * servo.dead_zone)
 		{
 			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 		}
+//        //编码器测差速测试
+//        if(fabs(servo.error[0]) > 2 * servo.dead_zone)
+//        {
+//            motor.speed_set_left = (int16)( ( -0.0020 * ( servo.duty - 1427 ) + 0.9987 ) * motor.speed_set );
+//            motor.speed_set_right = (int16)( ( 0.0020 * ( servo.duty - 1427 ) + 1.0013 ) * motor.speed_set );
+//        }
 		else
 		{
 			motor.speed_set_left = motor.speed_set;

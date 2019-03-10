@@ -9,7 +9,7 @@ void Init_All(void)
 {
     DisableInterrupts;
 	Oled_Gpio_Init();
-	OLED_Put6x8Str(20, 2, "initializing...");
+	OLED_Put6x8Str(20, 2, "Initializing...");
 	NVIC_Init();
 	Uart_Init();
 	Led_Gpio_Init();
@@ -22,10 +22,11 @@ void Init_All(void)
 	Servo_Gpio_Init();
 	Encoder_Init();
 	Speed_Init();
+    MPU6050_Init();
 	switch(ubyCamera_Init())
 	{
 	case 0:
-		OLED_Put6x8Str(20, 2, "initialized!!!  ");
+		OLED_Put6x8Str(20, 2, "Initialized!!!  ");
 		break;
 	case 1:
 		OLED_Put6x8Str(20, 2, "Error: Camera 1.");

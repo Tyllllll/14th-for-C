@@ -13,13 +13,27 @@ SerialPortType SerialPortRx;
 void Send_Data_to_FreeCars(void)
 {
     /*********************  PID  ****************************/
-	push(0, (uint16)motor.output_value_left);
-    push(1, (uint16)motor.speed_ave_left);
-    push(2, (uint16)motor.speed_set_left);
-    push(3, (uint16)P_valu);
-    push(4, (uint16)I_valu);
-    push(5, (uint16)D_valu);
-	Send_Data_To_Scope();
+//	push(0, (uint16)motor.output_value_left);
+//    push(1, (uint16)motor.speed_ave_left);
+//    push(2, (uint16)motor.speed_set_left);
+//    push(3, (uint16)P_valu);
+//    push(4, (uint16)I_valu);
+//    push(5, (uint16)D_valu);
+
+    /*********************  ¶æ»ú  ****************************/ 
+//    push(6, (uint16)servo.kp);
+//    push(7, (int16)servo.error[0]);
+//    push(8, (int16)servo.error_differ[0]);
+//    push(9, (uint16)servo.duty);
+
+    /*********************  MPU6050  ****************************/ 
+	push(0, (int16)mpu6050.ACCEL_X);
+    push(1, (int16)mpu6050.ACCEL_Y);
+    push(2, (int16)mpu6050.ACCEL_Z);
+    push(3, (int16)mpu6050.GYRO_X);
+    push(4, (int16)mpu6050.GYRO_Y);
+    push(5, (int16)mpu6050.GYRO_Z);    
+    	Send_Data_To_Scope();
 }
 
 /***************************************************************
@@ -33,6 +47,7 @@ void UartDebug(void)
 	if(UartData[0] != 0)
 	{
 		motor.kp = (int16)UartData[0];
+        servo.kd = (int16)UartData[1];
 	}
 	BUZZER_ON;
 	LPLD_LPTMR_DelayMs(100);

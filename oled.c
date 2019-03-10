@@ -412,18 +412,20 @@ void OLED_ShowImage(void)
 	}
     
     /*********************  赛道调试 ****************************/
-	OLED_Put6x8Str(80, 0, "top");
-	OLED_PrintUintValue(100, 0, feature.top_point);
-	OLED_Put6x8Str(80, 1, "zh");
-	OLED_PrintUintValue(100, 1, feature.straight_state);
-	OLED_Put6x8Str(80, 2, "wa");
-	OLED_PrintUintValue(100, 2, feature.turn_state);    
-    OLED_Put6x8Str(80, 3, "b&r");
-    OLED_PrintUintValue(100, 3, feature.breramp);   
-    OLED_Put6x8Str(80, 4, "whi");
-    OLED_PrintUintValue(100, 4, servo.which);
-    
-    
+//	OLED_Put6x8Str(80, 0, "top");
+//	OLED_PrintUintValue(100, 0, feature.top_point);
+//	OLED_Put6x8Str(80, 1, "zh");
+//	OLED_PrintUintValue(100, 1, feature.straight_state);
+//	OLED_Put6x8Str(80, 2, "wa");
+//	OLED_PrintUintValue(100, 2, feature.turn_state);    
+//    OLED_Put6x8Str(80, 3, "du");
+//    OLED_PrintUintValue(100, 3, feature.breakage_state);   
+//    //OLED_Put6x8Str(80, 4, "blo");
+//  //  OLED_PrintUintValue(100, 4, feature.block_state);
+//    OLED_Put6x8Str(80, 4, "po");
+//    OLED_PrintUintValue(100, 4, feature.ramp_state);    
+////    OLED_Put6x8Str(80, 5, "dis");
+////    OLED_PrintUintValue(100, 5, (uint16)motor.alldist);     
     OLED_PrintUintValue(80, 6, motor.speed_set_left);
 	OLED_PrintUintValue(100, 6, motor.speed_set_right);
 	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
@@ -431,18 +433,18 @@ void OLED_ShowImage(void)
     
     
     /********************  电感调试  ****************************/
-//    OLED_Put6x8Str(80, 0, "1");
-//    OLED_PrintUintValue(100, 0, (uint16)magnetic.onceUni[1]);
-//    OLED_Put6x8Str(80, 1, "2");
-//    OLED_PrintUintValue(100, 1, (uint16)magnetic.onceUni[2]);    
-//    OLED_Put6x8Str(80, 2, "3");
-//    OLED_PrintUintValue(100, 2, (uint16)magnetic.onceUni[3]);
-//    OLED_Put6x8Str(80, 3, "4");
-//    OLED_PrintUintValue(100, 3, (uint16)magnetic.onceUni[4]);
-//    OLED_Put6x8Str(80, 4, "5");
-//    OLED_PrintUintValue(100, 4, (uint16)magnetic.onceUni[5]);
-//    OLED_Put6x8Str(80, 5, "6");
-//    OLED_PrintUintValue(100, 5, (uint16)magnetic.onceUni[6]);	
+    OLED_Put6x8Str(80, 0, "1");
+    OLED_PrintUintValue(100, 0, (uint16)magnetic.onceUni[1]);
+    OLED_Put6x8Str(80, 1, "2");
+    OLED_PrintUintValue(100, 1, (uint16)magnetic.onceUni[2]);    
+    OLED_Put6x8Str(80, 2, "3");
+    OLED_PrintUintValue(100, 2, (uint16)magnetic.onceUni[3]);
+    OLED_Put6x8Str(80, 3, "4");
+    OLED_PrintUintValue(100, 3, (uint16)magnetic.onceUni[4]);
+    OLED_Put6x8Str(80, 4, "5");
+    OLED_PrintUintValue(100, 4, (uint16)magnetic.onceUni[5]);
+    OLED_Put6x8Str(80, 5, "6");
+    OLED_PrintUintValue(100, 5, (uint16)magnetic.onceUni[6]);	
 
 //	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature); 
 //	OLED_Put6x8Str(80, 4, "rt");

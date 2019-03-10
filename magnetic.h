@@ -10,12 +10,12 @@
 #define MAGNETIC_CH2x DAD1	//DP1
 #define MAGNETIC_CH3x AD20	//DM1
 #define MAGNETIC_CH4x AD19	//DM0
-#define HLEFT       1
+#define HLEFT       6
 #define MIDLEFT     2
 #define MIDRIGHT    3
 #define HRIGHT      4
 #define VLEFT       5
-#define VRIGHT      6
+#define VRIGHT      1
 typedef struct
 {
     int16   a;
@@ -45,5 +45,5 @@ float32 Magnetic_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn);
 void Magnetic_Solution(void);
 void Magnetic_OnceUnion(void);
 void Magnetic_Error_Mapping(void);
-
+uint8 Magnetic_Lose_Line(void);
 #endif

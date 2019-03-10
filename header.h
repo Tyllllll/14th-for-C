@@ -21,5 +21,5 @@
 #include "identify.h"
 #include "control.h"
 #include "uart.h"
-
+#include "IIC.h"
 #endif

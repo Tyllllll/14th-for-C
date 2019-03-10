@@ -35,7 +35,8 @@ void Speed_Init(void)
 	speed.curve_low = 170;
 	speed.cross = 220;
 	speed.roundabouts = 190;
-	
+	speed.ramp = 100;
+    speed.breakage = 170;
 //	speed.straight = 260;
 //	speed.long_straight = 300;
 //	speed.curve_high = 240;
@@ -59,7 +60,7 @@ void Speed_Init(void)
 void All_Fill(void)
 {
 	Roundabouts_Fill();
-	Breakage_Fill();
+	//Breakage_Fill();
 	if(feature.roundabouts_state != 1 && feature.roundabouts_state != 2)
 	{
 		Cross_Fill();
@@ -763,57 +764,57 @@ void Roundabouts_Fill(void)
 //	}
 }
 
-/***************************************************************
-	*	@brief	断路处理
-	*	@param	无
-	*	@note	无
-***************************************************************/
-void Breakage_Fill(void)
-{
-	uint8 i = 0;
-	if(feature.breakage_state == 1)
-	{
-//		BUZZER_ON;
-	}
-	else if(feature.breakage_state == 2)
-	{
-//		BUZZER_ON;
-		//左补线
-		for(i = 117; i > feature.top_point; i--)
-		{
-			line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
-		}
-	}
-	else if(feature.breakage_state == 3)
-	{
-//		BUZZER_ON;
-		//右补线
-		for(i = 117; i > feature.top_point; i--)
-		{
-			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
-		}
-	}
-	else if(feature.breakage_state == 4)
-	{
-		//切电磁
-	}
-	else if(feature.breakage_state == 5)
-	{
-		for(i = 80; i > 30; i--)
-		{
-			if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1
-			   && line.left_line_flag[i + 1] == 1 && line.right_line_flag[i] == 1)
-			{
-				servo.fore_max = i;
-			}
-		}
-	}
-}
+///***************************************************************
+//	*	@brief	断路处理
+//	*	@param	无
+//	*	@note	无
+//***************************************************************/
+//void Breakage_Fill(void)
+//{
+//	uint8 i = 0;
+//	if(feature.breakage_state == 1)
+//	{
+////		BUZZER_ON;
+//	}
+//	else if(feature.breakage_state == 2)
+//	{
+////		BUZZER_ON;
+//		//左补线
+//		for(i = 117; i > feature.top_point; i--)
+//		{
+//			line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
+//		}
+//	}
+//	else if(feature.breakage_state == 3)
+//	{
+////		BUZZER_ON;
+//		//右补线
+//		for(i = 117; i > feature.top_point; i--)
+//		{
+//			line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
+//		}
+//	}
+//	else if(feature.breakage_state == 4)
+//	{
+//		//切电磁
+//	}
+//	else if(feature.breakage_state == 5)
+//	{
+//		for(i = 80; i > 30; i--)
+//		{
+//			if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1
+//			   && line.left_line_flag[i + 1] == 1 && line.right_line_flag[i] == 1)
+//			{
+//				servo.fore_max = i;
+//			}
+//		}
+//	}
+//}
 
 /***************************************************************
-	*	@brief	速度设定
+	*	@brief	速度设定 && 路况记录
 	*	@param	无
-	*	@note	无
+	*	@note	1为长直道，2为短直道，3为弯，4为环，5为十字，6为坡道，7为断路，8为路障
 ***************************************************************/
 void Speed_Set(void)
 {
@@ -854,17 +855,15 @@ void Speed_Set(void)
 		}
 		feature.road_type[0] = 4;
 	}
-    else if(feature.ramp_state[1] == 1)
+    else if(feature.ramp_state == 1)
     {
         feature.road_type[0] = 6;
-        if(motor.speed_ave > speed.curve_high)
-        {
-            motor.speed_set = speed.curve_high;
-        }
-        else
-        {
-            motor.speed_set = speed.curve_high + (motor.speed_ave - speed.curve_high);
-        }
+        motor.speed_set = speed.ramp;
+    }
+    else if(feature.breakage_state == 2)
+    {
+        motor.speed_set = speed.breakage;
+        feature.road_type[0] = 7;
     }
 	else if(feature.cross_state[1] == 1)
 	{
@@ -898,11 +897,7 @@ void Speed_Set(void)
 	else
 	{
 		feature.road_type[0] = 3;
-		if(feature.turn_state == 5 || feature.turn_state == 6)
-		{
-			motor.speed_set = 50;
-		}
-		else if(feature.turn_state == 3 || feature.turn_state == 4)
+		if(feature.turn_state == 3 || feature.turn_state == 4)
 		{
 			motor.speed_set = speed.curve_low;
 		}
@@ -1059,16 +1054,29 @@ void Parameter_Setting_Init(void)
 	sprintf(setting.string[0][6], "round");
 	setting.data[0][6] = (float32)speed.roundabouts;
         
-	sprintf(setting.string[1][0], "FORESIGHT");
-	sprintf(setting.string[1][1], "fore_min");
-	setting.data[1][1] = (float32)servo.fore_min;
-	sprintf(setting.string[1][2], "fore_max");
-	setting.data[1][2] = (float32)servo.fore_max;
-	sprintf(setting.string[1][3], "dead_zone");
-	setting.data[1][3] = (float32)servo.dead_zone;
-	sprintf(setting.string[1][4], "dyna_zone");
-	setting.data[1][4] = (float32)servo.dynamic_zone;
-        
+//	sprintf(setting.string[1][0], "FORESIGHT");
+//	sprintf(setting.string[1][1], "fore_min");
+//	setting.data[1][1] = (float32)servo.fore_min;
+//	sprintf(setting.string[1][2], "fore_max");
+//	setting.data[1][2] = (float32)servo.fore_max;
+//	sprintf(setting.string[1][3], "dead_zone");
+//	setting.data[1][3] = (float32)servo.dead_zone;
+//	sprintf(setting.string[1][4], "dyna_zone");
+//	setting.data[1][4] = (float32)servo.dynamic_zone;
+	sprintf(setting.string[1][0], "dis");
+	sprintf(setting.string[1][1], "d1");
+	setting.data[1][1] = (float32)d1;
+	sprintf(setting.string[1][2], "d2");
+	setting.data[1][2] = (float32)d2;
+	sprintf(setting.string[1][3], "d3");
+	setting.data[1][3] = (float32)d3;
+	sprintf(setting.string[1][4], "d4");
+	setting.data[1][4] = (float32)d4;
+    sprintf(setting.string[1][5], "d5");
+	setting.data[1][4] = (float32)d5;
+    
+    
+
 	sprintf(setting.string[2][0], "SERVO");
 	sprintf(setting.string[2][1], "kp_left");
 	setting.data[2][1] = (float32)servo.kp_left;
@@ -1260,11 +1268,18 @@ void Save_Data(void)
 	speed.curve_low = (int16)setting.data[0][4];
 	speed.cross = (int16)setting.data[0][5];
 	speed.roundabouts = (int16)setting.data[0][6];
-	servo.fore_min = (uint8)setting.data[1][1];
-	servo.fore_max = (uint8)setting.data[1][2];
-	servo.dead_zone = (uint8)setting.data[1][3];
-	servo.dynamic_zone = (uint8)setting.data[1][4];
-	servo.kp_left = setting.data[2][1];
+    
+//	servo.fore_min = (uint8)setting.data[1][1];
+//	servo.fore_max = (uint8)setting.data[1][2];
+//	servo.dead_zone = (uint8)setting.data[1][3];
+//	servo.dynamic_zone = (uint8)setting.data[1][4];
+    d1 = setting.data[1][1];
+	d2 = setting.data[1][2];
+	d3 = setting.data[1][3];
+	d4 = setting.data[1][4];
+    d5 = setting.data[1][5];
+    
+	servo.kp_left = setting.data[2][1];    
 	servo.kp_right = setting.data[2][2];
 	servo.ki = setting.data[2][3];
 	servo.kd = setting.data[2][4];
@@ -1308,6 +1323,35 @@ uint8 is_Lose_All(uint8 row)
 	{
 		return 0;
 	}
+}
+
+
+
+/***************************************************************
+	*	@brief	限幅
+	*	@param	float data		当前数据
+                float max_out	最大输出
+                float min_out	最小输出
+	*	@note	无
+***************************************************************/
+float constrain_32(float *data, float max_out,float min_out)
+{
+  *data = (*data)>max_out ? max_out:*data;
+  *data = (*data)<min_out ? min_out:*data;
+  return *data;
+}
+/***************************************************************
+	*	@brief	限幅
+	*	@param	int16 data		当前数据
+                int16 max_out	最大输出
+                int16 min_out	最小输出
+	*	@note	无
+***************************************************************/
+int16 constrain_16(int16 *data, int16 max_out,int16 min_out)
+{
+  *data = (*data)>max_out ? max_out:*data;
+  *data = (*data)<min_out ? min_out:*data;
+  return *data;
 }
 
 /***************************************************************
