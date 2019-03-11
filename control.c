@@ -644,7 +644,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]) / 2;
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -674,7 +674,7 @@ void Roundabouts_Fill(void)
 				{
 					line.right_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]) / 2;
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -710,7 +710,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]) / 2;
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -740,7 +740,7 @@ void Roundabouts_Fill(void)
 				{
 					line.left_line[i] = 159;
 				}
-				line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]) / 2;
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
