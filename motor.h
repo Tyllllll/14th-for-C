@@ -19,23 +19,21 @@ typedef struct
 {
 	float32 kp;
 	float32 ki;
-	float32 kd;
 	int8 start;
 	int8 stop;
-
 	uint8 stall_cnt;
 	int16 speed_ave;
 	int16 speed_set;
 	int16 speed_current[5];
 	int16 speed_current_left[5];
 	int16 speed_current_right[5];
-	int16 error;
-	int16 error_integral;
 	int16 output_value;
 	int16 output_value_left;
 	int16 output_value_right;
 	int8 is_open_loop;
-    float32 alldist;	
+	float32 distance_set;
+	float32 alldist;
+	
 	float32 dif_const;
 	float32 dif_fore;
 	int16 speed_ave_left;
@@ -48,9 +46,8 @@ typedef struct
 	int16 error_integral_right;
 }Motor_Class;
 extern Motor_Class motor;
-extern int16 P_valu, I_valu, D_valu;
-void Motor_Pwm_Init(void);
-void Motor_Pit1_Init(void);
+
+uint8 Motor_Init(void);
 void Motor_PIT(void);
 void Motor_Control(void);
 void Motor_PID(void);

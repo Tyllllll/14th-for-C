@@ -16,13 +16,23 @@
  * 底层库使用方法见相关文档。 
  *
  */
-#include "header.h"
 
+/**************************
+换车需修改 
+1. servo.h 舵机中值
+2. encoder.c Encoder_FTM_Clear（）
+3. adc.h 6个电感的宏定义序号
+*************************/
+#include "header.h"
 void main(void)
 {
-    Init_All();
+    if(!Init_All())
+	{
+		while(1);
+	}
     while(1)
     {
+		VL53L0X_Get_Distance();
 		//参数设置
 		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
@@ -34,19 +44,23 @@ void main(void)
 			feature.cross_state[1] = 0;
 			feature.roundabouts_state = 0;
 	 		feature.breakage_state = 0;
-            feature.ramp_state[1] = 0;
-            servo.which = 0;
-            servo.enable = 1;
+			feature.ramp_state = 0;
+			feature.block_state = 0;
+			servo.enable = 1;
+			servo.which = 0;
 		}
-        //电感找最大值 跑前必须测试
-        if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 1)
-        {
-            Magnetic_findMax();
-            servo.enable = 0;
-        }
 		if(SWITCH4 == 1)
 		{
 			Send_Data_to_FreeCars();
+		}
+		//按键重置oled
+		if(KEY5 == 0)
+		{
+			Key_Delay();
+			if(KEY5 == 0)
+			{
+				Oled_Init();
+			}
 		}
 		//按键发车
 		if(KEY1 == 0 && SWITCH1 == 1 && SWITCH2 == 0 && SWITCH3 == 0)
@@ -60,7 +74,7 @@ void main(void)
 				if(motor.start == 0)
 				{
 					motor.start = 50;
-					motor.error_integral = 0;
+					motor.alldist = 0;
 					motor.error_integral_left = 0;
 					motor.error_integral_right = 0;
 				}
@@ -72,144 +86,92 @@ void main(void)
 			Key_Delay();
 			if(KEY2 == 0)
 			{
-				motor.stop = 5;
+				motor.stop = 1;
 				feature.straight_state = 0;
 				feature.pre_turn_state = 0;
 				feature.turn_state = 0;
 				feature.cross_state[0] = 0;
 				feature.cross_state[1] = 0;
 				feature.roundabouts_state = 0;
-                feature.breramp = 0;
-                servo.which = 0;
+				feature.breakage_state = 0;
+				feature.ramp_state = 0;
+				feature.block_state = 0;
+				servo.enable = 1;
+				servo.which = 0;
 				BUZZER_OFF;
+				encoder.left_num_sum = 0;
+				encoder.right_num_sum = 0;
 			}
 		}
 		if(camera.ready_read == 1)
-	//	if(0)
 		{
+			if(servo.counter != 0)
+			{
+				servo.counter--;
+			}
+			else
+			{
+				BUZZER_OFF;
+			}
 			Img_Extract();
 			Find_Line();
-			Check_Half_Width();
-            
+			Adc_Magnetic_Get_Result();
+			Adc_Measure_Distance();
 			Judge_Feature();
-			All_Fill();
+			if(servo.which == 0)
+			{
+				//摄像头
+//				Check_Half_Width();
+				All_Fill();
+			}
+			else if(servo.which == 1)
+			{
+				//电磁
+				Adc_Magnetic_Solution();
+			}
 			if(servo.enable == 1)
 			{
 				Servo_Control();
 			}
-			Magnetic_Solution();
-			Magnetic_Error_Mapping();
 			Speed_Set();
 			if(motor.start != 0)
 			{
-				if(is_Lose_All(105) == 1 && feature.breramp!=2 && feature.breramp!=3)
+				if(Adc_Magnetic_Lose_Line() == 1 && feature.block_state == 0)
 				{
-					servo.counter++;
-					if(servo.counter == 5)
-					{
-						motor.stop = 5;
-						servo.counter = 0;
-					}
+					motor.stop = 1;
 				}
-				else
+				if(motor.alldist > motor.distance_set && motor.distance_set != 0)
 				{
-					servo.counter = 0;
+					motor.stop = 1;
+				}
+			}
+			if(motor.start == 0)
+			{
+				if(Adc_Magnetic_Lose_Line() == 0)
+				{
+					motor.start = 1;
+					//motor.alldist = 0;
+					motor.error_integral_left = 0;
+					motor.error_integral_right = 0;
 				}
 			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
-//				Magnetic_Solution();
-//				OLED_PrintIntValue(40, 3, servo.error[0]);
-//				OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
-//				OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
-//				OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
 				OLED_ShowImage();
 			}
+			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 1)
+			{
+				Adc_Magnetic_Solution();
+				OLED_PrintIntValue(10, 1, (int32)magnetic.value[MID_L]);
+				OLED_PrintIntValue(70, 1, (int32)magnetic.value[MID_R]);
+				OLED_PrintIntValue(10, 2, (int32)magnetic.value[HORIZONTAL_L]);
+				OLED_PrintIntValue(70, 2, (int32)magnetic.value[HORIZONTAL_R]);
+				OLED_PrintIntValue(10, 3, (int32)magnetic.value[VERTICAL_L]);
+				OLED_PrintIntValue(70, 3, (int32)magnetic.value[VERTICAL_R]);
+				OLED_PrintIntValue(10, 4, (int32)magnetic.value[EQUIVALENT_L]);
+				OLED_PrintIntValue(70, 4, (int32)magnetic.value[EQUIVALENT_R]);
+				OLED_PrintIntValue(60, 5, (int32)infrared.distance);
+			}
 		}
-//		{
-//			Magnetic_Solution();
-//			servo.error[0] = (int16)(0.689 * (magnetic.right_outside_mag - magnetic.left_outside_mag) - 1.269);
-//			Servo_PID();
-//			Speed_Set();
-//			if(motor.start != 0)
-//			{
-//				if(is_Lose_All() == 1)
-//				{
-//					servo.counter++;
-//					if(servo.counter == 5)
-//					{
-//						motor.stop = 5;
-//						servo.counter = 0;
-//					}
-//				}
-//				else
-//				{
-//					servo.counter = 0;
-//				}
-//			}
-//			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
-//			{
-//				OLED_ShowImage();
-//			}
-//		}
-//		Magnetic_Solution();
-//		OLED_PrintIntValue(10, 1, magnetic.middle_left_mag);
-//		OLED_PrintIntValue(70, 1, magnetic.middle_right_mag);
-//		OLED_PrintIntValue(10, 2, magnetic.left_horizontal_mag);
-//		OLED_PrintIntValue(70, 2, magnetic.right_horizontal_mag);
-//		OLED_PrintIntValue(10, 3, magnetic.left_vertical_mag);
-//		OLED_PrintIntValue(70, 3, magnetic.right_vertical_mag);
-//		OLED_PrintIntValue(10, 4, magnetic.left_equivalent);
-//		OLED_PrintIntValue(70, 4, magnetic.right_equivalent);
-//		OLED_PrintFloatValue(60, 5, magnetic.angle * 57.3);
-//		LPLD_LPTMR_DelayMs(100);
-//		if(KEY1 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY1 == 0)
-//			{
-//				servo_up1();
-//			}
-//		}
-//		if(KEY2 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY2 == 0)
-//			{
-//				//servo_up5();
-//			}
-//		}
-//		if(KEY3 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY3 == 0)
-//			{
-//				servo_up10();
-//			}
-//		}
-//		if(KEY4 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY4 == 0)
-//			{
-//				servo_down10();
-//			}
-//		}
-//		if(KEY5 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY5 == 0)
-//			{
-//				servo_down5();
-//			}
-//		}
-//		if(KEY6 == 0)
-//		{
-//			Key_Delay();
-//			if(KEY6 == 0)
-//			{
-//				servo_down1();
-//			}
-//		}
     }
 }

@@ -101,7 +101,7 @@ const unsigned char F6x8[][6] =
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Oled_Gpio_Init(void)
+uint8 Oled_Init(void)
 {
 	static GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_PTx = OLED_SCLK_PTx;
@@ -109,14 +109,16 @@ void Oled_Gpio_Init(void)
 	GPIO_InitStructure.GPIO_Pins =  OLED_GPIO_SCLK_Pinx;
 	GPIO_InitStructure.GPIO_Output = OUTPUT_H;
 	GPIO_InitStructure.GPIO_PinControl = IRQC_DIS;
-	LPLD_GPIO_Init(GPIO_InitStructure);
+	if(!LPLD_GPIO_Init(GPIO_InitStructure))
+		return STATUS_FAILED;
 	
 	GPIO_InitStructure.GPIO_PTx = OLED_GPIO_PTx;
 	GPIO_InitStructure.GPIO_Dir = DIR_OUTPUT;
 	GPIO_InitStructure.GPIO_Pins =  OLED_GPIO_SDA_Pinx | OLED_GPIO_RST_Pinx | OLED_GPIO_DC_Pinx;
 	GPIO_InitStructure.GPIO_Output = OUTPUT_H;
 	GPIO_InitStructure.GPIO_PinControl = IRQC_DIS;
-	LPLD_GPIO_Init(GPIO_InitStructure);
+	if(!LPLD_GPIO_Init(GPIO_InitStructure))
+		return STATUS_FAILED;
 	
 	OLED_DC(0);
 	OLED_SDA(0);
@@ -146,6 +148,8 @@ void Oled_Gpio_Init(void)
 	SetDisplay_On_Off(0x01);	// Display On (0x00/0x01)
 	OLED_Fill(0x00);
 	OLED_SetPosition(0,0);
+	
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -410,42 +414,23 @@ void OLED_ShowImage(void)
 			OLED_WriteData(data);
 		}
 	}
-    
     /*********************  赛道调试 ****************************/
 	OLED_Put6x8Str(80, 0, "top");
 	OLED_PrintUintValue(100, 0, feature.top_point);
 	OLED_Put6x8Str(80, 1, "zh");
 	OLED_PrintUintValue(100, 1, feature.straight_state);
 	OLED_Put6x8Str(80, 2, "wa");
-	OLED_PrintUintValue(100, 2, feature.turn_state);    
-    OLED_Put6x8Str(80, 3, "b&r");
-    OLED_PrintUintValue(100, 3, feature.breramp);   
-    OLED_Put6x8Str(80, 4, "whi");
-    OLED_PrintUintValue(100, 4, servo.which);
-    OLED_Put6x8Str(80, 4, "skp");
-    OLED_PrintUintValue(100, 4, (uint16)servo.kp);    
-    
-    OLED_PrintUintValue(80, 6, motor.speed_set_left);
-	OLED_PrintUintValue(100, 6, motor.speed_set_right);
-	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
-	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
-    
-    
-    /********************  电感调试  ****************************/
-//    OLED_Put6x8Str(80, 0, "1");
-//    OLED_PrintUintValue(100, 0, (uint16)magnetic.onceUni[1]);
-//    OLED_Put6x8Str(80, 1, "2");
-//    OLED_PrintUintValue(100, 1, (uint16)magnetic.onceUni[2]);    
-//    OLED_Put6x8Str(80, 2, "3");
-//    OLED_PrintUintValue(100, 2, (uint16)magnetic.onceUni[3]);
-//    OLED_Put6x8Str(80, 3, "4");
-//    OLED_PrintUintValue(100, 3, (uint16)magnetic.onceUni[4]);
-//    OLED_Put6x8Str(80, 4, "5");
-//    OLED_PrintUintValue(100, 4, (uint16)magnetic.onceUni[5]);
-//    OLED_Put6x8Str(80, 5, "6");
-//    OLED_PrintUintValue(100, 5, (uint16)magnetic.onceUni[6]);	
-
-//	OLED_PrintIntValue(80, 5, feature.breakage_radius_curvature); 
+	OLED_PrintUintValue(100, 2, feature.turn_state);
+	OLED_Put6x8Str(80, 3, "du");
+	OLED_PrintUintValue(100, 3, feature.breakage_state);
+	OLED_Put6x8Str(80, 4, "po");
+	OLED_PrintUintValue(100, 4, feature.ramp_state);
+	OLED_Put6x8Str(80, 5, "lz");
+	OLED_PrintUintValue(100, 5, feature.block_state);
+	OLED_PrintUintValue(80, 6, servo.error[0]);
+	
+//	OLED_PrintFloatValue(80, 6, magnetic.angle * 57.3);
+//	OLED_PrintIntValue(80, 7, is_Lose_All(90));
 //	OLED_Put6x8Str(80, 4, "rt");
 //	OLED_PrintUintValue(100, 4, feature.road_type[0]);
 //	OLED_PrintUintValue(80, 4, feature.left_flection_row);
@@ -458,7 +443,8 @@ void OLED_ShowImage(void)
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
 //	OLED_PrintUintValue(80, 6, motor.speed_set_left);
 //	OLED_PrintUintValue(100, 6, motor.speed_set_right);
-
+//	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
+//	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);
 }
 

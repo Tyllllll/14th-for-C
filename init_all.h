@@ -1,7 +1,7 @@
 #ifndef _INIT_ALL_H_
 #define _INIT_ALL_H_
 
-void Init_All(void);
-void NVIC_Init(void);
+uint8 Init_All(void);
+uint8 NVIC_Init(void);
 
 #endif

@@ -1,8 +1,13 @@
+后底盘宽度：10.4cm
+后底盘左侧位置：17.3cm
+前底盘宽度：13.8cm
+后底盘右侧位置：15.6cm
 拨码开关用途：
 	S123：
 		000		参数设置
 		100+K1	发车
 		110		OLED显图
+		111		显示感应电动势（归一化）
 	S4：
 		1		发数据给FreeCars
 		0		不发数据
@@ -57,10 +62,15 @@ DMA:
 	DMA		摄像头			CH0
 
 ADC:
+	ADC0	电感	DM1		AD20
+	ADC0	电感	DP1		DAD1
 	ADC1	电感	DM0		AD19
 	ADC1	电感	DP0		DAD0
 	ADC1	电感	DP1		DAD1
 	ADC1	电感	DM1		AD20
 
 UART:
-	UART0
+	UART0	FreeCars
+
+I2C:
+	I2C1

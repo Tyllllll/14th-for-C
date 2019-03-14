@@ -12,20 +12,13 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-    /*********************  PID  ****************************/
-	push(0, (uint16)motor.output_value_left);
-    push(1, (uint16)motor.speed_ave_left);
-    push(2, (uint16)motor.speed_set_left);
-    push(3, (uint16)P_valu);
-    push(4, (uint16)I_valu);
-    push(5, (uint16)D_valu);
-    /*********************  舵机  ****************************/ 
-    push(6, (uint16)servo.kp);
-    push(7, (int16)servo.error[0]);
-    push(8, (int16)servo.error_differ[0]);
-    push(9, (uint16)servo.duty);
+	push(0, (uint16)motor.speed_set_left);
+	push(1, (uint16)motor.speed_ave_left);
+	push(2, (uint16)motor.speed_set_right);
+	push(3, (uint16)motor.speed_ave_right);
+	push(4, (uint16)servo.error[0]);
+	push(5, (uint16)servo.error_differ[0]);
 	Send_Data_To_Scope();
-    
 }
 
 /***************************************************************
@@ -35,11 +28,29 @@ void Send_Data_to_FreeCars(void)
 ***************************************************************/
 void UartDebug(void)
 {
-	push(0, (int16)UartData[0]);//将数据发送回去观察
 	if(UartData[0] != 0)
 	{
-		motor.kp = (int16)UartData[0];
-        servo.kd = (int16)UartData[1];
+		servo.kd = (int16)UartData[0];
+	}
+	if(UartData[1] != 0)
+	{
+		motor.kp = (int16)UartData[1];
+	}
+	if(UartData[2] != 0)
+	{
+		motor.ki = (int16)UartData[2];
+	}
+	if(UartData[3] != 0)
+	{
+		servo.duty = (int16)UartData[3];
+	}
+	if(UartData[7] != 0)
+	{
+		motor.start = (int16)UartData[7];
+	}
+	if(UartData[8] != 0)
+	{
+		motor.stop = (int16)UartData[8];
 	}
 	BUZZER_ON;
 	LPLD_LPTMR_DelayMs(100);
@@ -55,8 +66,9 @@ void UartCmd(uint8 CmdNum,uint8 Data)
 {
 	if(CmdNum == 2 && Data == 102)
 	{
-		motor.start = 50;
-		motor.error_integral = 0;
+		motor.start = 1;
+		motor.error_integral_left = 0;
+		motor.error_integral_right = 0;
 		BUZZER_ON;
 		LPLD_LPTMR_DelayMs(400);
 		motor.stop = 0;
@@ -64,8 +76,7 @@ void UartCmd(uint8 CmdNum,uint8 Data)
 	}
 	if(CmdNum == 2 && Data == 103)
 	{
-		motor.start = 0;
-		motor.stop = 25;
+		motor.stop = 1;
 		BUZZER_ON;
 		LPLD_LPTMR_DelayMs(400);
 		BUZZER_OFF; 
@@ -77,7 +88,7 @@ void UartCmd(uint8 CmdNum,uint8 Data)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-void Uart_Init(void)
+uint8 Uart_Init(void)
 {
 	static UART_InitTypeDef UART_InitStructure;
 	UART_InitStructure.UART_Uartx = UART0;
@@ -88,6 +99,7 @@ void Uart_Init(void)
 	UART_InitStructure.UART_RxIsr = Uart0_Isr;//接收中断回调函数
 	LPLD_UART_Init(UART_InitStructure);//初始化UART
 	LPLD_UART_EnableIrq(UART_InitStructure);//使能串口数据接收中断
+	return STATUS_OK;
 }
 
 /***************************************************************

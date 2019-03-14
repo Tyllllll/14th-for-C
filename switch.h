@@ -15,6 +15,6 @@
 #define SWITCH3	PTE26_I
 #define SWITCH4	PTA24_I
 
-void Switch_Gpio_Init(void);
+uint8 Switch_Gpio_Init(void);
 
 #endif

@@ -2,7 +2,7 @@
 
 Line_Class line;
 Feature_Class feature;
-uint8 TOP_POINT[5];
+
 /***************************************************************
 	*	@brief	寻线
 	*	@param	无
@@ -12,7 +12,6 @@ void Find_Line(void)
 {
 	uint8 i = 0, j = 0;
 	int16 column_start = 80;//基础寻线每行起始搜索列
-    line.midline[119] = 80;
 	for(i = 118; i > 10; i--)
 	{
 		line.left_line[i] = 0;
@@ -46,40 +45,16 @@ void Find_Line(void)
 		if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1)
 		{
 			line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-            if((line.midline[i]-line.midline[i+1])>5)
-            {
-                line.midline[i] = line.midline[i+1] + 5;
-            }
-            else if(line.midline[i]-line.midline[i+1]<-5)
-            {
-                line.midline[i] = line.midline[i+1] - 5;
-            }
 		}
 		else if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 0)
 		{
 			line.right_line[i] = 159;
 			line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-            if((line.midline[i]-line.midline[i+1])>5)
-            {
-                line.midline[i] = line.midline[i+1] + 5;
-            }
-            else if(line.midline[i]-line.midline[i+1]<-5)
-            {
-                line.midline[i] = line.midline[i+1] - 5;
-            }
 		}
 		else if(line.left_line_flag[i] == 0 && line.right_line_flag[i] == 1)
 		{
 			line.left_line[i] = 0;
 			line.midline[i] = line.right_line[i] / 2;
-            if((line.midline[i]-line.midline[i+1])>5)
-            {
-                line.midline[i] = line.midline[i+1] + 5;
-            }
-            else if(line.midline[i]-line.midline[i+1]<-5)
-            {
-                line.midline[i] = line.midline[i+1] - 5;
-            }
 		}
 		else if(line.left_line_flag[i] == 0 && line.right_line_flag[i] == 0)
 		{
@@ -91,23 +66,47 @@ void Find_Line(void)
 			}
 			else
 			{
-				line.midline[i] = line.midline[i + 1];
-				if(line.midline[i] > 40 && line.midline[i] < 120)
+				if(line.midline[i + 1] == 80)
 				{
-					if(camera.image[i - 1][line.midline[i]] != 0 && camera.image[i - 2][line.midline[i]] == 0 && camera.image[i - 4][line.midline[i]] == 0 && camera.image[i - 6][line.midline[i]] == 0)
-					{
-						if(camera.image[i - 5][line.midline[i] + 20] != 0)
-						{
-							line.midline[i] += 20;
-						}
-						else if(camera.image[i - 5][line.midline[i] - 20] != 0)
-						{
-							line.midline[i] -= 20;
-						}
-					}
+					line.midline[i] = line.midline[i + 1];
 				}
+				else
+				{
+					line.midline[i] = (line.midline[i + 1] + line.midline[i + 2] + line.midline[i + 3] + line.midline[i + 4] + line.midline[i + 5]) / 5;
+				}
+//				if(line.midline[i] > 40 && line.midline[i] < 120)
+//				{
+//					if(camera.image[i - 1][line.midline[i]] != 0 && camera.image[i - 2][line.midline[i]] == 0 && camera.image[i - 4][line.midline[i]] == 0 && camera.image[i - 6][line.midline[i]] == 0)
+//					{
+//						if(camera.image[i - 5][line.midline[i] + 20] != 0)
+//						{
+//							line.midline[i] += 20;
+//						}
+//						else if(camera.image[i - 5][line.midline[i] - 20] != 0)
+//						{
+//							line.midline[i] -= 20;
+//						}
+//					}
+//				}
 			}
 		}
+		if(i != 118)
+		{
+			if(line.midline[i] - line.midline[i + 1] > 10)
+			{
+				line.midline[i] = line.midline[i + 1] + 10;
+			}
+			else if(line.midline[i] - line.midline[i + 1] < -10)
+			{
+				line.midline[i] = line.midline[i + 1] - 10;
+			}
+		}
+        else
+        {
+            line.midline[i] = 80;
+            line.left_line[i] = 0;
+            line.right_line[i] = 159;
+        }
 		column_start = line.midline[i];
 	}
 }
@@ -137,11 +136,18 @@ void Judge_Feature(void)
 	Find_Inflection2();
 	
 	Judge_Roundabouts();
+	if(feature.roundabouts_state == 0)
+	{
+		if(feature.block_state == 0 || feature.block_state == -1)
+		{
+			Judge_Breakage();
+			Judge_Ramp();
+		}
+                Judge_Roadblock();
+	}
 	Judge_Straight();
 	Judge_Curve();
-    Judge_breramp();
-//	Judge_Breakage();
-//    Judge_ramp();
+	
 //	Judge_Cross();
 }
 
@@ -156,7 +162,7 @@ void Find_Top_Point(void)
 	feature.top_point = 0;
 	for(i = 100; i > 10; i--)
 	{
-		if(camera.image[i][line.midline[i]] != 0 && camera.image[i - 1][line.midline[i]] == 0 && camera.image[i - 3][line.midline[i]] == 0)
+		if(camera.image[i][line.midline[i]] != 0 && camera.image[i - 1][line.midline[i]] == 0 && camera.image[i - 3][line.midline[i]] == 0 && camera.image[i - 5][line.midline[i]] == 0)
 		{
 			feature.top_point = i;
 			break;
@@ -191,7 +197,7 @@ void Find_Inflection(void)
 			if(feature.left_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 28 && line.left_line[i] < 155)
+				if(i > 28 && line.left_line[i] < 145)
 				{
 					//大小条件
 					if(line.left_line[i] > line.left_line[i + 3] && line.left_line[i] > line.left_line[i - 3] && line.left_line[i] > line.left_line[i + 5] &&
@@ -218,7 +224,7 @@ void Find_Inflection(void)
 			if(feature.right_flection_flag == 0)
 			{
 				//位置条件
-				if(i > 28 && line.right_line[i] > 5)
+				if(i > 28 && line.right_line[i] > 15)
 				{
 					//大小条件
 					if(line.right_line[i] < line.right_line[i + 3] && line.left_line[i] < line.right_line[i - 3] && line.right_line[i] < line.right_line[i + 5] &&
@@ -675,13 +681,13 @@ void Judge_Roundabouts(void)
 	}
 	if(cnt == 0)
 	{
-//		Magnetic_Get_Result();
-		if((magnetic.onceUni[HLEFT] > 150 || magnetic.onceUni[MIDLEFT] > 180 || magnetic.onceUni[MIDRIGHT] > 180 || magnetic.onceUni[HRIGHT]>150)&& feature.roundabouts_state == 0)
+		if(magnetic.value[MID_L] > 200 || magnetic.value[MID_R] > 200 && feature.roundabouts_state == 0)
 		{
 			if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 			{
 				if(is_Right_Lose_Line(feature.left_flection2_row + 10) == 0)
 				{
+					Bee();
 					feature.roundabouts_state = 1;
 				}
 			}
@@ -689,6 +695,7 @@ void Judge_Roundabouts(void)
 			{
 				if(is_Left_Lose_Line(feature.right_flection2_row + 10) == 0)
 				{
+					Bee();
 					feature.roundabouts_state = 2;
 				}
 			}
@@ -696,7 +703,7 @@ void Judge_Roundabouts(void)
 	}
 	if(feature.roundabouts_state == 1)
 	{
-		if(line.right_line[feature.right_flection2_row] > 125)
+		if(feature.right_flection2_flag == 1 && line.right_line[feature.right_flection2_row] > 125)
 		{
 			feature.roundabouts_state = 3;
 		}
@@ -707,6 +714,7 @@ void Judge_Roundabouts(void)
 		{
 			if(line.right_line[feature.right_flection_row] > 120)
 			{
+				servo.enable = 0;
 				feature.roundabouts_state = 5;
 			}
 		}
@@ -716,13 +724,14 @@ void Judge_Roundabouts(void)
 		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 0 && line.right_line_flag[feature.top_point] == 1
 		|| feature.turn_state == 1)
 		{
+			Bee();
 			servo.enable = 1;
 			feature.roundabouts_state = 0;
 		}
 	}
 	if(feature.roundabouts_state == 2)
 	{
-		if(feature.left_flection2_flag == 1)
+		if(feature.left_flection2_flag == 1 && line.left_line[feature.left_flection2_row] < 35)
 		{
 			feature.roundabouts_state = 4;
 		}
@@ -733,6 +742,7 @@ void Judge_Roundabouts(void)
 		{
 			if(line.left_line[feature.left_flection_row] < 40)
 			{
+				servo.enable = 0;
 				feature.roundabouts_state = 6;
 			}
 		}
@@ -742,376 +752,315 @@ void Judge_Roundabouts(void)
 		if(feature.top_point < 20 && line.left_line_flag[feature.top_point] == 1 && line.right_line_flag[feature.top_point] == 0
 		|| feature.turn_state == 2)
 		{
+			Bee();
 			servo.enable = 1;
 			feature.roundabouts_state = 0;
 		}
 	}
 }
-///***************************************************************
-//	*	@brief	判坡道
-//	*	@param	无
-//	*	@note	无
-//***************************************************************/
-//void Judge_ramp(void)
-//{
-//    uint8 cnt1 = 0, cnt2 = 0, i = 0, ramp = 0;
-//    uint8 miderrormax = 0;
-//    uint8 miderror = 0;
-//    for(i = 0; i < 30; i++)
-//    {
-//        if(feature.road_type[i] == 6)
-//        {
-//            cnt1++;
-//        }
-//    }
-////    if(feature.ramp_state[1]==0 && feature.roundabouts_state==0 && cnt1==0)        //判断坡道
-////    { 
-////        Check_Half_Width();
-////        cnt1 = 0;
-////        cnt2 = 0;
-////        for(i=feature.top_point+20; i>feature.top_point; i--)
-////        {
-////            if(line.left_line_flag[i]==1 && line.right_line_flag[i]==1)
-////            {
-////                cnt2++;
-////                if(line.half_width_test[i] > (half_width[i]+10))
-////                {
-////                    cnt1++;
-////                }                
-////            }
-////
-////        }
-////        if((cnt2-cnt1)<3 && cnt2>10)
-////        {
-////            feature.ramp_state[1] = 1;      //车身处于赛道中间上坡
-////            feature.ramp_state[0] = 0;
-////            servo.which = 1;
-////        }
-////        else
-////        {
-////            cnt1 = 0;
-////            cnt2 = 0;
-////            for(uint8 i=40;i<100;i++)
-////            {
-////                cnt1 += line.left_line_flag[i];
-////                cnt2 += line.right_line_flag[i];
-////            }
-////            if(fabs(cnt1-cnt2)>=55 && feature.ramp_state[0]>0)
-////            {
-////                if(cnt1 > cnt2)
-////                {
-////                    if((line.left_line[80]-line.left_line[90])<10 && (line.left_line[50]-line.left_line[60])<10)
-////                    {
-////                        feature.ramp_state[1] = 1;
-////                        feature.ramp_state[0] = 0;
-////                        servo.which = 1;
-////                    }
-////                }
-////                else
-////                {
-////                    if((line.right_line[90]-line.right_line[80])<10 && (line.right_line[60]-line.right_line[50])<10)
-////                    {
-////                        feature.ramp_state[1] = 1;
-////                        feature.ramp_state[0] = 0;
-////                        servo.which = 1;
-////                    }
-////                }
-////            }
-////        }
-////    }
-////    
-//    if(feature.ramp_state[1]==0 && cnt1==0)
-//    {
-//        if(feature.top_point > 30)
-//        {
-//            if(Midline_Std_Deviation((uint8)(feature.top_point+30),(uint8)(feature.top_point+5)) < 7)
-//            {
-//                ramp = 1;
-//            }
-//            else
-//            {
-//                for(uint8 i=feature.top_point + 30 ; i > feature.top_point ; i--)
-//                {
-//                    miderror = (uint8)fabs(line.midline[i] - 80);
-//                    if(miderror > miderrormax)
-//                    {
-//                        miderrormax = miderror;
-//                    }
-//                }
-//                if(miderrormax > 50)
-//                {
-//                    ramp = 0;
-//                    feature.ramp_state[0] = 0;
-//                    feature.ramp_state[1] = 0;
-//                }
-//                else
-//                {
-//                    ramp = 1;
-//                }
-//            }
-//
-//        }
-//        feature.ramp_state[0] += ramp;
-//        if(feature.ramp_state[0] > 3)
-//        {
-//            feature.ramp_state[1] = 1;
-//            feature.ramp_state[0] = 0;
-//        }
-//        else
-//        {
-//            feature.ramp_state[1] = 0;
-//        }
-//    }
-//    else if(feature.ramp_state[1]==1)       //上坡过程切电磁巡线 检测是否到达坡顶  上坡过程中toppoint先减后增 结合toppoint范围 
-//    {
-//        if(TOP_POINT[0] != feature.top_point)
-//        {
-//            for(i = 4; i > 0; i--)
-//            {
-//                TOP_POINT[i] = TOP_POINT[i-1];
-//            }
-//            TOP_POINT[0] = feature.top_point;
-//        }
-//        if((TOP_POINT[0] - TOP_POINT[2]) < 0)
-//        {
-//            feature.ramp_state[0]++;
-//        }
-//        else
-//        {
-//            feature.ramp_state[0] = 0;
-//        }
-// 
-//        if(TOP_POINT[0] < 40 && TOP_POINT[0]>5 && feature.ramp_state[0]>5)
-//        {
-//            feature.ramp_state[1] = 2;
-//            feature.ramp_state[0] = 0;
-//            servo.which = 0;
-//        }
-//
-//    }
-//    else if(feature.ramp_state[1]==2 && feature.top_point < 15)       //下坡处理 暂无
-//    {
-//        Check_Half_Width();
-//        cnt1 = 0;
-//        for(i=feature.top_point+30; i>feature.top_point+5; i--)
-//        {
-//            if(line.half_width_test[i] > (half_width[i]+25))
-//            {
-//                cnt1++;
-//            }
-//        }
-//        if(cnt1 >= 20)
-//        {
-//            feature.ramp_state[0] = 0;
-//            feature.ramp_state[1] = 0;
-//            servo.which = 0;
-//        }
-//    }
-//}
-///***************************************************************
-//	*	@brief	判断路
-//	*	@param	无
-//	*	@note	无
-//***************************************************************/
-//void Judge_Breakage(void)
-//{
-//	uint8 i;
-//	uint8 top_row;
-//	uint8 bottom_row;
-//	feature.breakage_radius_curvature = 0;
-//	//判断路
-//	if(feature.breakage_state == 0 && feature.ramp_state[1] == 0)
-//	{
-//		if(feature.top_point > 50)
-//		{
-//			for(i = 100; i > feature.top_point; i--)
-//			{
-//				if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1)
-//				{
-//					top_row = i;
-//					break;
-//				}
-//			}
-//			//直入
-//			if(line.midline[top_row] >= 75 && line.midline[top_row] <= 85)
-//			{
-//				feature.breakage_state = 1;
-//			}
-//			else
-//			{
-//				//左断
-//				if(line.midline[top_row] < 75)
-//				{
-//					for(i = 110; i > feature.top_point; i--)
-//					{
-//						if(line.left_line_flag[i] == 1)
-//						{
-//							bottom_row = i;
-//							break;
-//						}
-//					}
-//					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
-//					if(feature.breakage_radius_curvature > 1700)
-//					{
-//						feature.breakage_state = 2;
-//					}
-//				}
-//				//右断
-//				else if(line.midline[top_row] > 85)
-//				{
-//					for(i = 110; i > feature.top_point; i--)
-//					{
-//						if(line.right_line_flag[i] == 1)
-//						{
-//							bottom_row = i;
-//							break;
-//						}
-//					}
-//					feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
-//					if(feature.breakage_radius_curvature > 1700)
-//					{
-//						feature.breakage_state = 3;
-//					}
-//				}
-//			}
-//		}
-//	}
-//	//进断路
-//	else if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
-//	{
-//		if(is_Lose_All(105) == 1)
-//		{
-//			servo.which = 1;
-//			feature.breakage_state = 4;
-//		}
-//	}
-//	//切回摄像头
-//	else if(feature.breakage_state == 4)
-//	{
-//		if(is_Lose_All(35) == 0)
-//		{
-//			servo.which = 0;
-//			feature.breakage_state = 5;
-//		}
-//	}
-//	//出断路
-//	else if(feature.breakage_state == 5)
-//	{
-//		if(is_Lose_All(105) == 0)
-//		{
-//			feature.breakage_state = 0;
-//		}
-//	}
-//}
 
-void Judge_breramp(void)
+/***************************************************************
+	*	@brief	判断路
+	*	@param	无
+	*	@note	顶点大于50判断
+***************************************************************/
+void Judge_Breakage(void)
 {
-	static uint8 cnt1 = 0, cnt2 = 0;
-    uint8 i, miderror, miderrormax = 0;
-    
-	//feature.breramp (1=断路坡道未知)
-	if(feature.breramp==0 && feature.top_point>40)
+	uint8 i, j;
+	uint8 top_row = 0;
+	uint8 bottom_row = 0;
+	uint16 black_count = 0;
+	uint16 white_count = 0;
+	feature.breakage_radius_curvature = 0;
+	//判断路
+	if(feature.breakage_state == 0)
 	{
-		if(line.midline[feature.top_point]>=75 && line.midline[feature.top_point]<=85)
+		if(feature.top_point > (infrared.distance > 600 ? 20 : 50) && feature.left_flection2_flag == 0 && feature.right_flection2_flag == 0)
 		{
-			feature.breramp = 1; //断路 坡道未知
-		}
-		else
-		{
-			for(i = feature.top_point+30; i > feature.top_point; i--)
+			if(infrared.distance <= 600)
 			{
-				miderror = (uint8)fabs(line.midline[i]-80);
-				if(miderror > miderrormax)
+				feature.block_state = -1;
+			}
+			else
+			{
+				feature.block_state = 0;
+			}
+			for(i = 100; i > feature.top_point; i--)
+			{
+				if(line.left_line_flag[i] == 1 && line.right_line_flag[i] == 1)
 				{
-					miderrormax = miderror;
+					top_row = i;
+					break;
 				}
 			}
-			if(miderrormax < 40)
+			if(top_row == 0)
 			{
-				feature.breramp = 1;
+				top_row = feature.top_point + 2;
+			}
+			//直入
+			if(line.midline[top_row] >= 75 && line.midline[top_row] <= 85)
+			{
+				Bee();
+				feature.breakage_state = 1;
+			}
+			else
+			{
+				//左断
+				if(line.midline[top_row] < 75)
+				{
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.left_line_flag[i] == 1 && line.left_line_flag[i - 3] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					if(bottom_row != 0 && bottom_row - top_row < 15)
+					{
+						feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.left_line[feature.top_point + 2], feature.top_point + 2, line.left_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.left_line[bottom_row], bottom_row);
+						if(feature.breakage_radius_curvature > 1600)
+						{
+							Bee();
+							feature.breakage_state = 2;
+						}
+						else if(bottom_row == 0)
+						{
+							if(line.midline[top_row] >= 60 && line.midline[top_row] <= 100)
+							{
+								Bee();
+								feature.breakage_state = 1;
+							}
+						}
+					}
+				}
+				//右断
+				else if(line.midline[top_row] > 85)
+				{
+					for(i = 110; i > feature.top_point; i--)
+					{
+						if(line.right_line_flag[i] == 1 && line.right_line_flag[i - 3] == 1)
+						{
+							bottom_row = i;
+							break;
+						}
+					}
+					if(bottom_row != 0 && bottom_row - top_row < 15)
+					{
+						feature.breakage_radius_curvature = (int16)Get_Radius_Curvature(line.right_line[feature.top_point + 2], feature.top_point + 2, line.right_line[(feature.top_point + bottom_row) / 2], (feature.top_point + bottom_row) / 2, line.right_line[bottom_row], bottom_row);
+						if(feature.breakage_radius_curvature > 1600)
+						{
+							Bee();
+							feature.breakage_state = 3;
+						}
+					}
+					else if(bottom_row == 0)
+					{
+						if(line.midline[top_row] >= 60 && line.midline[top_row] <= 100)
+						{
+							Bee();
+							feature.breakage_state = 1;
+						}
+					}
+				}
 			}
 		}
-		if(feature.breramp != 0)
+		if(feature.breakage_state != 0)
 		{
 			servo.which = 1;
-            motor.alldist = 0;
-            
-             				BUZZER_ON;
-				LPLD_LPTMR_DelayMs(50);
-				BUZZER_OFF;   
 		}
 	}
-	else if(feature.breramp == 1) // 断路 坡道未知
+	//进断路
+	else if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
 	{
-        if(motor.alldist < 70)
-        {
-            if(is_Lose_All(100) == 1)
-            {
-                feature.breramp = 2;	//半米内有丢线确定为断路 否则为坡道
-             				BUZZER_ON;
-				LPLD_LPTMR_DelayMs(50);
-				BUZZER_OFF;   
-            }
-
-        }
-        else if(feature.top_point < 40)
-        {
-            feature.breramp = 4;
-            servo.which = 0;
-        }
-        if(feature.breramp != 1)
-        {
-            cnt1 = 0;
-            cnt2 = 0;
-            motor.alldist = 0;
-        }
+		if(is_Lose_All(95) == 1)
+		{
+			feature.ramp_state = 0;
+			feature.breakage_state = 4;
+		}
+		
 	}
-	else if(feature.breramp == 2)   //进入断路 检测前方赛道宽度是否正常
+	//切回摄像头
+	else if(feature.breakage_state == 4)
 	{
-		if(line.half_width_test[60]<=(half_width[60]+5) && line.half_width_test[60]>=(half_width[60]-5))
-        {
-            cnt1++;
-        }
-        else
-        {
-            cnt1 = 0;
-        }
-        if(cnt1 > 3)
-        {
-            feature.breramp = 3; 
-            cnt1 = 0;
-            cnt2 = 0;
-        }
+		for(i = servo.fore_default + 5; i > servo.fore_default; i--)
+		{
+			for(j = 60; j < 100; j++)
+			{
+				if(camera.image[i][j] == 0)
+				{
+					black_count++;
+				}
+			}
+		}
+		if(black_count > 130)
+		{
+			for(i = servo.fore_default; i > servo.fore_default - 5; i--)
+			{
+				for(j = 60; j < 100; j++)
+				{
+					if(camera.image[i][j] == 253)
+					{
+						white_count++;
+					}
+				}
+			}
+			if(white_count > 130)
+			{
+				servo.which = 0;
+				feature.breakage_state = 5;
+			}
+		}
+		white_count = 0;
+		for(i = 110; i > 100; i--)
+		{
+			for(j = 10; j < 150; j++)
+			{
+				if(camera.image[i][j] == 253)
+				{
+					white_count++;
+				}
+			}
+		}
+		if(white_count > 1350)
+		{
+			servo.which = 0;
+			feature.breakage_state = 0;
+		}
 	}
-	else if(feature.breramp == 3) //检测不丢线则出断路
+	//出断路
+	else if(feature.breakage_state == 5)
 	{
 		if(is_Lose_All(105) == 0)
 		{
-			feature.breramp = 0;		//驶出断路
-            servo.which = 0;
+			Bee();
+			feature.breakage_state = 0;
 		}
 	}
-	else if(feature.breramp == 4)  //检测赛道半宽明显大于正常值 
-    {
-        cnt2 = 0;
-		if(feature.top_point>5 && feature.top_point<50)
+}
+
+/***************************************************************
+	*	@brief	判坡道
+	*	@param	无
+	*	@note	无
+***************************************************************/
+void Judge_Ramp(void)
+{
+	if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
+	{
+		if(line.right_line[80] - line.left_line[80] < 1.5 * half_width[80])
+		{
+			Bee();
+			servo.which = 1;
+			feature.ramp_state = 1;
+		}
+	}
+	if(feature.ramp_state == 1)
+	{
+		if(feature.top_point < 15)
+		{
+			if(line.right_line[35] - line.left_line[35] > 2.4 * half_width[35])
+			{
+				//下坡
+				Bee();
+				feature.breakage_state = 0;
+				feature.ramp_state = 2;
+			}
+		}
+	}
+	else if(feature.ramp_state == 2)
+	{
+		if(line.right_line[25] - line.left_line[25] > 1.9 * half_width[25] && line.right_line[25] - line.left_line[25] < 2.1 * half_width[25]
+		   && feature.top_point < 20 && feature.turn_state == 0)
+		{
+			Bee();
+			servo.which = 0;
+			feature.ramp_state = 0;
+		}
+	}
+}
+
+/***************************************************************
+	*	@brief	判路障
+	*	@param	无
+	*	@note	回到赛道前，左下角的夹角越大则车与赛道中线的夹角就越大 
+***************************************************************/
+float32 d1 = 35.0, d2 = 45.0, d3 = 60.0, d4 = 30.0, d5 = 30.0;
+void Judge_Roadblock(void)
+{
+    int16 servoturn = 130;
+	if(feature.block_state == 0)
+	{//检测到断路，且激光测距距离满足条件 
+		if(feature.breakage_state == 1 || feature.breakage_state == 2 || feature.breakage_state == 3)
+		{
+			if(infrared.distance > 600)
+			{
+				feature.breakage_state = 0;
+				feature.ramp_state = 0;
+				feature.block_state = 1;
+                motor.alldist = 0;
+                servo.enable = 0;
+                servo.which = 0;    //断路电磁巡线 需要切换回来
+            }
+        }
+    }
+    else if(feature.block_state == 1)        
+    {//判断有路障 左转出赛道 直到右边线丢线
+        servo.duty = (int16)(DEG_MAX);
+        if(is_Right_Point_Lose_All_Line(70) == 1 && motor.alldist >= 30.0)
         {
-            for(i = feature.top_point+30; i>feature.top_point; i--)
-            {
-                if(line.half_width_test[i] > (half_width[i]+20))
-                {
-                    cnt2++;
-                }
-                if(cnt2 >= 20 || feature.straight_state!=0)
-                {
-                    feature.breramp = 0;	//驶出坡道
-                    servo.which = 0;
-                }
-            }     
-                        
+            feature.block_state = 2;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state == 2)        
+    {//摆直出赛道
+        servo.duty = (int16)(DEG_MID);
+        if(motor.alldist >= 45.0)
+        {
+            feature.block_state = 3;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state == 3)        //右转
+    {//右转与赛道平行
+        servo.duty = (int16)(DEG_MID - 90);
+        if(motor.alldist >= d3)
+        {
+            feature.block_state = 4;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state == 4)        //摆直
+    {
+        servo.duty = (int16)(DEG_MID);
+        if(motor.alldist >= d4)
+        {
+            feature.block_state = 5;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state == 5)        //平行于赛道直行
+    {
+        servo.duty = (int16)(DEG_MID - 100);
+        if(motor.alldist >= d5)
+        {
+            feature.block_state = 6;
+            motor.alldist = 0;
+        }
+    }
+    else if(feature.block_state == 6)        //右转 回到赛道
+    {
+        servo.duty = (int16)(DEG_MID);
+        if(magnetic.value[EQUIVALENT_R] >= 3)   
+        {
+            feature.block_state = 0;
+            servo.enable = 1;
         }
     }
 }
+
+
 
 /**********************a little funcitons**********************/
 /***************************************************************
@@ -1305,6 +1254,22 @@ float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int
 }
 
 /***************************************************************
+	*	@brief	算前后5行中线偏差平均值
+	*	@param	row：行数
+	*	@note	无
+***************************************************************/
+int16 Get_Mid_Average(uint8 row)
+{
+	uint8 i;
+	int16 sum = 0;
+	for(i = row - 5; i < row + 5; i++)
+	{
+		sum += line.midline[i] - 80;
+	}
+	return sum / 10;
+}
+
+/***************************************************************
 	*	@brief	测赛道半宽
 	*	@param	无
 	*	@note	无
@@ -1315,4 +1280,46 @@ void Check_Half_Width(void)
 	{
 		line.half_width_test[i] = (line.right_line[i] - line.left_line[i]) / 2;
 	}
+}
+/**************************实现函数********************************************
+*函数原型:	  float variance_get(int16 begin_row,int16 end_row)
+*功　　能:	  获取中线方差
+输入参数：        无
+输出参数：        无
+添加时间         2019.3.12
+*******************************************************************************/
+float variance_get(int16 begin_row,int16 end_row)   //注意begin_row比end_row大
+{
+   int center_sum=0,count_center=0,center_ave=0,quadratic_sum=0,i=0;
+   float  variance=0;
+   for(i=begin_row;i>end_row;i--)
+   { 
+     center_sum+=line.midline[i];
+     count_center++;
+   }
+   center_ave=(int)((float)center_sum/(float)count_center);//求得平均中值
+   for(i=begin_row;i>end_row;i--)
+   { 
+     quadratic_sum+=(line.midline[i]-center_ave)*(line.midline[i]-center_ave);//每行据平均中值得平方和
+   }   
+   variance=(float)quadratic_sum/(float)count_center;
+   return (variance);
+}
+
+/**************************实现函数********************************************
+*函数原型:	   float invSqrt(double x)
+*功　　能:	   快速计算 Sqrt(x) 	
+输入参数：      要计算的值
+输出参数：      结果
+添加时间         2019.3.12
+*******************************************************************************/
+float invSqrt(uint16 x)
+{
+	float halfx = 0.5f * x;
+	float y = x;
+	long i = *(long*)&y;
+	i = 0x5f3759df - (i>>1);
+	y = *(float*)&i;
+	y = y * (1.5f - (halfx * y * y));
+	return 1/y;
 }

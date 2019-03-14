@@ -107,14 +107,15 @@ Camera_Class camera;
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 70;
+	camera.contrast = 71;
 	camera.ready_write = 1;
 	camera.which_buffer = 1;
 
 	uint16 i = 0;
 	uint8 ubyDeviceID = 0;
 	LPLD_SCCB_Init();
-	Camera_Gpio_Init();
+	if(!Camera_Gpio_Init())
+		return STATUS_FAILED;
 	Camera_Delay();
 	/* reset */
 	while(!LPLD_SCCB_WriteReg(OV7725_COM7, 0x80))
@@ -154,7 +155,7 @@ uint8 ubyCamera_Init(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-static void Camera_Gpio_Init(void)
+uint8 Camera_Gpio_Init(void)
 {
 	static GPIO_InitTypeDef CameraPT_InitStructure;
 	static GPIO_InitTypeDef isr_InitStructure;
@@ -165,7 +166,8 @@ static void Camera_Gpio_Init(void)
 	CameraPT_InitStructure.GPIO_Pins = CAMERAPT_Pinx;
 	CameraPT_InitStructure.GPIO_Dir = DIR_INPUT;
 	CameraPT_InitStructure.GPIO_PinControl = IRQC_DIS;
-	LPLD_GPIO_Init(CameraPT_InitStructure);
+	if(!LPLD_GPIO_Init(CameraPT_InitStructure))
+		return STATUS_FAILED;
 
 	/* img interrupt */
 	isr_InitStructure.GPIO_PTx = IMG_IRQ_PTx;
@@ -173,14 +175,17 @@ static void Camera_Gpio_Init(void)
 	isr_InitStructure.GPIO_Dir = DIR_INPUT;
 	isr_InitStructure.GPIO_PinControl = IRQC_FA | INPUT_PF_EN;
 	isr_InitStructure.GPIO_Isr = Img_Isr;
-	LPLD_GPIO_Init(isr_InitStructure);
-	LPLD_GPIO_EnableIrq(isr_InitStructure);
+	if(!LPLD_GPIO_Init(isr_InitStructure))
+		return STATUS_FAILED;
+	if(!LPLD_GPIO_EnableIrq(isr_InitStructure))
+		return STATUS_FAILED;
 
 	DMA_GPIO_InitStructure.GPIO_PTx = CAMERA_DMA_PTx;
 	DMA_GPIO_InitStructure.GPIO_Pins = CAMERA_DMA_Pinx;
 	DMA_GPIO_InitStructure.GPIO_Dir = DIR_INPUT;
 	DMA_GPIO_InitStructure.GPIO_PinControl = IRQC_DMAFA | INPUT_PULL_DIS;
-	LPLD_GPIO_Init(DMA_GPIO_InitStructure);
+	if(!LPLD_GPIO_Init(DMA_GPIO_InitStructure))
+		return STATUS_FAILED;
 
 	DMA_InitStructure.DMA_CHx = CAMERA_DMA_CHx;
 	DMA_InitStructure.DMA_Req = CAMERA_DMA_REQ;	//PORTB为请求源
@@ -192,8 +197,11 @@ static void Camera_Gpio_Init(void)
 	DMA_InitStructure.DMA_MajorCompleteIntEnable = TRUE;
 	DMA_InitStructure.DMA_AutoDisableReq = TRUE;
 	DMA_InitStructure.DMA_Isr = DMA_Complete_Isr;
-	LPLD_DMA_Init(DMA_InitStructure);
-	LPLD_DMA_EnableIrq(DMA_InitStructure);
+	if(!LPLD_DMA_Init(DMA_InitStructure))
+		return STATUS_FAILED;
+	if(!LPLD_DMA_EnableIrq(DMA_InitStructure))
+		return STATUS_FAILED;
+	return STATUS_OK;
 }
 
 /***************************************************************
@@ -201,7 +209,7 @@ static void Camera_Gpio_Init(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-static void Camera_Delay(void)
+void Camera_Delay(void)
 {
 	int i, j;
 

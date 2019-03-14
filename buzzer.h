@@ -6,6 +6,7 @@
 #define BUZZER_ON 		LPLD_GPIO_Output_b(PTC, 12, 1)
 #define BUZZER_OFF 		LPLD_GPIO_Output_b(PTC, 12, 0)
 
-void Buzzer_Gpio_Init(void);
+uint8 Buzzer_Gpio_Init(void);
+void Bee(void);
 
 #endif
