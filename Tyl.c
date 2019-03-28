@@ -16,15 +16,10 @@
  * 底层库使用方法见相关文档。 
  *
  */
-
-/**************************
-换车需修改 
-1. servo.h 舵机中值
-2. encoder.c Encoder_FTM_Clear（）
-3. adc.h 6个电感的宏定义序号
-*************************/
 #include "header.h"
-void main(void)
+
+
+     void main(void)
 {
     if(!Init_All())
 	{
@@ -32,23 +27,14 @@ void main(void)
 	}
     while(1)
     {
-		VL53L0X_Get_Distance();
-		//参数设置
-		if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
+//		VL53L0X_Get_Distance();
+		//参数设置		
+        if(SWITCH1 == 0 && SWITCH2 == 0 && SWITCH3 == 0)
 		{
 			Parameter_Setting();
-			feature.straight_state = 0;
-			feature.pre_turn_state = 0;
-			feature.turn_state = 0;
-			feature.cross_state[0] = 0;
-			feature.cross_state[1] = 0;
-			feature.roundabouts_state = 0;
-	 		feature.breakage_state = 0;
-			feature.ramp_state = 0;
-			feature.block_state = 0;
-			servo.enable = 1;
-			servo.which = 0;
+			flag_clean();
 		}
+        //向上位机发送数据
 		if(SWITCH4 == 1)
 		{
 			Send_Data_to_FreeCars();
@@ -74,7 +60,7 @@ void main(void)
 				if(motor.start == 0)
 				{
 					motor.start = 50;
-					motor.alldist = 0;
+					motor.distance_all = 0;
 					motor.error_integral_left = 0;
 					motor.error_integral_right = 0;
 				}
@@ -86,21 +72,9 @@ void main(void)
 			Key_Delay();
 			if(KEY2 == 0)
 			{
-				motor.stop = 1;
-				feature.straight_state = 0;
-				feature.pre_turn_state = 0;
-				feature.turn_state = 0;
-				feature.cross_state[0] = 0;
-				feature.cross_state[1] = 0;
-				feature.roundabouts_state = 0;
-				feature.breakage_state = 0;
-				feature.ramp_state = 0;
-				feature.block_state = 0;
-				servo.enable = 1;
-				servo.which = 0;
+				flag_clean();
+                motor.stop = 1;
 				BUZZER_OFF;
-				encoder.left_num_sum = 0;
-				encoder.right_num_sum = 0;
 			}
 		}
 		if(camera.ready_read == 1)
@@ -116,6 +90,7 @@ void main(void)
 			Img_Extract();
 			Find_Line();
 			Adc_Magnetic_Get_Result();
+            Data_analyse();
 			Adc_Measure_Distance();
 			Judge_Feature();
 			if(servo.which == 0)
@@ -124,11 +99,7 @@ void main(void)
 //				Check_Half_Width();
 				All_Fill();
 			}
-			else if(servo.which == 1)
-			{
-				//电磁
-				Adc_Magnetic_Solution();
-			}
+            Adc_Magnetic_Solution();
 			if(servo.enable == 1)
 			{
 				Servo_Control();
@@ -136,25 +107,31 @@ void main(void)
 			Speed_Set();
 			if(motor.start != 0)
 			{
-				if(Adc_Magnetic_Lose_Line() == 1 && feature.block_state == 0)
+				if(feature.roadblock_state <= 0 && servo.which == 0)
 				{
-					motor.stop = 1;
+                    if(Adc_Magnetic_Lose_Line() == 1)
+                    {
+                        motor.stop = 1;
+                    }
 				}
-				if(motor.alldist > motor.distance_set && motor.distance_set != 0)
+				if(motor.distance_all > 100 * (motor.distance_set) && motor.distance_set != 0)
 				{
 					motor.stop = 1;
 				}
 			}
-			if(motor.start == 0)
-			{
-				if(Adc_Magnetic_Lose_Line() == 0)
-				{
-					motor.start = 1;
-					//motor.alldist = 0;
-					motor.error_integral_left = 0;
-					motor.error_integral_right = 0;
-				}
-			}
+//			if(motor.start == 0 && motor.distance_set == 0)
+//			{
+//				if(Adc_Magnetic_Lose_Line() == 0)
+//				{
+//					motor.start = 1;
+//					if(motor.distance_set != 0)
+//					{
+//						motor.distance_all = 0;
+//					}
+//					motor.error_integral_left = 0;
+//					motor.error_integral_right = 0;
+//				}
+//			}
 			if(SWITCH1 == 1 && SWITCH2 == 1 && SWITCH3 == 0)
 			{
 				OLED_ShowImage();
@@ -170,8 +147,17 @@ void main(void)
 				OLED_PrintIntValue(70, 3, (int32)magnetic.value[VERTICAL_R]);
 				OLED_PrintIntValue(10, 4, (int32)magnetic.value[EQUIVALENT_L]);
 				OLED_PrintIntValue(70, 4, (int32)magnetic.value[EQUIVALENT_R]);
-				OLED_PrintIntValue(60, 5, (int32)infrared.distance);
+				OLED_PrintIntValue(60, 5, (int32)(100.0f*magnetic.error[0]));
+                OLED_PrintUintValue(60, 6, Position);
+//				Get_Angular_Velocity();
+//				Get_Acceleration();
+//				OLED_PrintIntValue(10, 1, (int32)gyro.accx);
+//				OLED_PrintIntValue(70, 1, (int32)gyro.accy);
+//				OLED_PrintIntValue(10, 2, (int32)gyro.accz);
+//				OLED_PrintIntValue(10, 3, (int32)gyro.angx);
+//				OLED_PrintIntValue(70, 3, (int32)gyro.angy);
+//				OLED_PrintIntValue(10, 4, (int32)gyro.angz);
 			}
 		}
-    }
+   }
 }

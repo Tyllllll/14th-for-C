@@ -16,6 +16,7 @@ typedef struct
 {
 	//顶点
 	uint8 top_point;
+    uint8 fullline;
 	//锐角拐点（十字近拐点）
 	uint8 left_flection_row;
 	int8 left_flection_flag;
@@ -33,10 +34,12 @@ typedef struct
 	float32 k_left2;
 	float32 k_right;
 	float32 k_right2;
+	float32 k_mid;
 	float32 k_left_record[3];
 	float32 k_right_record[3];
 	float32 k_left_record2[3];
 	float32 k_right_record2[3];
+	float32 k_mid_record[3];
 	//赛道类型记录 1为长直道，2为短直道，3为弯，4为环，5为断路，6为坡道，7为颠簸，8为障碍
 	int8 road_type[200];
 	//直道标志
@@ -57,7 +60,7 @@ typedef struct
 	//坡道标志
 	int8 ramp_state;
 	//路障标志
-	int8 block_state;
+	int8 roadblock_state;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -73,8 +76,7 @@ void Judge_Roundabouts(void);
 void Judge_Breakage(void);
 void Judge_Ramp(void);
 void Judge_Roadblock(void);
-float invSqrt(uint16 x);
-float variance_get(int16 begin_row,int16 end_row);
+
 float Midline_Std_Deviation(uint8 row_max, uint8 row_min);
 uint8 is_Left_Lose_Line(uint8 row);
 uint8 is_Right_Lose_Line(uint8 row);
@@ -85,4 +87,6 @@ uint8 is_Right_Point_Lose_All_Line(uint8 row);
 float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int16 point_By, int16 point_Cx, int16 point_Cy);
 int16 Get_Mid_Average(uint8 row);
 void Check_Half_Width(void);
+float32 line_Slope(uint8 type, uint8 row_beg, uint8 row_end);
+
 #endif

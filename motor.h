@@ -24,18 +24,6 @@ typedef struct
 	uint8 stall_cnt;
 	int16 speed_ave;
 	int16 speed_set;
-	int16 speed_current[5];
-	int16 speed_current_left[5];
-	int16 speed_current_right[5];
-	int16 output_value;
-	int16 output_value_left;
-	int16 output_value_right;
-	int8 is_open_loop;
-	float32 distance_set;
-	float32 alldist;
-	
-	float32 dif_const;
-	float32 dif_fore;
 	int16 speed_ave_left;
 	int16 speed_ave_right;
 	int16 speed_set_left;
@@ -44,6 +32,19 @@ typedef struct
 	int16 error_right;
 	int16 error_integral_left;
 	int16 error_integral_right;
+	int16 speed_current[5];
+	int16 speed_current_left[5];
+	int16 speed_current_right[5];
+	int16 output_value;
+	int16 output_value_left;
+	int16 output_value_right;
+	int8 is_open_loop;
+	int8 distance_cnt_en;
+	float32 distance_set;
+	float32 distance_all;
+	float32 distance_temp;
+	float32 dif_const;
+	float32 dif_fore;
 }Motor_Class;
 extern Motor_Class motor;
 

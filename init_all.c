@@ -31,7 +31,7 @@ uint8 Init_All(void)
 		OLED_Fill(0x00);
 		OLED_Put6x8Str(20, 2, "Error Magnetic");
 		OLED_Put6x8Str(20, 3, "Zero Drift");
-		return STATUS_FAILED;
+		while(!Adc_Find_Zero_Drift());
 	}
 	if(!Uart_Init())
 	{
@@ -69,6 +69,8 @@ uint8 Init_All(void)
 		OLED_Put6x8Str(20, 2, "Error IIC");
 		return STATUS_FAILED;
 	}
+//	MPU6050_Init();
+//	MPU6050_Zero_Drift();
 	if(!Motor_Init())
 	{
 		OLED_Fill(0x00);

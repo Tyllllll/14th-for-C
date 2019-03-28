@@ -5,6 +5,7 @@
 
 #define MODEL_WIDTH		15
 #define MODEL_LENGTH		20
+#define NEWCAR
 
 #define STATUS_OK 1
 #define STATUS_FAILED 0

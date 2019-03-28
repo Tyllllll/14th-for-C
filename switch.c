@@ -38,3 +38,17 @@ uint8 Switch_Gpio_Init(void)
 	
 	return STATUS_OK;
 }
+void flag_clean(void)
+{
+    feature.straight_state = 0;
+    feature.pre_turn_state = 0;
+    feature.turn_state = 0;
+    feature.cross_state[0] = 0;
+    feature.cross_state[1] = 0;
+    feature.roundabouts_state = 0;
+    feature.breakage_state = 0;
+    feature.ramp_state = 0;
+    feature.roadblock_state = 0;
+    servo.enable = 1;
+    servo.which = 0;    
+}

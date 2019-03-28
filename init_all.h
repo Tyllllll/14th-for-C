@@ -3,5 +3,4 @@
 
 uint8 Init_All(void);
 uint8 NVIC_Init(void);
-
 #endif

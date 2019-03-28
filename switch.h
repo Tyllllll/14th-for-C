@@ -16,5 +16,5 @@
 #define SWITCH4	PTA24_I
 
 uint8 Switch_Gpio_Init(void);
-
+void flag_clean(void);
 #endif

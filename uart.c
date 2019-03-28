@@ -12,12 +12,15 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-	push(0, (uint16)motor.speed_set_left);
-	push(1, (uint16)motor.speed_ave_left);
-	push(2, (uint16)motor.speed_set_right);
-	push(3, (uint16)motor.speed_ave_right);
+//	push(0, (uint16)motor.speed_set_left);
+//	push(1, (uint16)motor.speed_ave_left);
+//	push(2, (uint16)motor.speed_set_right);
+//	push(3, (uint16)motor.speed_ave_right);
 	push(4, (uint16)servo.error[0]);
-	push(5, (uint16)servo.error_differ[0]);
+	push(5, (uint16)servo.error_differ * 10);
+	push(6, (uint16)(servo.kp * 100));
+	push(7, (uint16)feature.road_type[0]);
+	push(8, (uint16)feature.roadblock_state);
 	Send_Data_To_Scope();
 }
 
@@ -34,19 +37,19 @@ void UartDebug(void)
 	}
 	if(UartData[1] != 0)
 	{
-		motor.kp = (int16)UartData[1];
+		magnetic.kp_default = (int16)UartData[1];
 	}
 	if(UartData[2] != 0)
 	{
-		motor.ki = (int16)UartData[2];
+		magnetic.kd = (int16)UartData[2];
 	}
 	if(UartData[3] != 0)
 	{
-		servo.duty = (int16)UartData[3];
+		speed.curve_high = (int16)UartData[3];
 	}
-	if(UartData[7] != 0)
+	if(UartData[4] != 0)
 	{
-		motor.start = (int16)UartData[7];
+		speed.curve_low = (int16)UartData[4];
 	}
 	if(UartData[8] != 0)
 	{

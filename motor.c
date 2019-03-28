@@ -74,7 +74,11 @@ void Motor_PIT(void)
 		motor.speed_current_right[0] = 0;
 	}
 	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
-	motor.alldist += ((50*((float)encoder.left_num)/((float)ENCODER_NUM_PER_METER_LEFT))+(50*((float)encoder.right_num)/((float)ENCODER_NUM_PER_METER_RIGHT)));
+	motor.distance_all += (50.0 * encoder.left_num / ENCODER_NUM_PER_METER_LEFT) + (50.0 * encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);//10ms前进的距离 单位cm
+	if(motor.distance_cnt_en == 1)
+	{
+		motor.distance_temp += (50.0 * encoder.left_num / ENCODER_NUM_PER_METER_LEFT) + (50.0 * encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);//10ms前进的距离 单位cm
+	}
 	Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
 	{
@@ -101,7 +105,7 @@ void Motor_Control(void)
 			{
 				motor.output_value_left = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
+			else if(motor.output_value_left < -MOTOR_MAX_OUTPUT)
 			{
 				motor.output_value_left = -MOTOR_MAX_OUTPUT;
 			}
@@ -109,7 +113,7 @@ void Motor_Control(void)
 			{
 				motor.output_value_right = MOTOR_MAX_OUTPUT;
 			}
-			if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
+			else if(motor.output_value_right < -MOTOR_MAX_OUTPUT)
 			{
 				motor.output_value_right = -MOTOR_MAX_OUTPUT;
 			}
@@ -195,27 +199,27 @@ void Motor_PID(void)
 	}
 	if(motor.speed_set != 0)
 	{
-		if(servo.error[0] < - 4 * servo.dead_zone)
+		if(servo.error[0] < - 10 * servo.dead_zone)
 		{
 //			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
 //			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
-//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
-//																				/ (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
-//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
-//																				 / (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
+//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
+//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
+			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
+																				/ (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
+			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
+																				 / (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
 		}
-		else if(servo.error[0] > 4 * servo.dead_zone)
+		else if(servo.error[0] > 10 * servo.dead_zone)
 		{
 //			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 //			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
-//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
-//																				/ (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
-//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
-//																				 / (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
+//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
+//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
+			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
+																				/ (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
+			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
+																				 / (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
 		}
 		else
 		{

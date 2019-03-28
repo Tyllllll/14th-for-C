@@ -8,14 +8,13 @@ extern uint8 half_width[120];
 
 typedef struct
 {
-	int16 straight;
 	int16 long_straight;
 	int16 curve_high;
 	int16 curve_low;
 	int16 roundabouts;
-	int16 breakage;
-	int16 ramp;
-    int16 block;
+	int16 mag_high;
+	int16 mag_low;
+	int16 roadblock;
 }Speed_Class;
 extern Speed_Class speed;
 
@@ -43,6 +42,5 @@ void Save_Data(void);
 
 uint8 is_Lose_All(uint8 row);
 int16 Get_Median(int16* arr, uint8 length);
-float Constrain_32(float *data, float max_out,float min_out);
-int16 Constrain_16(int16 *data, int16 max_out,int16 min_out);
+
 #endif

@@ -107,7 +107,7 @@ Camera_Class camera;
 ***************************************************************/
 uint8 ubyCamera_Init(void)
 {
-	camera.contrast = 71;
+	camera.contrast = 70;
 	camera.ready_write = 1;
 	camera.which_buffer = 1;
 
@@ -117,7 +117,7 @@ uint8 ubyCamera_Init(void)
 	if(!Camera_Gpio_Init())
 		return STATUS_FAILED;
 	Camera_Delay();
-	/* reset */
+	/* re++set */
 	while(!LPLD_SCCB_WriteReg(OV7725_COM7, 0x80))
 	{
 		i++;
@@ -311,131 +311,3 @@ void Img_Extract(void)
 		}
 	}
 }
-
-///***************************************************************
-//	*	@brief	求九个数的中值
-//	*	@param	无
-//	*	@note	无
-//***************************************************************/
-//uint8 Get_Median(uint8 n1, uint8 n2, uint8 n3, uint8 n4, uint8 n5, uint8 n6, uint8 n7, uint8 n8, uint8 n9)
-//{
-//	uint8 temp;
-//	uint8 arr[9];
-//	arr[0] = n1;
-//	arr[1] = n2;
-//	arr[2] = n3;
-//	arr[3] = n4;
-//	arr[4] = n5;
-//	arr[5] = n6;
-//	arr[6] = n7;
-//	arr[7] = n8;
-//	arr[8] = n9;
-//	//希尔排序
-//	for(uint8 gap = 9 / 2; gap > 0; gap /= 2)
-//	{
-//		for(uint8 i = gap; i < 9; i++)
-//		{
-//			for(int8 j = i - gap; j >= 0 && arr[j] > arr[j + gap]; j -= gap)
-//			{
-//				temp = arr[j];
-//				arr[j] = arr[j + gap];
-//				arr[j + gap] = temp;
-//			}
-//		}
-//	}
-//	return arr[4];
-//}
-//
-///***************************************************************
-//	*	@brief	灰度图片中值滤波
-//	*	@param	无
-//	*	@note	无
-//***************************************************************/
-//void Mid_Filter(void)
-//{
-//	uint8 i, j;
-//	if(camera.which_buffer == 1)
-//	{
-//		for(i = 1; i < ROW - 1; i++)
-//		{
-//			for(j = 1; j < COLUMN - 1; j++)
-//			{
-//				camera.image_buf1[i][j] = Get_Median(camera.image_buf1[i - 1][j - 1], camera.image_buf1[i - 1][j], camera.image_buf1[i - 1][j + 1],
-//													 camera.image_buf1[i][j - 1], camera.image_buf1[i][j], camera.image_buf1[i][j + 1],
-//													 camera.image_buf1[i + 1][j - 1], camera.image_buf1[i + 1][j], camera.image_buf1[i + 1][j + 1]);
-//			}
-//		}
-//	}
-//	else
-//	{
-//		for(i = 1; i < ROW - 1; i++)
-//		{
-//			for(j = 1; j < COLUMN - 1; j++)
-//			{
-//				camera.image_buf2[i][j] = Get_Median(camera.image_buf2[i - 1][j - 1], camera.image_buf2[i - 1][j], camera.image_buf2[i - 1][j + 1],
-//													 camera.image_buf2[i][j - 1], camera.image_buf2[i][j], camera.image_buf2[i][j + 1],
-//													 camera.image_buf2[i + 1][j - 1], camera.image_buf2[i + 1][j], camera.image_buf2[i + 1][j + 1]);
-//			}
-//		}
-//	}
-////	uint8 i, j, k, l;
-////	uint8 window[3];
-////	uint8 min;
-////	uint8 temp;
-////	if(camera.which_buffer == 1)
-////	{
-////		for(i = 0; i < ROW; i++)
-////		{
-////			for(j = 1; j < COLUMN - 1; j++)
-////			{
-////				for(k = 0; k < 3; k++)
-////				{
-////					window[k] = camera.image_buf1[i][j - 1 + k];
-////				}
-////				for(k = 0; k < 2; k++)
-////				{
-////					min = k;
-////					for(l = k + 1; l < 3; l++)
-////					{
-////						if(window[l] < window[min])
-////						{
-////							min = l;
-////						}
-////					}
-////					temp = window[k];
-////					window[k] = window[min];
-////					window[min] = temp;
-////				}
-////				camera.image_buf1[i][j] = window[2];
-////			}
-////		}
-////	}
-////	else
-////	{
-////		for(i = 0; i < ROW; i++)
-////		{
-////			for(j = 1; j < COLUMN - 1; j++)
-////			{
-////				for(k = 0; k < 3; k++)
-////				{
-////					window[k] = camera.image_buf1[i][j - 1 + k];
-////				}
-////				for(k = 0; k < 2; k++)
-////				{
-////					min = k;
-////					for(l = k + 1; l < 3; l++)
-////					{
-////						if(window[l] < window[min])
-////						{
-////							min = l;
-////						}
-////					}
-////					temp = window[k];
-////					window[k] = window[min];
-////					window[min] = temp;
-////				}
-////				camera.image_buf2[i][j] = window[2];
-////			}
-////		}
-////	}
-//}

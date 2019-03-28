@@ -21,8 +21,6 @@ typedef struct
 {
 	int left_num;
 	int right_num;
-	int left_num_sum;
-	int right_num_sum;
 }Encoder_Class;
 extern Encoder_Class encoder;
 
