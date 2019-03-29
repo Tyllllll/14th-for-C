@@ -444,6 +444,7 @@ void OLED_ShowImage(void)
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
 	OLED_PrintUintValue(80, 6, motor.speed_set_left);
 	OLED_PrintUintValue(100, 6, motor.speed_set_right);
+    OLED_PrintIntValue(80, 7, servo.error[0]);
 //	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
 //	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);

@@ -203,23 +203,23 @@ void Motor_PID(void)
 		{
 //			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
 //			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.515 * servo.duty + 862.4)));
-//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
-//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
-																				/ (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
-																				 / (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
+			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
+			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (-0.9878 * servo.duty + 1658)));
+//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
+//																				/ (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
+//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
+//																				 / (0.007436 * servo.duty * servo.duty - 24.34 * servo.duty + 19980)));
 		}
 		else if(servo.error[0] > 10 * servo.dead_zone)
 		{
 //			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
 //			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (0.515 * servo.duty - 632.2)));
-//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
-//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
-			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
-																				/ (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
-			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
-																				 / (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
+			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
+			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0 / (1.232 * servo.duty - 1534)));
+//			motor.speed_set_left = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore + MODEL_WIDTH / 2.0
+//																				/ (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
+//			motor.speed_set_right = (int16)(motor.dif_const * motor.speed_set * (motor.dif_fore - MODEL_WIDTH / 2.0
+//																				 / (0.006818 * servo.duty * servo.duty - 17.11 * servo.duty + 10790)));
 		}
 		else
 		{
@@ -252,7 +252,7 @@ void Motor_PID(void)
 	//开环加速
 	if(motor.speed_ave < 0.9 * motor.speed_set && motor.is_open_loop == 1)
 	{
-		motor.output_value = 9000;
+		motor.output_value = 7000;
 	}
 	//闭环pid控制
 	else

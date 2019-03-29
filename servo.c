@@ -22,7 +22,7 @@ uint8 Servo_Init(void)
 {
 	servo.duty = DEG_MID;
 	servo.kp = 3;
-	servo.kd = 6;
+	servo.kd = 7.5;
 	servo.dead_zone = 1;
 	servo.enable = 1;
 	

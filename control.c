@@ -628,20 +628,57 @@ void Cross_Fill(void)
 	*	@param	无
 	*	@note	入环补边线，出环打死
 ***************************************************************/
-//void Roundabouts_Fill(void)
-//{
-//	uint8 i = 0;
-//	float32 state12_k;
-//	uint8 state12_fill_row = 110;
-//	if(feature.roundabouts_state == 1)
-//	{
-//		if(feature.left_flection2_flag == 1)
+void Roundabouts_Fill(void)
+{
+	uint8 i = 0;
+	float32 state12_k;
+	uint8 state12_fill_row = 110;
+	if(feature.roundabouts_state == 1)
+	{
+		if(feature.left_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.right_line[state12_fill_row]) / (state12_fill_row - feature.left_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
+			{
+				line.right_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
+				if(line.right_line[i] < 0)
+				{
+					line.right_line[i] = 0;
+				}
+				else if(line.right_line[i] > 159)
+				{
+					line.right_line[i] = 159;
+				}
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+			for(i = feature.left_flection2_row; i > 10; i--)
+			{
+				line.midline[i] = 0;
+			}
+			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+			Find_Top_Point();
+		}
+		else
+		{
+			servo.enable = 0;
+			servo.duty += 20;
+		}
+//		else if(feature.right_flection2_flag == 1)
 //		{
-//			feature.roundabouts_k_record[0] = (float32)(line.left_line[feature.left_flection2_row] - line.right_line[state12_fill_row]) / (state12_fill_row - feature.left_flection2_row);
 //			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-//			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
+//			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
 //			{
-//				line.right_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
+//				line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
 //				if(line.right_line[i] < 0)
 //				{
 //					line.right_line[i] = 0;
@@ -660,58 +697,59 @@ void Cross_Fill(void)
 //					line.midline[i] = 159;
 //				}
 //			}
-//			for(i = feature.left_flection2_row; i > 10; i--)
+//			for(i = feature.right_flection2_row; i > 10; i--)
 //			{
 //				line.midline[i] = 0;
 //			}
-//			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
-//			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
-//			Find_Top_Point();
 //		}
+	}
+	else if(feature.roundabouts_state == 2)
+	{
+		if(feature.right_flection2_flag == 1)
+		{
+			feature.roundabouts_k_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.left_line[state12_fill_row]) / (state12_fill_row - feature.right_flection2_row);
+			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
+			{
+				line.left_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
+				if(line.left_line[i] < 0)
+				{
+					line.left_line[i] = 0;
+				}
+				else if(line.left_line[i] > 159)
+				{
+					line.left_line[i] = 159;
+				}
+				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
+				if(line.midline[i] < 0)
+				{
+					line.midline[i] = 0;
+				}
+				else if(line.midline[i] > 159)
+				{
+					line.midline[i] = 159;
+				}
+			}
+			for(i = feature.right_flection2_row; i > 10; i--)
+			{
+				line.midline[i] = 159;
+			}
+			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+			Find_Top_Point();
+		}
+		else
+		{
+			servo.enable = 0;
+			servo.duty -= 20;
+		}
 //		else
 //		{
-//			servo.enable = 0;
-//			servo.duty += 20;
-//		}
-////		else if(feature.right_flection2_flag == 1)
-////		{
-////			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-////			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
-////			{
-////				line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
-////				if(line.right_line[i] < 0)
-////				{
-////					line.right_line[i] = 0;
-////				}
-////				else if(line.right_line[i] > 159)
-////				{
-////					line.right_line[i] = 159;
-////				}
-////				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-////				if(line.midline[i] < 0)
-////				{
-////					line.midline[i] = 0;
-////				}
-////				else if(line.midline[i] > 159)
-////				{
-////					line.midline[i] = 159;
-////				}
-////			}
-////			for(i = feature.right_flection2_row; i > 10; i--)
-////			{
-////				line.midline[i] = 0;
-////			}
-////		}
-//	}
-//	else if(feature.roundabouts_state == 2)
-//	{
-//		if(feature.right_flection2_flag == 1)
-//		{
-//			feature.roundabouts_k_record[0] = (float32)(line.right_line[feature.right_flection2_row] - line.left_line[state12_fill_row]) / (state12_fill_row - feature.right_flection2_row);
+//			servo.enable = 1;
 //			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-//			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
+//			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
 //			{
-//				line.left_line[i] = (int16)(line.right_line[feature.right_flection2_row] + state12_k * (feature.right_flection2_row - i));
+//				line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
 //				if(line.left_line[i] < 0)
 //				{
 //					line.left_line[i] = 0;
@@ -730,120 +768,11 @@ void Cross_Fill(void)
 //					line.midline[i] = 159;
 //				}
 //			}
-//			for(i = feature.right_flection2_row; i > 10; i--)
+//			for(i = feature.left_flection2_row; i > 10; i--)
 //			{
 //				line.midline[i] = 159;
 //			}
-//			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
-//			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
-//			Find_Top_Point();
 //		}
-//		else
-//		{
-//			servo.enable = 0;
-//			servo.duty -= 20;
-//		}
-////		else
-////		{
-////			servo.enable = 1;
-////			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-////			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
-////			{
-////				line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] + state12_k * (feature.left_flection2_row - i));
-////				if(line.left_line[i] < 0)
-////				{
-////					line.left_line[i] = 0;
-////				}
-////				else if(line.left_line[i] > 159)
-////				{
-////					line.left_line[i] = 159;
-////				}
-////				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-////				if(line.midline[i] < 0)
-////				{
-////					line.midline[i] = 0;
-////				}
-////				else if(line.midline[i] > 159)
-////				{
-////					line.midline[i] = 159;
-////				}
-////			}
-////			for(i = feature.left_flection2_row; i > 10; i--)
-////			{
-////				line.midline[i] = 159;
-////			}
-////		}
-//	}
-//	else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
-//	{
-//		feature.left_flection2_antiflag = 0;
-//		feature.right_flection2_antiflag = 0;
-//		if(feature.left_flection_flag == 0 && feature.right_flection_flag == 0)
-//		{
-//			servo.duty_record[0] = servo.duty;
-//			for(i = 9; i > 0; i--)
-//			{
-//				servo.duty_record[i] = servo.duty_record[i - 1];
-//			}
-//		}
-//	}
-//}
-void Roundabouts_Fill(void)
-{
-	uint8 i = 0;
-	float32 state12_k;
-	uint8 state12_fill_row = 90;
-	if(feature.roundabouts_state == 1)
-	{
-		if(feature.left_flection2_flag == 1)
-		{
-			feature.roundabouts_k_record[0] = ((float32)(state12_fill_row - feature.left_flection2_row) / (159 - line.left_line[feature.left_flection2_row]) / (159 - line.left_line[feature.left_flection2_row]));
-			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-			for(i = line.left_line[feature.left_flection2_row]; i < 159; i++)
-			{
-				line.right_line[(int16)(state12_k * (i - line.left_line[feature.left_flection2_row]) * (i - line.left_line[feature.left_flection2_row]) + feature.left_flection2_row)] = i;
-			}
-			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
-			{
-				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-			}
-			for(i = feature.left_flection2_row; i > 10; i--)
-			{
-				line.midline[i] = 0;
-			}
-			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
-			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
-		}
-		else
-		{
-			servo.enable = 0;
-		}
-	}
-	else if(feature.roundabouts_state == 2)
-	{
-		if(feature.right_flection2_flag == 1)
-		{
-			feature.roundabouts_k_record[0] = ((float32)(state12_fill_row - feature.right_flection2_row) / line.right_line[feature.right_flection2_row] / line.right_line[feature.right_flection2_row]);
-			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
-			for(i = line.right_line[feature.right_flection2_row]; i > 0; i--)
-			{
-				line.left_line[(int16)(state12_k * (i - line.right_line[feature.right_flection2_row]) * (i - line.right_line[feature.right_flection2_row]) + feature.right_flection2_row)] = i;
-			}
-			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
-			{
-				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-			}
-			for(i = feature.right_flection2_row; i > 10; i--)
-			{
-				line.midline[i] = 159;
-			}
-			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
-			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
-		}
-		else
-		{
-			servo.enable = 0;
-		}
 	}
 	else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
 	{
@@ -859,6 +788,77 @@ void Roundabouts_Fill(void)
 		}
 	}
 }
+//void Roundabouts_Fill(void)
+//{
+//	uint8 i = 0;
+//	float32 state12_k;
+//	uint8 state12_fill_row = 90;
+//	if(feature.roundabouts_state == 1)
+//	{
+//		if(feature.left_flection2_flag == 1)
+//		{
+//			feature.roundabouts_k_record[0] = ((float32)(state12_fill_row - feature.left_flection2_row) / (159 - line.left_line[feature.left_flection2_row]) / (159 - line.left_line[feature.left_flection2_row]));
+//			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+//			for(i = line.left_line[feature.left_flection2_row]; i < 159; i++)
+//			{
+//				line.right_line[(int16)(state12_k * (i - line.left_line[feature.left_flection2_row]) * (i - line.left_line[feature.left_flection2_row]) + feature.left_flection2_row)] = i;
+//			}
+//			for(i = state12_fill_row; i > feature.left_flection2_row; i--)
+//			{
+//				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
+//			}
+//			for(i = feature.left_flection2_row; i > 10; i--)
+//			{
+//				line.midline[i] = 0;
+//			}
+//			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+//			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+//		}
+//		else
+//		{
+//			servo.enable = 0;
+//		}
+//	}
+//	else if(feature.roundabouts_state == 2)
+//	{
+//		if(feature.right_flection2_flag == 1)
+//		{
+//			feature.roundabouts_k_record[0] = ((float32)(state12_fill_row - feature.right_flection2_row) / line.right_line[feature.right_flection2_row] / line.right_line[feature.right_flection2_row]);
+//			state12_k = 0.6 * feature.roundabouts_k_record[0] + 0.2 * feature.roundabouts_k_record[1] + 0.2 * feature.roundabouts_k_record[2];
+//			for(i = line.right_line[feature.right_flection2_row]; i > 0; i--)
+//			{
+//				line.left_line[(int16)(state12_k * (i - line.right_line[feature.right_flection2_row]) * (i - line.right_line[feature.right_flection2_row]) + feature.right_flection2_row)] = i;
+//			}
+//			for(i = state12_fill_row; i > feature.right_flection2_row; i--)
+//			{
+//				line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
+//			}
+//			for(i = feature.right_flection2_row; i > 10; i--)
+//			{
+//				line.midline[i] = 159;
+//			}
+//			feature.roundabouts_k_record[2] = feature.roundabouts_k_record[1];
+//			feature.roundabouts_k_record[1] = feature.roundabouts_k_record[0];
+//		}
+//		else
+//		{
+//			servo.enable = 0;
+//		}
+//	}
+//	else if(feature.roundabouts_state == 3 || feature.roundabouts_state == 4)
+//	{
+//		feature.left_flection2_antiflag = 0;
+//		feature.right_flection2_antiflag = 0;
+//		if(feature.left_flection_flag == 0 && feature.right_flection_flag == 0)
+//		{
+//			servo.duty_record[0] = servo.duty;
+//			for(i = 9; i > 0; i--)
+//			{
+//				servo.duty_record[i] = servo.duty_record[i - 1];
+//			}
+//		}
+//	}
+//}
 
 
 /***************************************************************
@@ -1048,6 +1048,8 @@ void Parameter_Setting_Init(void)
 	setting.data[2][2] = (float32)servo.kd;
 	sprintf(setting.string[2][3], "enable");
 	setting.data[2][3] = (float32)servo.enable;
+	sprintf(setting.string[2][4], "which");
+	setting.data[2][3] = (float32)servo.which;    
 	sprintf(setting.string[2][6], "dif_c");
 	setting.data[2][6] = (float32)motor.dif_const;
 	sprintf(setting.string[2][7], "dif_f");
@@ -1088,6 +1090,7 @@ void Save_Data(void)
 	servo.kp = setting.data[2][1];
 	servo.kd = setting.data[2][2];
 	servo.enable = (uint8)setting.data[2][3];
+    servo.which = (uint8)setting.data[2][4];
 	motor.dif_const = setting.data[2][6];
 	motor.dif_fore = setting.data[2][7];
 	motor.kp = setting.data[3][1];

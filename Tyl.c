@@ -57,6 +57,7 @@
 				BUZZER_ON;
 				LPLD_LPTMR_DelayMs(200);
 				BUZZER_OFF;
+                servo.which = 1;
 				if(motor.start == 0)
 				{
 					motor.start = 50;
