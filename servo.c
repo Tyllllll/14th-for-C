@@ -12,7 +12,17 @@ int16 Fore340 = 42;
 int16 Fore350 = 41;
 int16 Fore360 = 40;
 int16 Fore370 = 40;
-
+//int16 Fore270 = 61;
+//int16 Fore280 = 60;
+//int16 Fore290 = 59;
+//int16 Fore300 = 59;
+//int16 Fore310 = 58;
+//int16 Fore320 = 58;
+//int16 Fore330 = 57;
+//int16 Fore340 = 57;
+//int16 Fore350 = 56;
+//int16 Fore360 = 55;
+//int16 Fore370 = 55;
 /***************************************************************
 	*	@brief	舵机初始化
 	*	@param	无
@@ -103,8 +113,11 @@ void Servo_Control(void)
 		{
 			servo.foresight = feature.top_point + 5;
 		}
-		servo.error[0] = Get_Mid_Average(servo.foresight);
-		servo.error[0] = (int16)(0.88 * servo.error[0] + 0.12 * servo.error[1]);
+        if(feature.roadblock_state == 0 || feature.roadblock_state == -1)
+        {
+            servo.error[0] = Get_Mid_Average(servo.foresight);
+            servo.error[0] = (int16)(0.88 * servo.error[0] + 0.12 * servo.error[1]);
+        }
 		servo.error_differ = servo.error[0] - servo.error[1];
 		for(uint8 i = 4; i > 0; i--)
 		{
@@ -163,19 +176,18 @@ void Servo_Control(void)
 	*	@param	无
 	*	@note	无
 ***************************************************************/
-static int8 fuzzy0_e[7] = {-71, -50, -25, 0, 22, 49, 70};
-static int8 fuzzy0_ec[5] = {-15, -8, 0, 8, 15};
+static int8 fuzzy0_e[7] = {-75, -60, -30, 0, 30, 60, 75};
+static int8 fuzzy0_ec[5] = {-30, -15, 0, 15, 30};
 //static float32 fuzzy0_u[7] = {0.2, 0.9, 1.7, 2.4, 3.2, 4.1, 5};
-static float32 fuzzy0_u[7] = {0.6, 1.6, 2.7, 3.6, 4.4, 4.9, 5.5};
+static float32 fuzzy0_u[7] = {1, 1.17, 1.3, 1.6, 2, 2.3, 3.1};
 static uint8 fuzzy_rule_kp[7][5] = {
-//	-7,-4, 0, 4, 7,	ec	e
-	{6, 5, 5, 3, 3},//	-50
-	{5, 4, 3, 2, 2},//	-35
-	{4, 2, 1, 1, 1},//	-20
-	{2, 1, 0, 1, 2},//	0
-	{1, 1, 1, 2, 4},//	20
-	{2, 2, 3, 4, 5},//	35
-	{3, 3, 5, 5, 6}	//	50
+	{5, 5, 6, 4, 4},
+	{4, 5, 5, 3, 2},
+	{2, 3, 4, 2, 1},
+	{0, 1, 5, 1, 0},
+	{1, 2, 4, 3, 2},
+	{2, 3, 5, 5, 4},
+	{4, 4, 6, 5, 5}
 };
 void Servo_Fuzzy(void)
 {

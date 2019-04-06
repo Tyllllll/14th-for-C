@@ -65,6 +65,13 @@ typedef struct
 	int16 filter_neg;
 	int16 filter_pos;
 	int16 sum_set;
+    float Turn_Speed;
+    float ACC_Angle;
+    float Gravity_Angle;
+    float Angle_Speed;
+    float TurnAngle_Integral;
+    float CarY_Angle;
+    float Car_Angle;
 }Gyro_Class;
 extern Gyro_Class gyro;
 
@@ -78,7 +85,8 @@ void MPU6050_Init(void);
 uint8 MPU6050_Zero_Drift(void);
 void Get_Angular_Velocity(void);
 void Get_Acceleration(void);
-
+void Kalman_Filter(float angle_m,float gyro_m);
 void VL53L0X_Get_Distance(void);
+void MPU6050_data_analyse(void);
 
 #endif

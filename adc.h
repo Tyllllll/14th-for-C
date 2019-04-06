@@ -62,9 +62,9 @@ extern Magnetic_Class magnetic;
 
 typedef struct
 {
-	int16 distance;
+	float distance;
 }Infrared_Class;
-extern Infrared_Class infrared;
+extern Infrared_Class laser;
 extern float Position_transit_short[4];
 extern uint8 Position;
 uint8 Adc_Init(void);
@@ -75,5 +75,5 @@ float Adc_GetAdc(ADC_Type *adcx, AdcChnEnum_Type chn);
 void Adc_Magnetic_Solution(void);
 uint8 Adc_Magnetic_Lose_Line(void);
 void Adc_Measure_Distance(void);
-void Data_analyse(void);
+void Mag_data_analyse(void);
 #endif

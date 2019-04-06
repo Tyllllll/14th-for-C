@@ -63,12 +63,13 @@ uint8 Init_All(void)
 		OLED_Put6x8Str(20, 2, "Error BUZZER");
 		return STATUS_FAILED;
 	}
-	if(!IIC_Init())
-	{
-		OLED_Fill(0x00);
-		OLED_Put6x8Str(20, 2, "Error IIC");
-		return STATUS_FAILED;
-	}
+    i2c.I2C_Init();
+//	if(!IIC_Init())
+//	{
+//		OLED_Fill(0x00);
+//		OLED_Put6x8Str(20, 2, "Error IIC");
+//		return STATUS_FAILED;
+//	}
 //	MPU6050_Init();
 //	MPU6050_Zero_Drift();
 	if(!Motor_Init())

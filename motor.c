@@ -75,10 +75,15 @@ void Motor_PIT(void)
 	}
 	motor.speed_current[0] = (int16)(0.5 * motor.speed_current_left[0] + 0.5 * motor.speed_current_right[0]);
 	motor.distance_all += (50.0 * encoder.left_num / ENCODER_NUM_PER_METER_LEFT) + (50.0 * encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);//10ms前进的距离 单位cm
-	if(motor.distance_cnt_en == 1)
+	//状态切换后 倒数距离
+    if(motor.distance_temp > 0)
 	{
-		motor.distance_temp += (50.0 * encoder.left_num / ENCODER_NUM_PER_METER_LEFT) + (50.0 * encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);//10ms前进的距离 单位cm
+		motor.distance_temp -= (50.0 * encoder.left_num / ENCODER_NUM_PER_METER_LEFT) + (50.0 * encoder.right_num / ENCODER_NUM_PER_METER_RIGHT);//10ms前进的距离 单位cm
 	}
+    else
+    {
+        motor.distance_temp = 0;
+    }
 	Motor_Control();
 	for(uint8 i = 4; i > 0; i--)
 	{

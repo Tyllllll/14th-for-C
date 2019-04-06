@@ -60,20 +60,20 @@ void Speed_Init(void)
 	*	@note	无
 ***************************************************************/
 void Speed_Set(void)
-{
+{ 
 	if(servo.which == 0)
 	{
 		int16 error_ave;
         /**********速度给定*************/       
 		if(feature.roadblock_state > 0)                  //路障
 		{
-			if(feature.roadblock_state == 1 )
+			if(feature.roadblock_state == 1 && motor.distance_temp > 30)
 			{
-				motor.speed_set = speed.roadblock - 50;
+				motor.speed_set = speed.roadblock - 20;
 			}
 			else
 			{
-				motor.speed_set = speed.roadblock;
+				motor.speed_set = speed.roadblock + 20;
 			}
 			feature.road_type[0] = 8;
 //			if(feature.roadblock_state == 1 || feature.roadblock_state == 2)
@@ -329,7 +329,7 @@ void Curve_Fill(void)
 void Cross_Fill(void)
 {
 	uint8 i = 0;
-	uint8 bottom_row = 90;
+	uint8 bottom_row = 100;
 	if(feature.left_flection_flag == 1 && line.left_line[feature.left_flection_row + 8] > 0
 			|| feature.right_flection_flag == 1 && line.right_line[feature.right_flection_row + 8] < 159)
 	{
@@ -415,19 +415,12 @@ void Cross_Fill(void)
 				feature.k_mid_record[1] = feature.k_mid_record[0];
 			}
 			else
-			{
-				if(feature.left_flection2_row - 9 > 6)
-				{
-					feature.k_left_record2[0] = (float32)(line.left_line[feature.left_flection2_row - 9] - line.left_line[feature.left_flection2_row - 1]) / 8.0;
-				}
-				else
-				{
-					feature.k_left_record2[0] = (float32)(line.left_line[6] - line.left_line[feature.left_flection2_row - 1]) / (feature.left_flection2_row - 7);
-				}
+            {
+				feature.k_left_record2[0] = (float32)(line.left_line[bottom_row] - line.left_line[feature.left_flection2_row]) / (feature.left_flection2_row - bottom_row);
 				feature.k_left2 = 0.6 * feature.k_left_record2[0] + 0.2 * feature.k_left_record2[1] + 0.2 * feature.k_left_record2[2];
 				for(i = 110; i > 30; i--)
 				{
-					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row - 2] - feature.k_left2 * (feature.left_flection2_row - 2 - i));
+					line.left_line[i] = (int16)(line.left_line[feature.left_flection2_row] - feature.k_left2 * (feature.left_flection2_row - i));
 					if(line.left_line[i] < 0)
 					{
 						line.left_line[i] = 0;
@@ -464,31 +457,21 @@ void Cross_Fill(void)
 			}
 			else
 			{
-				if(feature.right_flection2_row - 9 > 6)
-				{
-					feature.k_right_record2[0] = (float32)(line.right_line[feature.right_flection2_row - 9] - line.right_line[feature.right_flection2_row - 1]) / 8.0;
-				}
-				else
-				{
-					feature.k_right_record2[0] = (float32)(line.right_line[6] - line.right_line[feature.right_flection2_row - 1]) / (feature.right_flection2_row - 7);
-				}
+				feature.k_right_record2[0] = (float32)(line.right_line[bottom_row] - line.right_line[feature.right_flection2_row]) / (feature.right_flection2_row - bottom_row);
 				feature.k_right2 = 0.6 * feature.k_right_record2[0] + 0.2 * feature.k_right_record2[1] + 0.2 * feature.k_right_record2[2];
-				if(feature.right_flection2_antiflag == 0)
-				{
-					for(i = 110; i > 30; i--)
-					{
-						line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row - 2] + feature.k_right2 * (feature.right_flection2_row - 2 - i));
-						if(line.right_line[i] < 0)
-						{
-							line.right_line[i] = 0;
-						}
-						else if(line.right_line[i] > 159)
-						{
-							line.right_line[i] = 159;
-						}
-					}
-					feature.k_right_record2[2] = feature.k_right_record2[1];
-					feature.k_right_record2[1] = feature.k_right_record2[0];
+                for(i = 110; i > 30; i--)
+                {
+                    line.right_line[i] = (int16)(line.right_line[feature.right_flection2_row] - feature.k_right2 * (feature.right_flection2_row - i));
+                    if(line.right_line[i] < 0)
+                    {
+                        line.right_line[i] = 0;
+                    }
+                    else if(line.right_line[i] > 159)
+                    {
+                        line.right_line[i] = 159;
+                    }
+                feature.k_right_record2[2] = feature.k_right_record2[1];
+                feature.k_right_record2[1] = feature.k_right_record2[0];
 				}
 			}
 		}
@@ -516,18 +499,7 @@ void Cross_Fill(void)
 		{
 			for(i = feature.left_flection_row; i > (feature.top_point > 20 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				if(line.right_line_flag[i] == 1)
-				{
-					line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-				}
-				else if(i == feature.left_flection_row)
-				{
-					line.midline[i] = line.left_line[i] + half_width[i];
-				}
-				else
-				{
-					line.midline[i] = line.midline[i + 1] + (line.left_line[i] - line.left_line[i + 1]);
-				}
+				line.midline[i] = line.left_line[i] + RoadWide(i);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -542,18 +514,7 @@ void Cross_Fill(void)
 		{
 			for(i = feature.right_flection_row; i > (feature.top_point > 20 ? feature.top_point - 5 : feature.top_point); i--)
 			{
-				if(line.left_line_flag[i] == 1)
-				{
-					line.midline[i] = (line.left_line[i] + line.right_line[i]) / 2;
-				}
-				else if(i == feature.right_flection_row)
-				{
-					line.midline[i] = line.right_line[i] - half_width[i];
-				}
-				else
-				{
-					line.midline[i] = line.midline[i + 1] - (line.right_line[i + 1] - line.right_line[i]);
-				}
+				line.midline[i] = line.right_line[i] - RoadWide(i);
 				if(line.midline[i] < 0)
 				{
 					line.midline[i] = 0;
@@ -570,17 +531,17 @@ void Cross_Fill(void)
 	{
 		if(feature.left_flection2_flag == 1 && feature.right_flection2_flag == 0)
 		{
-			for(i = 100; i > 30; i--)
-			{
-				if(feature.left_flection2_antiflag == 1)
-				{
-					if(i == 100)
+            if(feature.left_flection2_antiflag == 1)
+            {
+                for(i = bottom_row; i > 30; i--)
+                {
+					if(i == bottom_row)
 					{
 						line.midline[i] = 80;
 					}
 					else
 					{
-						line.midline[i] = line.midline[i + 1] - (line.left_line[i + 1] - line.left_line[i]);
+						line.midline[i] = (int16)(line.left_line[i] - RoadWide(i));
 					}
 					if(line.midline[i] < 0)
 					{
@@ -595,17 +556,17 @@ void Cross_Fill(void)
 		}
 		else if(feature.left_flection2_flag == 0 && feature.right_flection2_flag == 1)
 		{
-			for(i = 100; i > 30; i--)
-			{
-				if(feature.right_flection2_antiflag == 1)
-				{
-					if(i == 100)
+            if(feature.right_flection2_antiflag == 1)
+            {
+                for(i = bottom_row; i > 30; i--)
+                {
+					if(i == bottom_row)
 					{
 						line.midline[i] = 80;
 					}
 					else
 					{
-						line.midline[i] = line.midline[i + 1] + (line.right_line[i] - line.right_line[i + 1]);
+						line.midline[i] = (int16)(line.right_line[i] + RoadWide(i));
 					}
 					if(line.midline[i] < 0)
 					{

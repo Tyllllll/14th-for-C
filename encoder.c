@@ -45,15 +45,16 @@ uint8 Encoder_Init(void)
 	*	@brief	获取编码器脉冲数
 	*	@param	无
 	*	@note	无
+
 ***************************************************************/
 void Encoder_Get(void)
 {
 #ifdef NEWCAR
-	encoder.left_num = (int16)(-LPLD_FTM_GetCounter(FTM1));
-	encoder.right_num = (int16)(-LPLD_FTM_GetCounter(FTM2));
+	encoder.left_num = (int16)(LPLD_FTM_GetCounter(FTM2));
+	encoder.right_num = (int16)(-LPLD_FTM_GetCounter(FTM1));
 #else
-	encoder.left_num = (int16)LPLD_FTM_GetCounter(FTM1);
-	encoder.right_num = (int16)LPLD_FTM_GetCounter(FTM2);
+	encoder.right_num = (int16)LPLD_FTM_GetCounter(FTM1);
+	encoder.left_num = (int16)LPLD_FTM_GetCounter(FTM2);
 #endif
 }
 

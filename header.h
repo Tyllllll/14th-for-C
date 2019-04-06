@@ -5,7 +5,7 @@
 
 #define MODEL_WIDTH		15
 #define MODEL_LENGTH		20
-#define NEWCAR
+//#define NEWCAR
 
 #define STATUS_OK 1
 #define STATUS_FAILED 0
@@ -24,8 +24,8 @@
 #include "identify.h"
 #include "control.h"
 #include "uart.h"
-#include "iic.h"
-
+//#include "iic.h"
+#include "APP_Filter.h"
 #include "DEV_SCCB.h"
-
+#include "gyroscope.h"
 #endif

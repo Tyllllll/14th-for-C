@@ -430,7 +430,7 @@ void OLED_ShowImage(void)
 	OLED_PrintUintValue(100, 6, feature.roadblock_state);
 //	OLED_PrintIntValue(80, 7, magnetic.error[0]);
 	
-//	OLED_PrintFloatValue(80, 6, magnetic.angle * 57.3);
+//	OLED_PrintFloatValue(80, 7, gyro.TurnAngle_Integral * 10);
 //	OLED_PrintIntValue(80, 7, is_Lose_All(90));
 //	OLED_Put6x8Str(80, 4, "rt");
 //	OLED_PrintUintValue(100, 4, feature.road_type[0]);
@@ -442,9 +442,9 @@ void OLED_ShowImage(void)
 //	OLED_PrintUintValue(100, 6, line.left_line[feature.left_flection2_row - 1]);
 //	OLED_PrintUintValue(80, 7, feature.right_flection2_row);
 //	OLED_PrintUintValue(100, 7, line.right_line[feature.right_flection2_row - 1]);
-	OLED_PrintUintValue(80, 6, motor.speed_set_left);
-	OLED_PrintUintValue(100, 6, motor.speed_set_right);
-    OLED_PrintIntValue(80, 7, servo.error[0]);
+	OLED_PrintUintValue(80, 7, motor.speed_set_left);
+	OLED_PrintUintValue(100, 7, motor.speed_set_right);
+ //   OLED_PrintUintValue(80, 7, feature.linecnt);
 //	OLED_PrintUintValue(80, 7, motor.speed_current_left[0]);
 //	OLED_PrintUintValue(100, 7, motor.speed_current_right[0]);
 //	OLED_PrintIntValue(80, 7, servo.duty);

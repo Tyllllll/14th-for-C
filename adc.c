@@ -1,7 +1,7 @@
 #include "header.h"
 
 Magnetic_Class magnetic;
-Infrared_Class infrared;
+Infrared_Class laser;
 float Position_transit_short[4];
 uint8 Position;
 /***************************************************************
@@ -259,7 +259,7 @@ uint8 Adc_Magnetic_Lose_Line(void)
     *   @time   2019Äê3ÔÂ25ÈÕ10:57:30
 ***************************************************************/
 uint8 max_front, max_front_old, Position, last_Position, errcnt;
-void Data_analyse(void)
+void Mag_data_analyse(void)
 {
     uint8 i;
     for(i = 0; i < 4; i++)
@@ -349,5 +349,8 @@ void Data_analyse(void)
 ***************************************************************/
 void Adc_Measure_Distance(void)
 {
-	infrared.distance = (int16)Adc_GetAdc(INFRARED_ADCx, INFRARED_CHx);
+    static float temp = 0;
+	temp = Adc_GetAdc(INFRARED_ADCx, INFRARED_CHx);
+    temp = 174070 / (temp + 570.7) - 28.5;
+    LPF_1_db(50,0.005, temp, &laser.distance);
 }

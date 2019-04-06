@@ -3,7 +3,7 @@
 static I2C_InitTypeDef I2C_InitStructure;
 Gyro_Class gyro;
 VL53L0X_Class vl53l0x;
-
+float Acc_X,Acc_Y,Acc_Z,Gyro_X,Gyro_Y,Gyro_Z;
 /***************************************************************
 	*	@brief	红外初始化
 	*	@param	无

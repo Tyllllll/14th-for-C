@@ -10,9 +10,9 @@
 //Æ«´ó×óÆ«£¬Æ«Ð¡ÓÒÆ«
 #ifdef NEWCAR
 
-#define DEG_MAX  1587
-#define DEG_MID  1427
-#define DEG_MIN  1257
+#define DEG_MAX  1736
+#define DEG_MID  1566
+#define DEG_MIN  1396
 
 #else
 

@@ -12,10 +12,10 @@ SerialPortType SerialPortRx;
 ***************************************************************/
 void Send_Data_to_FreeCars(void)
 {
-//	push(0, (uint16)motor.speed_set_left);
-//	push(1, (uint16)motor.speed_ave_left);
-//	push(2, (uint16)motor.speed_set_right);
-//	push(3, (uint16)motor.speed_ave_right);
+	push(0, (uint16)gyro.Car_Angle);
+	push(1, (uint16)(gyro.TurnAngle_Integral * 100));
+	push(2, (uint16)motor.speed_set_right);
+	push(3, (uint16)motor.speed_ave_right);
 	push(4, (uint16)servo.error[0]);
 	push(5, (uint16)servo.error_differ * 10);
 	push(6, (uint16)(servo.kp * 100));

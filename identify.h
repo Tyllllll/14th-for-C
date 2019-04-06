@@ -61,6 +61,7 @@ typedef struct
 	int8 ramp_state;
 	//Â·ÕÏ±êÖ¾
 	int8 roadblock_state;
+    uint8 linecnt;
 }Feature_Class;
 extern Feature_Class feature;
 
@@ -88,5 +89,6 @@ float32 Get_Radius_Curvature(int16 point_Ax, int16 point_Ay, int16 point_Bx, int
 int16 Get_Mid_Average(uint8 row);
 void Check_Half_Width(void);
 float32 line_Slope(uint8 type, uint8 row_beg, uint8 row_end);
-
+uint8 Judge_StartLine(void);
+float32 RoadWide(uint8 row);
 #endif
